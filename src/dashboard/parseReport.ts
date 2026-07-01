@@ -1,7 +1,13 @@
 import type { EventSummary } from '../analytics/eventSummary';
 import { buildContentInteractionsSummary } from '../analytics/contentInteractionsSummary';
 import { buildTeacherButtonSummary } from '../analytics/teacherButtonSummary';
+import {
+  enrichEventForExport,
+  enrichFeedbackCommentForExport,
+} from '../analytics/exportEvents';
 import type { AnalyticsEvent } from '../analytics/eventTypes';
+import type { FeedbackCommentRecord } from '../analytics/feedbackComments';
+import { ANALYTICS_TIMEZONE_BR, formatDateTimeBr } from '../lib/formatDateTimeBr';
 import type { ParsedDashboardReport, DashboardReport } from './types';
 
 export class ReportParseError extends Error {
@@ -101,17 +107,31 @@ export function parseReportJson(raw: unknown): ParsedDashboardReport {
     events,
   );
   const feedbackComments = Array.isArray(raw.feedback_comments)
-    ? raw.feedback_comments
+    ? (raw.feedback_comments as FeedbackCommentRecord[])
     : [];
 
+  const exportedAt = typeof raw.exported_at === 'string' ? raw.exported_at : '';
+  const exportedAtBr =
+    typeof raw.exported_at_br === 'string' ? raw.exported_at_br : formatDateTimeBr(exportedAt);
+
+  const summaryExportedAtBr =
+    isRecord(raw.summary) && typeof raw.summary.exported_at_br === 'string'
+      ? raw.summary.exported_at_br
+      : formatDateTimeBr(summary.exported_at);
+
   const report: DashboardReport = {
-    exported_at: typeof raw.exported_at === 'string' ? raw.exported_at : '',
+    exported_at: exportedAt,
+    exported_at_br: exportedAtBr,
+    timezone: ANALYTICS_TIMEZONE_BR,
     book_id: typeof raw.book_id === 'string' ? raw.book_id : '—',
     chapter_id: typeof raw.chapter_id === 'string' ? raw.chapter_id : '—',
     event_count: typeof raw.event_count === 'number' ? raw.event_count : events.length,
-    summary,
-    events,
-    feedback_comments: feedbackComments,
+    summary: {
+      ...summary,
+      exported_at_br: summaryExportedAtBr,
+    },
+    events: events.map(enrichEventForExport),
+    feedback_comments: feedbackComments.map(enrichFeedbackCommentForExport),
   };
 
   return {

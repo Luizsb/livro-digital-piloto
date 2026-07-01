@@ -18,23 +18,12 @@ import {
   getEventDisplayInfo,
   type EventBadge,
 } from '../analytics/eventLabels';
+import { getEventVisualStyle, getEventVisualStyleByBadgeKey } from '../analytics/eventVisualStyle';
+import { formatDateTimeBr } from '../lib/formatDateTimeBr';
 
 interface EventReportPanelProps {
   events: AnalyticsEvent[];
   onClose: () => void;
-}
-
-function formatTime(iso: string): string {
-  try {
-    return new Date(iso).toLocaleTimeString('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      fractionalSecondDigits: 3,
-    });
-  } catch {
-    return iso;
-  }
 }
 
 function buildCompactSummaryLine(
@@ -237,15 +226,19 @@ function CollectionSummary({
 
       {eventBadges.length > 0 ? (
         <div className="flex flex-wrap gap-2 px-4 py-3">
-          {eventBadges.map((badge) => (
-            <span
-              key={badge.key}
-              className="rounded-full bg-[#80298F]/10 px-2.5 py-0.5 text-xs font-medium text-[#80298F]"
-              title={badge.description}
-            >
-              {badge.label}: {badge.count}
-            </span>
-          ))}
+          {eventBadges.map((badge) => {
+            const style = getEventVisualStyleByBadgeKey(badge.key);
+            return (
+              <span
+                key={badge.key}
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${style.badgeClass}`}
+                title={badge.description}
+              >
+                <span aria-hidden="true">{style.icon}</span>
+                {badge.label}: {badge.count}
+              </span>
+            );
+          })}
         </div>
       ) : null}
     </div>
@@ -378,23 +371,34 @@ function EventReportPanel({ events, onClose }: EventReportPanelProps) {
               sortedEvents.map((event) => {
                 const meta = formatMetadataForDisplay(event.metadata);
                 const display = getEventDisplayInfo(event);
+                const style = getEventVisualStyle(event);
                 return (
                   <li
                     key={event.event_id}
-                    className="mb-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+                    className={`mb-3 rounded-lg border border-slate-200 border-l-4 px-3 py-2 text-sm ${style.borderClass} ${style.bgClass}`}
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <span className="font-semibold text-[#80298F]">{display.label}</span>
-                        {display.description ? (
-                          <p className="mt-0.5 text-xs text-slate-500">{display.description}</p>
-                        ) : null}
+                      <div className="flex min-w-0 gap-2">
+                        <span
+                          className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-sm font-bold leading-none ${style.iconWrapClass}`}
+                          aria-hidden="true"
+                        >
+                          {style.icon}
+                        </span>
+                        <div className="min-w-0">
+                          <span className={`font-semibold ${style.titleClass}`}>
+                            {display.label}
+                          </span>
+                          {display.description ? (
+                            <p className="mt-0.5 text-xs text-slate-500">{display.description}</p>
+                          ) : null}
+                        </div>
                       </div>
-                      <time className="shrink-0 text-xs text-slate-500" dateTime={event.timestamp}>
-                        {formatTime(event.timestamp)}
+                      <time className="shrink-0 text-right text-[10px] leading-tight text-slate-500 sm:text-xs" dateTime={event.timestamp}>
+                        {formatDateTimeBr(event.timestamp)}
                       </time>
                     </div>
-                    {meta ? <p className="mt-1 text-xs text-slate-600">{meta}</p> : null}
+                    {meta ? <p className="mt-1 pl-9 text-xs text-slate-600">{meta}</p> : null}
                   </li>
                 );
               })

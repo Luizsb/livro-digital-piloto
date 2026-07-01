@@ -6,6 +6,7 @@ import {
   listChapterPageNumbers,
   resolveChapterPageBounds,
 } from '../analytics/chapterPageConfig';
+import { formatDateTimeBr } from '../lib/formatDateTimeBr';
 import type { PageJourneyItem } from './types';
 
 export function getChapterPageNumbers(
@@ -64,12 +65,7 @@ export function formatDuration(seconds: number | null): string {
 }
 
 export function formatExportedAt(iso: string): string {
-  if (!iso) return '—';
-  try {
-    return new Date(iso).toLocaleString('pt-BR');
-  } catch {
-    return iso;
-  }
+  return formatDateTimeBr(iso);
 }
 
 export function getParticipantLabel(summary: EventSummary): string {
