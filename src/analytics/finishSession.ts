@@ -86,7 +86,7 @@ export function finishTestFromButton(
   const chapterCompleted = meetsChapterCompletedCriteria(chapterMetrics, sessionId);
 
   trackOncePerSession(sessionId, ANALYTICS_EVENT_NAMES.chapterFinished, () => {
-    track(ANALYTICS_EVENT_NAMES.chapterFinished, chapterMetrics);
+    track(ANALYTICS_EVENT_NAMES.chapterFinished, { ...chapterMetrics });
   });
 
   if (chapterCompleted) {

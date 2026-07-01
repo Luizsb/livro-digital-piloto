@@ -129,7 +129,9 @@ export function AnalyticsProvider({
     setSessionStartedAt(new Date().toISOString());
     setSessionStatus('active');
     setSessionStatusState('active');
-    track(ANALYTICS_EVENT_NAMES.sessionStarted, captureSessionDeviceContext());
+    track(ANALYTICS_EVENT_NAMES.sessionStarted, {
+      ...captureSessionDeviceContext(),
+    });
   }, [participantId, refreshSessionStatus, sessionId, track]);
 
   useEffect(() => {

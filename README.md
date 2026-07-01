@@ -71,7 +71,7 @@ Guia completo: **[docs/CONFIGURACAO-ANALYTICS.md](docs/CONFIGURACAO-ANALYTICS.md
 
 ## Fase atual
 
-**MVP-05** — botão do professor + dashboard LD Insights + **fluxo de finalização do teste**.
+**MVP-06** — saúde técnica na navegação + dashboard LD Insights + fluxo de finalização do teste.
 
 | Documento | Conteúdo |
 |-----------|----------|
@@ -81,9 +81,10 @@ Guia completo: **[docs/CONFIGURACAO-ANALYTICS.md](docs/CONFIGURACAO-ANALYTICS.md
 | [docs/MVP-03-INTERACOES-CONTEUDO.md](docs/MVP-03-INTERACOES-CONTEUDO.md) | Imagens, zoom, recursos |
 | [docs/MVP-04-FEEDBACK.md](docs/MVP-04-FEEDBACK.md) | Feedback, `chapter_finished` / `chapter_completed` |
 | [docs/MVP-05-BOTAO-PROFESSOR.md](docs/MVP-05-BOTAO-PROFESSOR.md) | Botão Para o Professor |
+| [docs/MVP-06-SAUDE-TECNICA.md](docs/MVP-06-SAUDE-TECNICA.md) | Erros, tempo de carga, peso observado na sessão |
 | [docs/DASHBOARD-MVP.md](docs/DASHBOARD-MVP.md) | **LD Insights** — dashboard do JSON |
-| **[docs/CONFIGURACAO-ANALYTICS.md](docs/CONFIGURACAO-ANALYTICS.md)** | **Limiares e tempos — referência completa** |
-| **[docs/EVIDENCIAS.md](docs/EVIDENCIAS.md)** | **Histórico de evoluções — manter atualizado** |
+| [docs/CONFIGURACAO-ANALYTICS.md](docs/CONFIGURACAO-ANALYTICS.md) | Limiares e tempos — referência completa |
+| [docs/EVIDENCIAS.md](docs/EVIDENCIAS.md) | Histórico de evoluções — manter atualizado |
 
 ## Estrutura
 
