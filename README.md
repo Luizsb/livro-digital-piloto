@@ -18,18 +18,17 @@ npm run dev
 
 ### GitHub Pages (testes públicos)
 
-Deploy automático a cada push na branch `main` (workflow `.github/workflows/deploy-pages.yml`).  
-O build compilado vai para a branch **`gh-pages`** (não publique `main` diretamente).
+Deploy automático via **GitHub Actions** (workflow `.github/workflows/deploy-pages.yml`).
 
-**Configuração única no GitHub** (Settings → Pages):
+**Configuração no GitHub** (Settings → Pages):
 
 | Campo | Valor |
 |-------|--------|
-| Source | **Deploy from a branch** |
-| Branch | **`gh-pages`** |
-| Folder | **`/ (root)`** |
+| Source | **GitHub Actions** (não "Deploy from a branch") |
 
-> Se a branch for `main`, o site tenta carregar `src/main.tsx` e fica com tela branca.
+> Se estiver em "Deploy from a branch" com `main`, o site carrega `src/main.tsx` e fica em **tela branca**.
+
+Após o primeiro deploy, recarregue com **Ctrl+Shift+R** (limpa cache do navegador).
 
 | URL | Efeito |
 |-----|--------|
