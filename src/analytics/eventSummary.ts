@@ -6,8 +6,12 @@ import { buildFeedbackSummary } from './feedbackSummary';
 import { getReadingDepthLabel, type ReadingDepth } from './readingQuality';
 
 import { buildTeacherButtonSummary, type TeacherButtonSummary } from './teacherButtonSummary';
+import {
+  extractDeviceContextFromMetadata,
+  type SessionDeviceSummary,
+} from './deviceContextSummary';
 
-export interface EventSummary extends TeacherButtonSummary {
+export interface EventSummary extends TeacherButtonSummary, Partial<SessionDeviceSummary> {
   exported_at: string;
   book_id: string;
   chapter_id: string;
@@ -68,9 +72,14 @@ export function buildEventSummary(): EventSummary {
   let chapterCompletedCount = 0;
   let lastReadingDepth: string | undefined;
   let lastReadingDepthLabel: string | undefined;
+  let deviceContext: SessionDeviceSummary | null = null;
 
   for (const event of events) {
     byEventName[event.event_name] = (byEventName[event.event_name] ?? 0) + 1;
+
+    if (event.event_name === ANALYTICS_EVENT_NAMES.sessionStarted && !deviceContext) {
+      deviceContext = extractDeviceContextFromMetadata(event.metadata);
+    }
 
     const meta = event.metadata ?? {};
     if (event.event_name === ANALYTICS_EVENT_NAMES.pageViewed && typeof meta.page === 'number') {
@@ -166,6 +175,7 @@ export function buildEventSummary(): EventSummary {
     reading_depth_label: lastReadingDepthLabel,
     chapter_finished_count: chapterFinishedCount,
     chapter_completed_count: chapterCompletedCount,
+    ...(deviceContext ?? {}),
     ...chapterPages,
   };
 }

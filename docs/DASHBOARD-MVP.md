@@ -31,6 +31,7 @@ Relatórios antigos ou sem `session_finished` são completados em `parseReport.t
 |---------|------------------|
 | **Profundidade de leitura** | `summary` → `session_finished` → `chapter_finished` → `chapter_completed` |
 | **Duração da sessão** | `session_finished.duration_seconds` → intervalo `session_started` até `chapter_finished` → primeiro/último evento |
+| **Ambiente / idiomas** | `summary` ou metadata de `session_started`; JSONs antigos com só `language` tratam como idioma do navegador |
 
 ## Seções
 
@@ -38,6 +39,7 @@ Relatórios antigos ou sem `session_finished` são completados em `parseReport.t
 |-------|----------|
 | Cards principais | Participante, duração, páginas, status (badge), profundidade, feedback, usaria novamente |
 | Resumo interpretativo | Texto narrativo executivo da sessão (destaque visual após os cards) |
+| Ambiente de acesso | Dispositivo, SO, navegador, resolução, touch, idioma do app e do navegador (`session_started`) |
 | Jornada de leitura | Grid páginas 3–12 com emojis: ✅ Concluída · 👁️ Apenas visualizada · ⚪ Não visualizada |
 | Status do capítulo | Badge + insight + taxa de conclusão |
 | Imagens no capítulo | Exposição (`image_viewed`) vs interação intencional (`image_zoomed`) |

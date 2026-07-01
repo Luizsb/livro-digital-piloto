@@ -22,6 +22,10 @@ import {
   PAGE_JOURNEY_LABELS,
   type ChapterStatusLabel,
 } from './reportExtractors';
+import {
+  formatBrowserLabel,
+  formatScreenResolution,
+} from '../analytics/deviceContext';
 
 function StatusMetricCard({ status }: { status: ChapterStatusLabel }) {
   return (
@@ -170,6 +174,15 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
   const sessionInsight = buildSessionInsight(parsed);
   const commentText = feedbackComments[0]?.comment;
 
+  const deviceEmoji =
+    summary.device_type === 'mobile'
+      ? '📱'
+      : summary.device_type === 'tablet'
+        ? '📲'
+        : summary.device_type === 'desktop'
+          ? '🖥️'
+          : null;
+
   return (
     <div className="space-y-6">
       {warnings.map((warning) => (
@@ -217,6 +230,74 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
         eventCount={report.event_count}
         exportedAt={report.exported_at}
       />
+
+      {summary.device_type_label ? (
+        <Section title="Ambiente de acesso">
+          <p className="mb-4 text-sm text-slate-600">
+            Registrado no início da sessão — útil para entender em qual dispositivo o participante
+            usou o livro digital.
+          </p>
+          <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3 lg:grid-cols-4">
+            <div>
+              <dt className="text-slate-500">Dispositivo</dt>
+              <dd className="mt-1 font-semibold text-[#80298F]">
+                {deviceEmoji ? `${deviceEmoji} ` : ''}
+                {summary.device_type_label}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Sistema operacional</dt>
+              <dd className="mt-1 font-semibold text-[#80298F]">{summary.os_name ?? '—'}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Navegador</dt>
+              <dd className="mt-1 font-semibold text-[#80298F]">
+                {formatBrowserLabel(summary.browser_name, summary.browser_version)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Resolução da tela</dt>
+              <dd className="mt-1 font-semibold text-[#80298F]">
+                {formatScreenResolution(summary.screen_width, summary.screen_height)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Janela do navegador</dt>
+              <dd className="mt-1 font-semibold text-[#80298F]">
+                {formatScreenResolution(summary.viewport_width, summary.viewport_height)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Tela touch</dt>
+              <dd className="mt-1 font-semibold text-[#80298F]">
+                {summary.is_touch_device ? 'Sim' : 'Não'}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Idioma do app</dt>
+              <dd className="mt-1 font-semibold text-[#80298F]">{summary.app_language ?? '—'}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Idioma do navegador</dt>
+              <dd className="mt-1 font-semibold text-[#80298F]">
+                {summary.browser_language ?? '—'}
+              </dd>
+            </div>
+            <div className="col-span-2 sm:col-span-3 lg:col-span-4">
+              <dt className="text-slate-500">Preferências de idioma (navegador)</dt>
+              <dd className="mt-1 font-semibold text-[#80298F]">
+                {summary.browser_languages ?? '—'}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Densidade de pixels</dt>
+              <dd className="mt-1 font-semibold text-[#80298F]">
+                {summary.pixel_ratio ? `${summary.pixel_ratio}×` : '—'}
+              </dd>
+            </div>
+          </dl>
+        </Section>
+      ) : null}
 
       <Section title="Jornada de leitura">
         <div className="mb-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-600">

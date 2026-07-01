@@ -11,7 +11,40 @@ Estabelecer a infraestrutura mínima de analytics no piloto: participante anôni
 - **Quando:** participante informa código válido (`P01`, `P02`…)
 - **Onde:** `AnalyticsProvider.tsx` (efeito após `setParticipantId`)
 - **Deduplicação:** uma vez por `session_id`
-- **Metadata:** `{}`
+- **Metadata:** ambiente de acesso (sem gravar user-agent bruto):
+
+```json
+{
+  "device_type": "desktop",
+  "device_type_label": "Computador",
+  "os_name": "Windows",
+  "browser_name": "Chrome",
+  "browser_version": "125",
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "viewport_width": 1280,
+  "viewport_height": 720,
+  "pixel_ratio": 1,
+  "is_touch_device": false,
+  "app_language": "pt-BR",
+  "browser_language": "en-US",
+  "browser_languages": "en-US, en, pt-BR"
+}
+```
+
+| Campo | Significado |
+|-------|-------------|
+| `app_language` | Idioma do livro (`<html lang="pt-BR">`) |
+| `browser_language` | Idioma principal do navegador (`navigator.language`) — pode ser `en-US` mesmo com app em português |
+| `browser_languages` | Lista de preferências do navegador |
+
+| `device_type` | Label |
+|---------------|--------|
+| `desktop` | Computador |
+| `tablet` | Tablet |
+| `mobile` | Celular |
+
+Implementação: `deviceContext.ts` → `captureSessionDeviceContext()`.
 
 ### `session_resumed`
 

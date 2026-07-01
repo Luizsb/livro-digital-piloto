@@ -34,6 +34,7 @@ import {
   syncSessionStatus,
   type SessionStatus,
 } from './sessionStatus';
+import { captureSessionDeviceContext } from './deviceContext';
 
 interface AnalyticsContextValue {
   sessionId: string;
@@ -127,7 +128,7 @@ export function AnalyticsProvider({
     setSessionStartedAt(new Date().toISOString());
     setSessionStatus('active');
     setSessionStatusState('active');
-    track(ANALYTICS_EVENT_NAMES.sessionStarted);
+    track(ANALYTICS_EVENT_NAMES.sessionStarted, captureSessionDeviceContext());
   }, [participantId, refreshSessionStatus, sessionId, track]);
 
   useEffect(() => {

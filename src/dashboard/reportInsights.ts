@@ -11,6 +11,7 @@ import {
   getChapterStatusLabel,
   getParticipantLabel,
 } from './reportExtractors';
+import { formatBrowserLabel } from '../analytics/deviceContext';
 
 export function buildChapterStatusInsight(summary: EventSummary): string {
   const bounds = resolveChapterPageBounds(summary);
@@ -51,6 +52,10 @@ export function buildSessionInsight(parsed: ParsedDashboardReport): string {
   const duration = formatDuration(extractSessionDurationSeconds(events));
   const depth = summary.reading_depth_label ?? 'não classificada';
   const status = getChapterStatusLabel(summary).toLowerCase();
+  const deviceLine =
+    summary.device_type_label && summary.os_name && summary.browser_name
+      ? ` Acesso via ${summary.device_type_label.toLowerCase()} (${summary.os_name}, ${formatBrowserLabel(summary.browser_name, summary.browser_version)}).`
+      : '';
   const feedbackRating = summary.feedback.submitted
     ? `${summary.feedback.rating}/5`
     : 'sem feedback';
@@ -58,7 +63,7 @@ export function buildSessionInsight(parsed: ParsedDashboardReport): string {
     ? formatWouldUseAgain(summary.feedback.would_use_again)
     : null;
 
-  let text = `O participante ${participant} visualizou ${viewedPct}% das páginas do capítulo, concluiu ${summary.completion_rate}%, foi exposto a ${summary.images_viewed_unique_count} imagem(ns) e interagiu com ${summary.image_zoom_unique_count} delas por meio de zoom, abriu ${summary.resources_opened_total} recurso(s) digital(is) e finalizou o capítulo com status ${status}. A sessão durou ${duration} e foi classificada como ${depth}.`;
+  let text = `O participante ${participant} visualizou ${viewedPct}% das páginas do capítulo, concluiu ${summary.completion_rate}%, foi exposto a ${summary.images_viewed_unique_count} imagem(ns) e interagiu com ${summary.image_zoom_unique_count} delas por meio de zoom, abriu ${summary.resources_opened_total} recurso(s) digital(is) e finalizou o capítulo com status ${status}. A sessão durou ${duration} e foi classificada como ${depth}.${deviceLine}`;
 
   if (summary.feedback.submitted) {
     text += ` O feedback geral foi ${feedbackRating}`;

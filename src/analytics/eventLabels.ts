@@ -28,7 +28,8 @@ export interface EventCatalogEntry {
 export const EVENT_CATALOG: Record<string, EventCatalogEntry> = {
   [ANALYTICS_EVENT_NAMES.sessionStarted]: {
     label: 'Sessão iniciada',
-    description: 'Participante entrou com um código válido (ex.: P01).',
+    description:
+      'Participante entrou com código válido; registra tipo de dispositivo, SO e navegador.',
     active: true,
   },
   [ANALYTICS_EVENT_NAMES.sessionResumed]: {
@@ -217,6 +218,21 @@ const METADATA_LABELS: Record<string, string> = {
   would_use_again: 'Usaria novamente',
   has_comment: 'Incluiu comentário',
   comment_length: 'Tamanho do comentário (car.)',
+  device_type: 'Tipo de dispositivo',
+  device_type_label: 'Dispositivo',
+  os_name: 'Sistema operacional',
+  browser_name: 'Navegador',
+  browser_version: 'Versão do navegador',
+  screen_width: 'Largura da tela (px)',
+  screen_height: 'Altura da tela (px)',
+  viewport_width: 'Largura da janela (px)',
+  viewport_height: 'Altura da janela (px)',
+  pixel_ratio: 'Densidade de pixels',
+  is_touch_device: 'Tela touch',
+  app_language: 'Idioma do app',
+  browser_language: 'Idioma do navegador',
+  browser_languages: 'Idiomas do navegador',
+  language: 'Idioma do navegador (legado)',
 };
 
 function formatMetadataValue(key: string, value: unknown): string {
@@ -243,6 +259,14 @@ function formatMetadataValue(key: string, value: unknown): string {
   }
   if (key === 'would_use_again' && typeof value === 'string') {
     return WOULD_USE_AGAIN_LABELS[value] ?? value;
+  }
+  if (key === 'device_type' && typeof value === 'string') {
+    const map: Record<string, string> = {
+      desktop: 'Computador',
+      tablet: 'Tablet',
+      mobile: 'Celular',
+    };
+    return map[value] ?? value;
   }
   if (typeof value === 'boolean') return value ? 'sim' : 'não';
   if (value === null || value === undefined) return '—';

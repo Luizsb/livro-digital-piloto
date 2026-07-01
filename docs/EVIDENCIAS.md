@@ -56,7 +56,7 @@ Sempre que houver mudança relevante no piloto:
 
 | Área | O que coleta / exibe |
 |------|----------------------|
-| Sessão | Código P01… (digita só o número), `session_started`, `session_resumed` no F5, export JSON |
+| Sessão | Código P01… (digita só o número), `session_started` (+ dispositivo/SO/navegador), `session_resumed` no F5, export JSON |
 | Jornada | `page_viewed`, `page_completed`, `reading_depth` |
 | Imagens | `image_viewed` (exposição), `image_zoomed`, lightbox sem rolagem |
 | ODA | `resource_opened` + `resource_engagement_recorded` (tempo no modal) |
@@ -85,6 +85,17 @@ Sempre que houver mudança relevante no piloto:
 ---
 
 ## Registro cronológico
+
+### 2026-07-01 — Ambiente de acesso (dispositivo, SO, navegador)
+
+**Tipo:** feature  
+**MVP:** 01 (transversal)  
+**Resumo:** `session_started` registra tipo de dispositivo (computador/tablet/celular), sistema operacional, navegador, resolução, viewport, touch e idiomas (`app_language` do `<html lang>`, `browser_language` do navegador) — sem user-agent bruto. Campos no `summary` do export e seção **Ambiente de acesso** no LD Insights.  
+**Arquivos:** `deviceContext.ts`, `deviceContextSummary.ts`, `AnalyticsProvider.tsx`, `eventSummary.ts`, `DashboardPage.tsx`, `parseReport.ts`  
+**Docs atualizados:** `EVIDENCIAS.md`, `MVP-01-BASE.md`, `DASHBOARD-MVP.md`, `RELATORIO-USO-LIVRO.md`  
+**Como validar:** Nova sessão P01 → Ver eventos (metadata em Sessão iniciada) → exportar JSON → dashboard mostra Ambiente de acesso.
+
+---
 
 ### 2026-07-01 — Dashboard: duração, profundidade e emojis na jornada
 
