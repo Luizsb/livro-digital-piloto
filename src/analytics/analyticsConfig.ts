@@ -20,7 +20,7 @@
  * | chapter          | taxa mínima de `chapter_completed` (%)        |
  * | scroll           | `page_viewed`, paginação por scroll           |
  * | image            | `image_viewed` (exposição na viewport)        |
- * | readingQuality   | `session_finished.reading_depth`              |
+ * | readingQuality   | `session_finished.reading_depth` (MVP-02)     |
  *
  * | Páginas do capítulo | chapterPageConfig.ts → CHAPTER_PAGE_REGISTRY |
  */
@@ -47,7 +47,7 @@ export const ANALYTICS_CONFIG = {
      *
      * Lógica: chapterMetrics.ts → meetsChapterCompletedCriteria()
      */
-    minCompletionRateForChapterCompleted: 90,
+    minCompletionRateForChapterCompleted: 99,
   },
 
   // ── Scroll — quando uma página “vira” ativa (MVP-02) ────────────────────
@@ -63,11 +63,11 @@ export const ANALYTICS_CONFIG = {
     viewDelayMs: 750,
   },
 
-  // ── Profundidade de leitura em `session_finished` (MVP-04) ─────────────
+  // ── Profundidade de leitura em `session_finished` (MVP-02) ─────────────
   readingQuality: {
     veryQuickMaxSeconds: 5,
     quickScanMaxSeconds: 15,
-    moderateMaxSeconds: 40,
+    moderateMaxSeconds: 40, 
   },
 } as const;
 

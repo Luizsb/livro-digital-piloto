@@ -1,0 +1,201 @@
+# Evidências e evolução do piloto
+
+Registro cronológico das **mudanças, melhorias e correções** do Livro Digital Piloto.  
+Use este arquivo para acompanhar o que foi feito, validar com a equipe e atualizar contexto em outras ferramentas (ex.: GPT).
+
+**Repositório:** [github.com/Luizsb/livro-digital-piloto](https://github.com/Luizsb/livro-digital-piloto)
+
+---
+
+## Como manter este documento
+
+Sempre que houver mudança relevante no piloto:
+
+1. **Adicione uma entrada** na seção [Registro cronológico](#registro-cronológico) (mais recente no topo).
+2. **Atualize o doc de MVP** correspondente (ex.: nova métrica → `MVP-03-INTERACOES-CONTEUDO.md`).
+3. Se mudou limiar ou parâmetro → `CONFIGURACAO-ANALYTICS.md` e `analyticsConfig.ts`.
+4. Se mudou evento ou label → `eventLabels.ts` e tabela em `RELATORIO-USO-LIVRO.md`.
+5. Se mudou dashboard → `DASHBOARD-MVP.md`.
+
+### Modelo de entrada
+
+```markdown
+### AAAA-MM-DD — Título curto
+
+**Tipo:** feature | fix | docs | UX | infra  
+**MVP:** 01–05 (ou transversal)  
+**Resumo:** uma frase do que mudou e por quê.  
+**Arquivos:** lista dos principais arquivos alterados.  
+**Docs atualizados:** links ou “pendente”.  
+**Como validar:** passos rápidos de teste.
+```
+
+---
+
+## Mapa da documentação
+
+| Documento | Função | Atualizar quando… |
+|-----------|--------|-------------------|
+| **[EVIDENCIAS.md](./EVIDENCIAS.md)** (este) | Histórico de evoluções | Qualquer entrega ou correção relevante |
+| [RELATORIO-USO-LIVRO.md](./RELATORIO-USO-LIVRO.md) | Índice, arquitetura, lista de eventos | Novo evento, nova camada analytics |
+| [MVP-01 … MVP-05](./MVP-01-BASE.md) | Especificação por fase | Regra de negócio ou critério de aceite |
+| [CONFIGURACAO-ANALYTICS.md](./CONFIGURACAO-ANALYTICS.md) | Limiares editáveis | Mudança em `analyticsConfig.ts` |
+| [DASHBOARD-MVP.md](./DASHBOARD-MVP.md) | LD Insights | Nova seção ou métrica no dashboard |
+| [README.md](../README.md) | Porta de entrada do projeto | Fase atual, links, estrutura |
+
+---
+
+## Estado atual (snapshot)
+
+**Fase:** MVP-05 concluído + extensões MVP-03 (vídeo e modal robusto)  
+**Capítulo piloto:** `cap07_historia_ai43` / `cap07` (páginas 3–12)  
+**Última atualização deste doc:** 2026-06-30
+
+### Funcionalidades ativas
+
+| Área | O que coleta / exibe |
+|------|----------------------|
+| Sessão | Código P01…, `session_started`, export JSON |
+| Jornada | `page_viewed`, `page_completed`, `reading_depth` |
+| Imagens | `image_viewed` (exposição), `image_zoomed`, lightbox sem rolagem |
+| ODA | `resource_opened` + `resource_engagement_recorded` (tempo no modal) |
+| Escola Digital | Modal + vídeo: `video_started`, `video_completed`, `video_progress_recorded` |
+| Professor | `teacher_button_opened` / `teacher_button_closed` |
+| Encerramento | `feedback_submitted`, `chapter_finished`, `chapter_completed`, `session_finished` |
+| Dashboard | LD Insights em `#/dashboard` |
+
+### Arquivos-chave (além dos MVPs originais)
+
+| Arquivo | Papel |
+|---------|--------|
+| `modalResourceTracking.ts` | Sessão de modal ODA/Escola Digital; tempo ao fechar |
+| `videoTracking.ts` + `TrackedVideo.tsx` | Play, conclusão e progresso do vídeo |
+| `teacherButtonTracking.ts` | Abertura/fechamento do botão do professor |
+| `contentInteractionsSummary.ts` | Agregados ODA, Escola Digital e vídeo no export |
+| `EventReportPanel.tsx` | Painel em tempo real (resumo recolhível + log) |
+| `parseReport.ts` | Enriquecimento de JSONs antigos no dashboard |
+
+---
+
+## Registro cronológico
+
+### 2026-06-30 — Documento de evidências criado
+
+**Tipo:** docs  
+**MVP:** transversal  
+**Resumo:** Criação deste arquivo para centralizar evoluções e regras de manutenção da documentação.  
+**Docs atualizados:** `EVIDENCIAS.md`, `README.md`, `RELATORIO-USO-LIVRO.md`.
+
+---
+
+### 2026-06-30 — Correção de referência MVP (`readingQuality`)
+
+**Tipo:** docs  
+**MVP:** 02  
+**Resumo:** `readingQuality` em `analyticsConfig.ts` referenciado como MVP-02 (jornada), não MVP-04 (feedback).  
+**Arquivos:** `analyticsConfig.ts`, `CONFIGURACAO-ANALYTICS.md`.
+
+---
+
+### 2026-06-30 — Repositório publicado no GitHub
+
+**Tipo:** infra  
+**MVP:** transversal  
+**Resumo:** Projeto versionado e enviado para `Luizsb/livro-digital-piloto` (branch `main`).  
+**Observação:** vídeo `SAE26_AI43_HIS_C07_VA1.mp4` (~97 MB) — GitHub recomenda LFS acima de 50 MB.
+
+---
+
+### 2026-06-30 — Lightbox de imagens sem rolagem
+
+**Tipo:** UX  
+**MVP:** 03  
+**Resumo:** Modal de ampliação redimensiona a imagem com `object-contain` para caber na tela, sem barra de rolagem.  
+**Arquivos:** `TrackedImage.tsx`  
+**Como validar:** Ampliar mapa “Circulação de pessoas e mercadorias” — imagem inteira visível, sem scroll.
+
+---
+
+### 2026-06-30 — Layout dos modais ODA e vídeo
+
+**Tipo:** fix + UX  
+**MVP:** 03  
+**Resumo:** Botão fechar voltou a sobrepor o conteúdo (sem barra que cortava área útil); modal até 90vh; iframe/vídeo em altura total.  
+**Arquivos:** `GameModal.tsx`, `OdaApp.tsx`, `EscolaDigital.tsx`
+
+---
+
+### 2026-06-30 — Tempo no ODA/Escola Digital (registro ao fechar)
+
+**Tipo:** fix  
+**MVP:** 03  
+**Resumo:** `resource_engagement_recorded` passou a ser garantido no cleanup do modal e ao encerrar sessão (`modalResourceTracking.ts`). Corrige caso em que só aparecia `resource_opened`.  
+**Arquivos:** `modalResourceTracking.ts`, `GameModal.tsx`, `finishSession.ts`  
+**Como validar:** Abrir ODA → esperar → fechar pelo X roxo → painel deve mostrar **Recurso aberto** e **Tempo no recurso**.
+
+---
+
+### 2026-06-30 — Rastreamento de vídeo Escola Digital
+
+**Tipo:** feature  
+**MVP:** 03  
+**Resumo:** Novos eventos de reprodução, distintos do tempo com modal aberto.  
+**Eventos:** `video_started`, `video_completed`, `video_progress_recorded`  
+**Summary:** `escola_digital_video_play_count`, `escola_digital_video_watched_to_end`, `escola_digital_video_max_progress_percent`, etc.  
+**Arquivos:** `TrackedVideo.tsx`, `videoTracking.ts`, `videoInteractionTypes.ts`, `contentInteractionsSummary.ts`, `eventSummary.ts`, `DashboardPage.tsx`, `reportInsights.ts`  
+**Docs:** `MVP-03-INTERACOES-CONTEUDO.md`, `RELATORIO-USO-LIVRO.md`, `DASHBOARD-MVP.md`
+
+---
+
+### 2026-06-30 — Painel “Eventos em tempo real” refinado
+
+**Tipo:** UX  
+**MVP:** transversal  
+**Resumo:** Resumo da coleta (jornada, imagens, recursos) recolhível por padrão; log de eventos com mais altura e scroll. Tempo no recurso **sempre visível** no log (decisão de produto).  
+**Arquivos:** `EventReportPanel.tsx`
+
+---
+
+### 2026-06 (anterior) — MVP-05 Botão do professor
+
+**Tipo:** feature  
+**MVP:** 05  
+**Resumo:** `teacher_button_opened` / `teacher_button_closed`, summary por seção, dashboard e insights.  
+**Docs:** [MVP-05-BOTAO-PROFESSOR.md](./MVP-05-BOTAO-PROFESSOR.md)
+
+---
+
+### 2026-06 (anterior) — Dashboard LD Insights v0.1
+
+**Tipo:** feature  
+**MVP:** transversal  
+**Resumo:** Visualização do JSON exportado; cards, jornada, recursos, professor, feedback, saúde da coleta.  
+**Docs:** [DASHBOARD-MVP.md](./DASHBOARD-MVP.md)
+
+---
+
+### 2026-06 (anterior) — MVPs 01–04 implementados
+
+**Tipo:** feature  
+**MVP:** 01–04  
+**Resumo:** Base de sessão, jornada de leitura, interações com conteúdo, feedback e encerramento do capítulo.  
+**Docs:** `MVP-01-BASE.md` … `MVP-04-FEEDBACK.md`
+
+---
+
+## Próximos passos previstos
+
+| Item | MVP | Status |
+|------|-----|--------|
+| Atividades interativas (`activity_started` / `activity_completed`) | 06 | ⏳ Planejado |
+| `image_load_error` | 03 | ⏳ Planejado |
+| Git LFS para vídeo grande (opcional) | infra | ⏳ Avaliar |
+
+---
+
+## Para handoff (copiar em outra ferramenta)
+
+> Piloto Livro Digital — analytics por fases. Repo: github.com/Luizsb/livro-digital-piloto  
+> Índice: `docs/RELATORIO-USO-LIVRO.md` · Evoluções: `docs/EVIDENCIAS.md`  
+> ODA/Escola Digital: abertura + tempo no modal (`resource_*`). Vídeo: `video_*`.  
+> Config: `analyticsConfig.ts` + `docs/CONFIGURACAO-ANALYTICS.md`

@@ -23,7 +23,7 @@ Salve e recarregue o app após editar. Não duplique números em outros arquivos
 | `chapter.minCompletionRateForChapterCompleted` | `chapter_completed` (taxa mínima) | `chapterMetrics.ts` |
 | `scroll.*` | `page_viewed` | `bookPageScroll.ts` |
 | `image.*` | `image_viewed` (exposição) | `TrackedImage.tsx` |
-| `readingQuality.*` | `session_finished.reading_depth` | `readingQuality.ts` |
+| `readingQuality.*` | `session_finished.reading_depth` | `readingQuality.ts` — ver [MVP-02](./MVP-02-JORNADA-LEITURA.md) |
 
 ### `chapterPageConfig.ts` — por livro + capítulo
 
@@ -82,6 +82,8 @@ Taxa mínima (%) para `chapter_completed`. Pode ser sobrescrita por capítulo em
 | `quickScanMaxSeconds` | `15` | Varredura rápida |
 | `moderateMaxSeconds` | `40` | Leitura moderada |
 | acima de 40 | — | Leitura aprofundada |
+
+Classificação por `avg_seconds_per_viewed_page` ao encerrar a sessão. Detalhes: [MVP-02-JORNADA-LEITURA.md](./MVP-02-JORNADA-LEITURA.md).
 
 ---
 

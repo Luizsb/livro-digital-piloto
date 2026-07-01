@@ -248,4 +248,6 @@ Seção **Interações com o conteúdo**:
 
 ## Próximo passo
 
-**MVP-05** — Botão do professor (`teacher_button_opened`).
+**MVP-06** — Atividades interativas (`activity_started` / `activity_completed`).
+
+**Evoluções deste MVP:** registrar em [EVIDENCIAS.md](./EVIDENCIAS.md) a cada entrega.

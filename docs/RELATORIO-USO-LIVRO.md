@@ -13,6 +13,7 @@ Projeto independente em `Documentos/livro-digital-piloto`. O **livro-bett** perm
 | Migração DIA LD | [GUIA-MIGRACAO-DIA-LD.md](./GUIA-MIGRACAO-DIA-LD.md) | Referência para portar |
 | Dashboard | [DASHBOARD-MVP.md](./DASHBOARD-MVP.md) | LD Insights — visualizar JSON |
 | Configuração | [CONFIGURACAO-ANALYTICS.md](./CONFIGURACAO-ANALYTICS.md) | **Limiares e tempos editáveis** |
+| **Evidências / evolução** | **[EVIDENCIAS.md](./EVIDENCIAS.md)** | **Histórico de mudanças — manter atualizado** |
 
 ## Como rodar
 
@@ -96,9 +97,12 @@ Definições, metadados e regras de disparo: ver [MVP-02-JORNADA-LEITURA.md](./M
 | `analyticsConfig.ts` | **Parâmetros editáveis (tempos, limiares)** |
 | `feedbackTracking.ts` | Evento `feedback_submitted` |
 | `teacherButtonTracking.ts` | Eventos `teacher_button_opened` / `teacher_button_closed` |
+| `modalResourceTracking.ts` | Tempo no modal ODA / Escola Digital ao fechar |
+| `videoTracking.ts` | Play, conclusão e progresso do vídeo Escola Digital |
 | `resourceEvents.ts` | Helpers para `resource_opened` / engajamento |
 
-Ver [CONFIGURACAO-ANALYTICS.md](./CONFIGURACAO-ANALYTICS.md) para alterar critérios sem mexer na lógica.
+Ver [CONFIGURACAO-ANALYTICS.md](./CONFIGURACAO-ANALYTICS.md) para alterar critérios sem mexer na lógica.  
+**Histórico de entregas:** [EVIDENCIAS.md](./EVIDENCIAS.md) — atualizar a cada mudança relevante.
 
 ## Dados
 

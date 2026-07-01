@@ -54,6 +54,7 @@ Guia completo: **[docs/CONFIGURACAO-ANALYTICS.md](docs/CONFIGURACAO-ANALYTICS.md
 | [docs/MVP-05-BOTAO-PROFESSOR.md](docs/MVP-05-BOTAO-PROFESSOR.md) | Botão Para o Professor |
 | [docs/DASHBOARD-MVP.md](docs/DASHBOARD-MVP.md) | **LD Insights** — dashboard do JSON |
 | **[docs/CONFIGURACAO-ANALYTICS.md](docs/CONFIGURACAO-ANALYTICS.md)** | **Limiares e tempos — referência completa** |
+| **[docs/EVIDENCIAS.md](docs/EVIDENCIAS.md)** | **Histórico de evoluções — manter atualizado** |
 
 ## Estrutura
 
@@ -77,6 +78,7 @@ src/
     FinishTestButton.tsx
     ChapterFeedback.tsx      ← feedback final (MVP-04)
 docs/                     ← especificações por MVP + guia DIA LD
+    EVIDENCIAS.md         ← ★ histórico de mudanças (atualizar sempre)
 ```
 
 ## Relação com outros projetos
