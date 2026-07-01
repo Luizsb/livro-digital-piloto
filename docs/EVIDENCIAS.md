@@ -84,9 +84,9 @@ Sempre que houver mudança relevante no piloto:
 
 **Tipo:** infra  
 **MVP:** transversal  
-**Resumo:** Piloto publicado em https://luizsb.github.io/livro-digital-piloto/ para testes externos; analytics continua no navegador (export JSON manual).  
+**Resumo:** Piloto publicado em https://luizsb.github.io/livro-digital-piloto/ para testes externos; build na branch `gh-pages` (não publicar `main` diretamente).  
 **Arquivos:** `.github/workflows/deploy-pages.yml`, `vite.config.ts`, `package.json`, `README.md`  
-**Como validar:** Abrir a URL, informar `P01`, navegar o capítulo; exportar JSON e carregar em `/#/dashboard`.
+**Como validar:** Settings → Pages → branch `gh-pages`; abrir a URL, informar `P01`, navegar o capítulo.
 
 ---
 
