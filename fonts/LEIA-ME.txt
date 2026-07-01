@@ -1,0 +1,20 @@
+Filson Soft — família completa
+
+Os ficheiros estão em:
+  fonts/Filson-Soft-Font/Filson-Soft-Font/WOFF2/
+  fonts/Filson-Soft-Font/Filson-Soft-Font/TTF/
+
+O src/index.css declara @font-face para "Filson Soft" (pesos 100–900, normal e itálico) com esses caminhos.
+
+Pode apagar a pasta __MACOSX (resíduos do macOS); não é usada no site.
+
+---
+
+Myriad VF (Light Condensed)
+
+Ficheiros na raiz de fonts/:
+  Myriad VF Light Condensed.ttf
+  Myriad VF Light Condensed Italic.ttf
+
+O index.css usa estes ficheiros para "Myriad VF". Negrito (700) tenta primeiro fontes locais do sistema;
+se tiver mais ficheiros .woff2/.ttf da família, pode acrescentar src em @font-face no CSS.
