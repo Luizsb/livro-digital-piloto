@@ -1,0 +1,46 @@
+{
+    "configuracoes": {
+        "marca": "SAE",
+        "codigo": "ARCO",
+        "musica": {
+            "src": "Lotus.mp3",
+            "volume": 0.25
+        }
+    },
+    "creditos": [
+        {
+            "titulo": "Créditos de Imagem",
+            "texto": "MaryDesy/stock.adobe.com; \nImagem gerada por IA/OpenAI; Mariana Fontoura."
+        },
+        {
+            "titulo": "Créditos de SOM",
+            "texto": "Misterbates - Meditate with Kwolok / CC0 freesound.org; \nElevenLabs/voz e efeitos sonoros gerados por Inteligência Artificial"
+        }
+    ],
+    "orientacaoMetodologica": [
+        {
+            "titulo": "ORIENTAÇÃO METODOLÓGICA",
+            "texto": "O ODA pode ser utilizado como uma atividade de imersão histórica, na etapa introdutória ou de consolidação do conteúdo sobre o surgimento do comércio e as formas antigas de troca. \nIncentiva a tomada de decisão com base em contexto histórico e promove a reflexão crítica por meio de comparação entre práticas comerciais antigas e atuais. Pode ser realizada em sala, com apoio do professor para mediação das decisões e discussão posterior."
+        }
+    ],
+    "paginas": [
+        {
+            "enunciado": {
+                "titulo": "",
+                "texto": "",
+                "codNarracao": ""
+            }
+        },
+        {
+            "enunciado": {
+                "titulo": "",
+                "texto": "",
+                "codNarracao": ""
+            },
+            "orientacaoProfessor": {
+                "titulo": "",
+                "texto": ""
+            }
+        }
+    ]
+}
