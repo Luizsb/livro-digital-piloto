@@ -397,8 +397,8 @@ function Book() {
 
                 </div>
                 <p className="mb-4 indent-6">
-                  Por essa rota, viajavam produtos como a seda, porcelanas da China e as
-                  <strong>especiarias</strong> da Índia. Produtos como a pimenta e o cravo eram essenciais
+                  Por essa rota, viajavam produtos como a seda, porcelanas da China e as 
+                  <strong> especiarias</strong> da Índia. Produtos como a pimenta e o cravo eram essenciais
                   na Europa, tanto para dar sabor aos alimentos quanto para conservá-los. Além
                   disso, as especiarias eram símbolos de riqueza e poder, e quem as possuía era
                   visto com grande prestígio.
