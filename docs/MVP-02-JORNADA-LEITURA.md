@@ -65,8 +65,13 @@ Rastrear se o participante percorreu o conteúdo do capítulo: páginas visualiz
 
 **Quando dispara:**
 
-1. Clique em **"Finalizar teste"** (`FinishTestButton.tsx`)
-2. Fechamento/saída da aba (`pagehide` em `useSessionFinishOnUnload.ts`)
+1. Clique em **"Finalizar teste"** (`FinishTestButton.tsx`) — fluxo completo de capítulo
+2. Fechamento/saída da aba (`pagehide` em `useSessionFinishOnUnload.ts`) — apenas encerramento de sessão
+
+**Não dispara em:**
+
+- Recarregar a aba (F5 / botão atualizar) — sessão ativa é restaurada; ver `session_resumed`
+- Exportação JSON
 
 **Regras:**
 

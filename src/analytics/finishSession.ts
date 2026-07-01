@@ -15,6 +15,10 @@ import { closeAllOpenTeacherButtons } from './teacherButtonTracking';
 import { flushAllOpenVideoSessions } from './videoTracking';
 import { flushAllOpenModalResourceSessions } from './modalResourceTracking';
 import { getReadingDepthLabel } from './readingQuality';
+import {
+  setSessionFinishedAt,
+  setSessionStatus,
+} from './sessionStatus';
 
 export interface FinishTestResult {
   /** `false` se a sessão já havia sido finalizada. */
@@ -44,6 +48,10 @@ export function finishSessionOnUnload(
       reading_depth: metadata.reading_depth,
       reading_depth_label: getReadingDepthLabel(metadata.reading_depth),
     });
+
+    const finishedAt = new Date().toISOString();
+    setSessionStatus('finished');
+    setSessionFinishedAt(finishedAt);
   });
 }
 
@@ -98,6 +106,10 @@ export function finishTestFromButton(
     reading_depth: sessionMetadata.reading_depth,
     reading_depth_label: getReadingDepthLabel(sessionMetadata.reading_depth),
   });
+
+  const finishedAt = new Date().toISOString();
+  setSessionStatus('finished');
+  setSessionFinishedAt(finishedAt);
 
   return { emitted: true, chapterCompleted };
 }

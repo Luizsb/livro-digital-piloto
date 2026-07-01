@@ -20,6 +20,14 @@ export function markSessionEventTracked(sessionId: string, key: string): void {
   }
 }
 
+export function unmarkSessionEventTracked(sessionId: string, key: string): void {
+  try {
+    sessionStorage.removeItem(dedupeKey(sessionId, key));
+  } catch {
+    // ignore
+  }
+}
+
 /** Registra no máximo uma vez por sessão; retorna true se o evento foi emitido. */
 export function trackOncePerSession(
   sessionId: string,

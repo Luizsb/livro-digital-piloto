@@ -71,7 +71,7 @@ Guia completo: **[docs/CONFIGURACAO-ANALYTICS.md](docs/CONFIGURACAO-ANALYTICS.md
 
 ## Fase atual
 
-**MVP-05** — botão do professor + dashboard LD Insights refinado.
+**MVP-05** — botão do professor + dashboard LD Insights + **fluxo de finalização do teste**.
 
 | Documento | Conteúdo |
 |-----------|----------|
@@ -101,8 +101,9 @@ src/
     TrackedImage.tsx       ← imagens com view + zoom (MVP-03)
     TrackedLink.tsx        ← links rastreáveis (MVP-03)
     TrackedVideo.tsx       ← play e conclusão do vídeo Escola Digital (MVP-03)
-    ParticipantGate.tsx
-    EventReportPanel.tsx  ← painel em tempo real
+    ParticipantGate.tsx       ← P fixo + número; link dashboard
+    TestFinishedScreen.tsx    ← tela após Finalizar teste
+    EventReportPanel.tsx      ← painel em tempo real
     ExportEventsButton.tsx
     FinishTestButton.tsx
     ChapterFeedback.tsx      ← feedback final (MVP-04)

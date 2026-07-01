@@ -56,14 +56,15 @@ Sempre que houver mudança relevante no piloto:
 
 | Área | O que coleta / exibe |
 |------|----------------------|
-| Sessão | Código P01…, `session_started`, export JSON |
+| Sessão | Código P01… (digita só o número), `session_started`, `session_resumed` no F5, export JSON |
 | Jornada | `page_viewed`, `page_completed`, `reading_depth` |
 | Imagens | `image_viewed` (exposição), `image_zoomed`, lightbox sem rolagem |
 | ODA | `resource_opened` + `resource_engagement_recorded` (tempo no modal) |
 | Escola Digital | Modal + vídeo: `video_started`, `video_completed`, `video_progress_recorded` |
 | Professor | `teacher_button_opened` / `teacher_button_closed` |
 | Encerramento | `feedback_submitted`, `chapter_finished`, `chapter_completed`, `session_finished` |
-| Dashboard | LD Insights em `#/dashboard` |
+| Tela pós-teste | **Teste finalizado** — exportar JSON ou iniciar novo teste (sem voltar ao livro) |
+| Dashboard | LD Insights em `#/dashboard` (também no gate de acesso) |
 
 ### Arquivos-chave (além dos MVPs originais)
 
@@ -72,6 +73,9 @@ Sempre que houver mudança relevante no piloto:
 | `modalResourceTracking.ts` | Sessão de modal ODA/Escola Digital; tempo ao fechar |
 | `videoTracking.ts` + `TrackedVideo.tsx` | Play, conclusão e progresso do vídeo |
 | `teacherButtonTracking.ts` | Abertura/fechamento do botão do professor |
+| `sessionStatus.ts` | Status da sessão (`not_started` / `active` / `finished`) |
+| `exportSessionReport.ts` | Export JSON com `events_exported` antes do download |
+| `TestFinishedScreen.tsx` | Tela de encerramento após Finalizar teste |
 | `contentInteractionsSummary.ts` | Agregados ODA, Escola Digital e vídeo no export |
 | `EventReportPanel.tsx` | Painel em tempo real (resumo recolhível + log) |
 | `parseReport.ts` | Enriquecimento de JSONs antigos no dashboard |
@@ -79,6 +83,26 @@ Sempre que houver mudança relevante no piloto:
 ---
 
 ## Registro cronológico
+
+### 2026-06-30 — Fluxo de finalização do teste + UX do gate
+
+**Tipo:** feature + fix + UX  
+**MVP:** 01, 04 (transversal)  
+**Resumo:** Botão **Finalizar teste** exibe tela de encerramento com export JSON e **Iniciar novo teste** (sem “Voltar ao livro”). Status `active`/`finished` em `sessionStorage`; coleta bloqueada após finalizar (exceto `events_exported`). F5 **não** finaliza sessão ativa — registra `session_resumed`. Gate com **P** fixo (só digita o número) e link **Abrir dashboard (LD Insights)**.  
+**Arquivos:** `sessionStatus.ts`, `finishSession.ts`, `exportSessionReport.ts`, `TestFinishedScreen.tsx`, `ParticipantGate.tsx`, `App.tsx`, `AnalyticsProvider.tsx`, `useSessionFinishOnUnload.ts`  
+**Docs atualizados:** `EVIDENCIAS.md`, `MVP-01-BASE.md`, `MVP-04-FEEDBACK.md`, `MVP-02-JORNADA-LEITURA.md`, `RELATORIO-USO-LIVRO.md`, `DASHBOARD-MVP.md`, `README.md`  
+**Como validar:** Entrar P01 → ler → F5 volta ao livro → Finalizar → tela de encerramento → F5 mantém tela → Exportar → Iniciar novo teste limpa e volta ao gate.
+
+---
+
+### 2026-06-30 — Datas pt-BR e cores no painel de eventos
+
+**Tipo:** UX  
+**MVP:** transversal  
+**Resumo:** Timestamps em fuso `America/Sao_Paulo` no export e painel; ícones/cores por categoria no `EventReportPanel`.  
+**Arquivos:** `formatDateTimeBr.ts`, `eventVisualStyle.ts`, `EventReportPanel.tsx`, `exportEvents.ts`
+
+---
 
 ### 2026-06-30 — Deploy no GitHub Pages
 

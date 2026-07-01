@@ -21,15 +21,29 @@ import {
   saveParticipantId,
   trackEvent as persistTrackEvent,
 } from './trackEvent';
-import { markSessionEventTracked, setSessionStartedAt, wasSessionEventTracked, getSessionStartedAt } from './sessionDedup';
+import {
+  markSessionEventTracked,
+  setSessionStartedAt,
+  wasSessionEventTracked,
+  getSessionStartedAt,
+} from './sessionDedup';
+import {
+  isEventAllowedWhenFinished,
+  recoverActiveSessionAfterReload,
+  setSessionStatus,
+  syncSessionStatus,
+  type SessionStatus,
+} from './sessionStatus';
 
 interface AnalyticsContextValue {
   sessionId: string;
   participantId: string | null;
+  sessionStatus: SessionStatus;
   bookId: string;
   chapterId: string;
   setParticipantId: (participantId: string) => boolean;
   track: (eventName: string, metadata?: Record<string, unknown>) => void;
+  refreshSessionStatus: () => void;
 }
 
 const AnalyticsContext = createContext<AnalyticsContextValue | null>(null);
@@ -45,23 +59,45 @@ export function AnalyticsProvider({
   bookId = BOOK_PILOT.book_id,
   chapterId = BOOK_PILOT.chapter_id,
 }: AnalyticsProviderProps) {
-  const sessionId = useMemo(() => getOrCreateSessionId(), []);
+  const sessionId = useMemo(() => {
+    const id = getOrCreateSessionId();
+    recoverActiveSessionAfterReload(id);
+    return id;
+  }, []);
   const [participantId, setParticipantIdState] = useState<string | null>(() =>
     getStoredParticipantId(),
   );
+  const [sessionStatus, setSessionStatusState] = useState<SessionStatus>(() =>
+    syncSessionStatus(sessionId),
+  );
   const sessionStartedRef = useRef(false);
+  const sessionResumedRef = useRef(false);
 
-  const setParticipantId = useCallback((raw: string): boolean => {
-    const normalized = normalizeParticipantId(raw);
-    if (!isValidParticipantId(normalized)) return false;
-    saveParticipantId(normalized);
-    setParticipantIdState(normalized);
-    return true;
-  }, []);
+  const refreshSessionStatus = useCallback(() => {
+    setSessionStatusState(syncSessionStatus(sessionId));
+  }, [sessionId]);
+
+  const setParticipantId = useCallback(
+    (raw: string): boolean => {
+      const normalized = normalizeParticipantId(raw);
+      if (!isValidParticipantId(normalized)) return false;
+      saveParticipantId(normalized);
+      setParticipantIdState(normalized);
+      setSessionStatus('active');
+      setSessionStatusState('active');
+      return true;
+    },
+    [],
+  );
 
   const track = useCallback(
     (eventName: string, metadata: Record<string, unknown> = {}) => {
       if (!participantId) return;
+
+      const status = syncSessionStatus(sessionId);
+      if (status === 'finished' && !isEventAllowedWhenFinished(eventName)) {
+        return;
+      }
 
       const input: TrackEventInput = {
         event_name: eventName,
@@ -83,24 +119,52 @@ export function AnalyticsProvider({
       if (!getSessionStartedAt()) {
         setSessionStartedAt(new Date().toISOString());
       }
+      refreshSessionStatus();
       return;
     }
     sessionStartedRef.current = true;
     markSessionEventTracked(sessionId, ANALYTICS_EVENT_NAMES.sessionStarted);
     setSessionStartedAt(new Date().toISOString());
+    setSessionStatus('active');
+    setSessionStatusState('active');
     track(ANALYTICS_EVENT_NAMES.sessionStarted);
+  }, [participantId, refreshSessionStatus, sessionId, track]);
+
+  useEffect(() => {
+    if (!participantId || sessionResumedRef.current) return;
+    if (syncSessionStatus(sessionId) !== 'active') return;
+    if (!wasSessionEventTracked(sessionId, ANALYTICS_EVENT_NAMES.sessionStarted)) return;
+
+    const nav = performance.getEntriesByType('navigation')[0] as
+      | PerformanceNavigationTiming
+      | undefined;
+    if (nav?.type !== 'reload') return;
+
+    sessionResumedRef.current = true;
+    track(ANALYTICS_EVENT_NAMES.sessionResumed);
   }, [participantId, sessionId, track]);
 
   const value = useMemo(
     () => ({
       sessionId,
       participantId,
+      sessionStatus,
       bookId,
       chapterId,
       setParticipantId,
       track,
+      refreshSessionStatus,
     }),
-    [bookId, chapterId, participantId, sessionId, setParticipantId, track],
+    [
+      bookId,
+      chapterId,
+      participantId,
+      refreshSessionStatus,
+      sessionId,
+      sessionStatus,
+      setParticipantId,
+      track,
+    ],
   );
 
   return (

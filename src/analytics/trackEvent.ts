@@ -43,6 +43,13 @@ function persistEvents(events: AnalyticsEvent[]): void {
   }
 }
 
+export function removeEventsForSessionByName(sessionId: string, eventName: string): void {
+  const events = loadStoredEvents().filter(
+    (event) => !(event.session_id === sessionId && event.event_name === eventName),
+  );
+  persistEvents(events);
+}
+
 export function trackEvent(input: TrackEventInput): AnalyticsEvent {
   const event: AnalyticsEvent = {
     event_id: createEventId(),

@@ -1,26 +1,19 @@
 import { useState } from 'react';
-import { ANALYTICS_EVENT_NAMES } from '../analytics/eventTypes';
 import { useAnalytics } from '../analytics/AnalyticsProvider';
-import { downloadEventsJson } from '../analytics/exportEvents';
-import { loadStoredEvents } from '../analytics/trackEvent';
-import { getAndIncrementExportCount } from '../analytics/sessionDedup';
+import { exportSessionReport, type ExportSource } from '../analytics/exportSessionReport';
 
-function ExportEventsButton() {
+interface ExportEventsButtonProps {
+  exportSource?: ExportSource;
+}
+
+function ExportEventsButton({ exportSource = 'manual_button' }: ExportEventsButtonProps) {
   const { track, sessionId } = useAnalytics();
   const [status, setStatus] = useState<string | null>(null);
 
   const handleExport = () => {
-    const eventCountBeforeExport = loadStoredEvents().length;
-    const exportCount = getAndIncrementExportCount(sessionId);
-
-    track(ANALYTICS_EVENT_NAMES.eventsExported, {
-      event_count_before_export: eventCountBeforeExport,
-      export_format: 'json',
-      export_source: 'manual_button',
-      export_count: exportCount,
+    const payload = exportSessionReport(sessionId, track, {
+      export_source: exportSource,
     });
-
-    const payload = downloadEventsJson();
     setStatus(`${payload.event_count} evento(s) exportado(s)`);
     window.setTimeout(() => setStatus(null), 3000);
   };

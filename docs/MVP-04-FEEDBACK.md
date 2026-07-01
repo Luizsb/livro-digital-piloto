@@ -113,7 +113,25 @@ Se o usuário viu tudo mas concluiu só 40% das páginas → `chapter_finished` 
 
 Fim da sessão de teste. Inclui `reading_depth` (técnico) e `reading_depth_label` (português).
 
-Ao **fechar a aba**: apenas `page_completed` + `session_finished` (sem eventos de capítulo).
+| Origem | Eventos de capítulo |
+|--------|---------------------|
+| **Finalizar teste** (botão) | `chapter_finished` + `chapter_completed` (se critério) + `session_finished` |
+| **Fechar a aba** | `page_completed` (página ativa) + `session_finished` apenas |
+| **F5 / recarregar** | **Não** dispara `session_finished`; sessão ativa continua com `session_resumed` |
+
+---
+
+## Tela de encerramento (`TestFinishedScreen.tsx`)
+
+Exibida após **Finalizar teste** (e mantida no F5 enquanto status = `finished`).
+
+| Ação | Comportamento |
+|------|---------------|
+| **Exportar relatório JSON** | `events_exported` com `export_source: finish_screen` + download |
+| **Iniciar novo teste** | Limpa `sessionStorage` e volta ao gate |
+| Voltar ao livro | **Não disponível** — após finalizar, não há modo consulta |
+
+Coleta de novos eventos fica bloqueada (`AnalyticsProvider`) exceto `events_exported`.
 
 ---
 
@@ -140,6 +158,8 @@ Registrado **antes** de montar o JSON de download.
 - [x] Comentário fora do evento principal (`feedback_comments` no export)
 - [x] `events_exported` incluído no JSON exportado
 - [x] `reading_depth_label` em português no painel e export
+- [x] Tela de encerramento com export e novo teste
+- [x] F5 não encerra sessão ativa; F5 após finalizar mantém tela de encerramento
 
 ## Próximo passo
 

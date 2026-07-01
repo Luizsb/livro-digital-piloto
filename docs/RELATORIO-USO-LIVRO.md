@@ -33,16 +33,18 @@ Em **desenvolvimento**, os dados são zerados automaticamente a cada reinício d
 
 ```text
 App.tsx
-  ├── AnalyticsProvider          ← contexto de sessão + track()
-  ├── ParticipantGate            ← código P01, P02…
-  ├── SessionLifecycle           ← session_finished ao fechar aba
+  ├── AnalyticsProvider          ← contexto de sessão + track() + sessionStatus
+  ├── ParticipantGate            ← código P + número; link LD Insights
+  │     └── TestFinishedScreen   ← após Finalizar teste
+  ├── SessionLifecycle           ← session_finished ao fechar aba (não no F5)
   ├── Book.tsx                   ← conteúdo do capítulo
   │     ├── BookPageTracker      ← marcador página 3 + hook de tracking
   │     └── data-page-end="12"   ← fim da última página (Book.tsx)
   └── Controles (fixos, canto inferior esquerdo)
         ├── EventsPanelButton    ← painel em tempo real
-        ├── FinishTestButton     ← session_finished manual
-        └── ExportEventsButton   ← download JSON
+        ├── FinishTestButton     ← encerramento formal do teste
+        ├── ExportEventsButton   ← download JSON
+        └── LD Insights          ← link #/dashboard
 ```
 
 ## Eventos implementados
@@ -50,6 +52,7 @@ App.tsx
 | event_name | Label (painel) | MVP | Ativo |
 |------------|----------------|-----|-------|
 | `session_started` | Sessão iniciada | 01 | ✅ |
+| `session_resumed` | Sessão retomada (F5) | 01 | ✅ |
 | `book_opened` | Livro aberto | 01 | ✅ |
 | `page_viewed` | Página visualizada | 02 | ✅ |
 | `page_completed` | Página concluída | 02 | ✅ |
@@ -91,7 +94,9 @@ Definições, metadados e regras de disparo: ver [MVP-02-JORNADA-LEITURA.md](./M
 | `useBookPageTracking.ts` | `page_viewed` + `page_completed` |
 | `chapterMetrics.ts` | Métricas e critérios de `chapter_finished` / `chapter_completed` |
 | `finishSession.ts` | Fluxos de encerramento (botão vs. aba) |
-| `useSessionFinishOnUnload.ts` | `session_finished` ao fechar aba |
+| `sessionStatus.ts` | Status `not_started` / `active` / `finished` |
+| `exportSessionReport.ts` | Export com `events_exported` antes do download |
+| `useSessionFinishOnUnload.ts` | `session_finished` ao fechar aba (exceto F5) |
 | `useStoredEvents.ts` | Hook para painel em tempo real |
 | `sortAnalyticsEvents.ts` | Ordenação narrativa no painel |
 | `analyticsConfig.ts` | **Parâmetros editáveis (tempos, limiares)** |

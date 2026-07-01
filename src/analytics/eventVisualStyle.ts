@@ -103,6 +103,7 @@ const CATEGORY_STYLES: Record<EventVisualCategory, Omit<EventVisualStyle, 'categ
 
 const EVENT_NAME_CATEGORY: Partial<Record<string, EventVisualCategory>> = {
   [ANALYTICS_EVENT_NAMES.sessionStarted]: 'session',
+  [ANALYTICS_EVENT_NAMES.sessionResumed]: 'session',
   [ANALYTICS_EVENT_NAMES.sessionFinished]: 'session',
   [ANALYTICS_EVENT_NAMES.bookOpened]: 'session',
   [ANALYTICS_EVENT_NAMES.eventsExported]: 'session',

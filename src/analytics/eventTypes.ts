@@ -11,6 +11,8 @@ export const ANALYTICS_STORAGE_KEYS = {
   participantId: 'ld_analytics_participant_id',
   sessionId: 'ld_analytics_session_id',
   sessionStartedAt: 'ld_analytics_session_started_at',
+  sessionStatus: 'ld_analytics_session_status',
+  sessionFinishedAt: 'ld_analytics_session_finished_at',
   exportCountPrefix: 'ld_analytics_export_count_',
 } as const;
 
@@ -18,6 +20,7 @@ export const ANALYTICS_EVENTS_UPDATED = 'ld_analytics_events_updated';
 
 export const ANALYTICS_EVENT_NAMES = {
   sessionStarted: 'session_started',
+  sessionResumed: 'session_resumed',
   bookOpened: 'book_opened',
   eventsExported: 'events_exported',
   pageViewed: 'page_viewed',

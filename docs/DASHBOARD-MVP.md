@@ -10,7 +10,7 @@ Com o servidor rodando:
 http://localhost:5173/#/dashboard
 ```
 
-No piloto do livro, use o botão **LD Insights** (canto inferior esquerdo).
+No piloto do livro, use o botão **LD Insights** (canto inferior esquerdo durante a leitura) ou **Abrir dashboard (LD Insights)** na tela de acesso ao livro.
 
 ## Uso
 

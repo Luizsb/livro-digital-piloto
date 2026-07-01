@@ -31,6 +31,11 @@ export const EVENT_CATALOG: Record<string, EventCatalogEntry> = {
     description: 'Participante entrou com um código válido (ex.: P01).',
     active: true,
   },
+  [ANALYTICS_EVENT_NAMES.sessionResumed]: {
+    label: 'Sessão retomada',
+    description: 'Participante recarregou a página (F5) com sessão ativa.',
+    active: true,
+  },
   [ANALYTICS_EVENT_NAMES.bookOpened]: {
     label: 'Livro aberto',
     description: 'Capítulo foi exibido após o código do participante.',
