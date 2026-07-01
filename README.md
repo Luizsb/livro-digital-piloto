@@ -16,6 +16,25 @@ npm run dev
 | http://localhost:5173/#/dashboard | **LD Insights** — dashboard do JSON exportado |
 | http://localhost:5173/?reset=1 | Nova sessão |
 
+### GitHub Pages (testes públicos)
+
+Deploy automático a cada push na branch `main` (workflow `.github/workflows/deploy-pages.yml`).
+
+| URL | Efeito |
+|-----|--------|
+| https://luizsb.github.io/livro-digital-piloto/ | Piloto do livro |
+| https://luizsb.github.io/livro-digital-piloto/#/dashboard | **LD Insights** |
+| https://luizsb.github.io/livro-digital-piloto/?reset=1 | Nova sessão |
+
+Simular o build de Pages localmente:
+
+```bash
+npm run build:pages
+npm run preview:pages
+```
+
+> **Coleta:** eventos ficam no `sessionStorage` do navegador de cada participante. Para análise, exporte o JSON e carregue no LD Insights (não há backend centralizado neste piloto).
+
 Em desenvolvimento, os dados são **zerados a cada reinício do `npm run dev`**. Recarregue a aba após reiniciar o servidor.
 
 ## Configurar critérios das métricas

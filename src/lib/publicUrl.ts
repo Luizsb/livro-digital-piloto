@@ -1,6 +1,6 @@
 /**
  * URL para ficheiros em `public/` (imagens, etc.), respeitando o `base` do Vite
- * (dev `/`, produção `/livro-bett/`, Electron `/`).
+ * (dev `/`, GitHub Pages `/livro-digital-piloto/`).
  */
 export function publicUrl(pathFromPublic: string): string {
   const p = pathFromPublic.replace(/^\/+/, '');

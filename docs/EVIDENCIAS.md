@@ -49,7 +49,8 @@ Sempre que houver mudança relevante no piloto:
 
 **Fase:** MVP-05 concluído + extensões MVP-03 (vídeo e modal robusto)  
 **Capítulo piloto:** `cap07_historia_ai43` / `cap07` (páginas 3–12)  
-**Última atualização deste doc:** 2026-06-30
+**Última atualização deste doc:** 2026-06-30  
+**Deploy público:** https://luizsb.github.io/livro-digital-piloto/
 
 ### Funcionalidades ativas
 
@@ -78,6 +79,16 @@ Sempre que houver mudança relevante no piloto:
 ---
 
 ## Registro cronológico
+
+### 2026-06-30 — Deploy no GitHub Pages
+
+**Tipo:** infra  
+**MVP:** transversal  
+**Resumo:** Piloto publicado em https://luizsb.github.io/livro-digital-piloto/ para testes externos; analytics continua no navegador (export JSON manual).  
+**Arquivos:** `.github/workflows/deploy-pages.yml`, `vite.config.ts`, `package.json`, `README.md`  
+**Como validar:** Abrir a URL, informar `P01`, navegar o capítulo; exportar JSON e carregar em `/#/dashboard`.
+
+---
 
 ### 2026-06-30 — Documento de evidências criado
 
