@@ -8,6 +8,7 @@ import {
 import type { AnalyticsEvent } from '../analytics/eventTypes';
 import type { FeedbackCommentRecord } from '../analytics/feedbackComments';
 import { ANALYTICS_TIMEZONE_BR, formatDateTimeBr } from '../lib/formatDateTimeBr';
+import { enrichSummaryReadingMetrics } from './reportExtractors';
 import type { ParsedDashboardReport, DashboardReport } from './types';
 
 export class ReportParseError extends Error {
@@ -102,8 +103,11 @@ export function parseReportJson(raw: unknown): ParsedDashboardReport {
     );
   }
 
-  const summary = enrichEscolaDigitalVideoSummary(
-    enrichTeacherButtonSummary(raw.summary, events),
+  const summary = enrichSummaryReadingMetrics(
+    enrichEscolaDigitalVideoSummary(
+      enrichTeacherButtonSummary(raw.summary, events),
+      events,
+    ),
     events,
   );
   const feedbackComments = Array.isArray(raw.feedback_comments)

@@ -19,6 +19,7 @@ import {
   getChapterStatusBadgeClass,
   getChapterStatusLabel,
   getParticipantLabel,
+  PAGE_JOURNEY_LABELS,
   type ChapterStatusLabel,
 } from './reportExtractors';
 
@@ -219,21 +220,21 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
 
       <Section title="Jornada de leitura">
         <div className="mb-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-600">
-          <span className="flex items-center gap-2">
-            <span className="font-semibold text-emerald-700">✓</span>
-            <span>Concluída</span>
-          </span>
-          <span className="flex items-center gap-2">
-            <span className="font-semibold text-[#80298F]">•</span>
-            <span>Apenas visualizada</span>
-          </span>
-          <span className="flex items-center gap-2">
-            <span className="font-semibold text-slate-400">○</span>
-            <span>Não visualizada</span>
-          </span>
+          {(Object.keys(PAGE_JOURNEY_LABELS) as Array<keyof typeof PAGE_JOURNEY_LABELS>).map(
+            (status) => (
+              <span key={status} className="flex items-center gap-2">
+                <span className="text-base leading-none" aria-hidden>
+                  {PAGE_JOURNEY_LABELS[status].emoji}
+                </span>
+                <span>{PAGE_JOURNEY_LABELS[status].legend}</span>
+              </span>
+            ),
+          )}
         </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-5 lg:grid-cols-10">
-          {pageJourney.map((item) => (
+          {pageJourney.map((item) => {
+            const statusLabel = PAGE_JOURNEY_LABELS[item.status];
+            return (
             <div
               key={item.page}
               className={`rounded-lg border px-2 py-3 text-center text-sm font-semibold ${
@@ -244,16 +245,14 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
                     : 'border-slate-200 bg-slate-50 text-slate-400'
               }`}
             >
-              <div className="text-lg">{item.page}</div>
-              <div className="mt-1 text-[10px] font-normal">
-                {item.status === 'completed'
-                  ? '✓ Concluída'
-                  : item.status === 'viewed'
-                    ? '• Apenas visualizada'
-                    : '○ Não visualizada'}
+              <div className="text-xl leading-none" aria-hidden>
+                {statusLabel.emoji}
               </div>
+              <div className="mt-1 text-lg font-bold">{item.page}</div>
+              <div className="mt-1 text-[10px] font-normal">{statusLabel.card}</div>
             </div>
-          ))}
+            );
+          })}
         </div>
         <p className="mt-4 text-sm text-slate-600">
           <span className="font-medium">Visualizadas:</span>{' '}

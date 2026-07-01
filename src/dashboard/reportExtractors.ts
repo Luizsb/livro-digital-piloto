@@ -6,8 +6,107 @@ import {
   listChapterPageNumbers,
   resolveChapterPageBounds,
 } from '../analytics/chapterPageConfig';
+import { getReadingDepthLabel, type ReadingDepth } from '../analytics/readingQuality';
 import { formatDateTimeBr } from '../lib/formatDateTimeBr';
 import type { PageJourneyItem } from './types';
+
+const FINISH_EVENTS_FOR_DEPTH = [
+  ANALYTICS_EVENT_NAMES.sessionFinished,
+  ANALYTICS_EVENT_NAMES.chapterFinished,
+  ANALYTICS_EVENT_NAMES.chapterCompleted,
+] as const;
+
+function findLastEvent(
+  events: AnalyticsEvent[],
+  eventName: string,
+): AnalyticsEvent | undefined {
+  return [...events].reverse().find((event) => event.event_name === eventName);
+}
+
+function findFirstEvent(
+  events: AnalyticsEvent[],
+  eventName: string,
+): AnalyticsEvent | undefined {
+  return events.find((event) => event.event_name === eventName);
+}
+
+export function extractReadingDepth(
+  summary: EventSummary,
+  events: AnalyticsEvent[],
+): { depth?: string; label?: string } {
+  if (summary.reading_depth_label) {
+    return { depth: summary.reading_depth, label: summary.reading_depth_label };
+  }
+
+  for (const eventName of FINISH_EVENTS_FOR_DEPTH) {
+    const event = findLastEvent(events, eventName);
+    if (!event) continue;
+
+    const depth = event.metadata?.reading_depth;
+    const label = event.metadata?.reading_depth_label;
+    if (typeof label === 'string') {
+      return {
+        depth: typeof depth === 'string' ? depth : undefined,
+        label,
+      };
+    }
+    if (typeof depth === 'string') {
+      return { depth, label: getReadingDepthLabel(depth as ReadingDepth) };
+    }
+  }
+
+  return {};
+}
+
+export function extractSessionDurationSeconds(events: AnalyticsEvent[]): number | null {
+  const sessionFinished = findLastEvent(events, ANALYTICS_EVENT_NAMES.sessionFinished);
+  const duration = sessionFinished?.metadata?.duration_seconds;
+  if (typeof duration === 'number' && duration > 0) {
+    return duration;
+  }
+
+  const started = findFirstEvent(events, ANALYTICS_EVENT_NAMES.sessionStarted);
+  const end =
+    sessionFinished ??
+    findLastEvent(events, ANALYTICS_EVENT_NAMES.chapterFinished) ??
+    findLastEvent(events, ANALYTICS_EVENT_NAMES.chapterCompleted);
+
+  if (started && end) {
+    const startMs = Date.parse(started.timestamp);
+    const endMs = Date.parse(end.timestamp);
+    if (!Number.isNaN(startMs) && !Number.isNaN(endMs)) {
+      const seconds = Math.max(0, Math.round((endMs - startMs) / 1000));
+      if (seconds > 0) return seconds;
+    }
+  }
+
+  if (events.length >= 2) {
+    const sorted = [...events].sort(
+      (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
+    );
+    const startMs = Date.parse(sorted[0].timestamp);
+    const endMs = Date.parse(sorted[sorted.length - 1].timestamp);
+    if (!Number.isNaN(startMs) && !Number.isNaN(endMs)) {
+      const seconds = Math.max(0, Math.round((endMs - startMs) / 1000));
+      if (seconds > 0) return seconds;
+    }
+  }
+
+  return typeof duration === 'number' ? duration : null;
+}
+
+export function enrichSummaryReadingMetrics(
+  summary: EventSummary,
+  events: AnalyticsEvent[],
+): EventSummary {
+  const { depth, label } = extractReadingDepth(summary, events);
+  if (!label) return summary;
+  return {
+    ...summary,
+    reading_depth: depth ?? summary.reading_depth,
+    reading_depth_label: label,
+  };
+}
 
 export function getChapterPageNumbers(
   summary?: Pick<
@@ -25,14 +124,6 @@ export function getChapterPageNumbers(
     ? resolveChapterPageBounds(summary)
     : getActiveChapterPageConfig();
   return listChapterPageNumbers(bounds);
-}
-export function extractSessionDurationSeconds(events: AnalyticsEvent[]): number | null {
-  const finished = [...events]
-    .reverse()
-    .find((event) => event.event_name === ANALYTICS_EVENT_NAMES.sessionFinished);
-
-  const duration = finished?.metadata?.duration_seconds;
-  return typeof duration === 'number' ? duration : null;
 }
 
 export function extractZoomedImageIds(events: AnalyticsEvent[]): string[] {
@@ -55,6 +146,24 @@ export function buildPageJourney(summary: EventSummary): PageJourneyItem[] {
     return { page, status: 'not_viewed' as const };
   });
 }
+
+export const PAGE_JOURNEY_LABELS = {
+  completed: {
+    emoji: '✅',
+    legend: 'Concluída',
+    card: 'Concluída',
+  },
+  viewed: {
+    emoji: '👁️',
+    legend: 'Apenas visualizada',
+    card: 'Visualizada',
+  },
+  not_viewed: {
+    emoji: '⚪',
+    legend: 'Não visualizada',
+    card: 'Não vista',
+  },
+} as const;
 
 export function formatDuration(seconds: number | null): string {
   if (seconds === null) return '—';

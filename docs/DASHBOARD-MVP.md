@@ -21,7 +21,16 @@ No piloto do livro, use o botão **LD Insights** (canto inferior esquerdo durant
 ## Fonte de dados
 
 - **Primária:** objeto `summary` do export.
-- **Complementar:** `events` (duração, zooms) e `feedback_comments` (comentário sob demanda).
+- **Complementar:** `events` (duração, profundidade, zooms) e `feedback_comments` (comentário sob demanda).
+
+### Enriquecimento ao carregar JSON
+
+Relatórios antigos ou sem `session_finished` são completados em `parseReport.ts` / `reportExtractors.ts`:
+
+| Métrica | Ordem de leitura |
+|---------|------------------|
+| **Profundidade de leitura** | `summary` → `session_finished` → `chapter_finished` → `chapter_completed` |
+| **Duração da sessão** | `session_finished.duration_seconds` → intervalo `session_started` até `chapter_finished` → primeiro/último evento |
 
 ## Seções
 
@@ -29,7 +38,7 @@ No piloto do livro, use o botão **LD Insights** (canto inferior esquerdo durant
 |-------|----------|
 | Cards principais | Participante, duração, páginas, status (badge), profundidade, feedback, usaria novamente |
 | Resumo interpretativo | Texto narrativo executivo da sessão (destaque visual após os cards) |
-| Jornada de leitura | Grid páginas 3–12 com legenda: ✓ Concluída · • Apenas visualizada · ○ Não visualizada |
+| Jornada de leitura | Grid páginas 3–12 com emojis: ✅ Concluída · 👁️ Apenas visualizada · ⚪ Não visualizada |
 | Status do capítulo | Badge + insight + taxa de conclusão |
 | Imagens no capítulo | Exposição (`image_viewed`) vs interação intencional (`image_zoomed`) |
 | Recursos externos | ODA e Escola Digital (modal + reprodução do vídeo) |

@@ -104,7 +104,11 @@ export function buildEventSummary(): EventSummary {
     if (event.event_name === ANALYTICS_EVENT_NAMES.chapterCompleted) {
       chapterCompletedCount += 1;
     }
-    if (event.event_name === ANALYTICS_EVENT_NAMES.sessionFinished) {
+    if (
+      event.event_name === ANALYTICS_EVENT_NAMES.sessionFinished ||
+      event.event_name === ANALYTICS_EVENT_NAMES.chapterFinished ||
+      event.event_name === ANALYTICS_EVENT_NAMES.chapterCompleted
+    ) {
       const depth = event.metadata?.reading_depth;
       if (typeof depth === 'string') {
         lastReadingDepth = depth;

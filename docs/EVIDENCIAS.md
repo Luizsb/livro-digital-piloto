@@ -49,7 +49,7 @@ Sempre que houver mudança relevante no piloto:
 
 **Fase:** MVP-05 concluído + extensões MVP-03 (vídeo e modal robusto)  
 **Capítulo piloto:** `cap07_historia_ai43` / `cap07` (páginas 3–12)  
-**Última atualização deste doc:** 2026-06-30  
+**Última atualização deste doc:** 2026-07-01  
 **Deploy público:** https://luizsb.github.io/livro-digital-piloto/
 
 ### Funcionalidades ativas
@@ -85,6 +85,17 @@ Sempre que houver mudança relevante no piloto:
 ---
 
 ## Registro cronológico
+
+### 2026-07-01 — Dashboard: duração, profundidade e emojis na jornada
+
+**Tipo:** fix + UX  
+**MVP:** transversal  
+**Resumo:** LD Insights voltou a exibir **duração** e **profundidade de leitura** em JSONs só com `chapter_finished` (fallback nos eventos). Jornada de leitura com emojis ✅ / 👁️ / ⚪. Export passa a gravar profundidade também a partir de `chapter_finished`.  
+**Arquivos:** `reportExtractors.ts`, `parseReport.ts`, `DashboardPage.tsx`, `eventSummary.ts`  
+**Docs atualizados:** `EVIDENCIAS.md`, `DASHBOARD-MVP.md`  
+**Como validar:** Carregar JSON com `chapter_finished` sem `session_finished` → cards de duração e profundidade preenchidos; grid da jornada com emojis.
+
+---
 
 ### 2026-06-30 — Painel de eventos: acordeão, timer e ícones
 
