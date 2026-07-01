@@ -230,7 +230,7 @@ function ChapterFeedback() {
   if (submitted || alreadySubmitted) {
     return (
       <section
-        className="my-12 overflow-hidden rounded-2xl border-2 border-[#80298F]/30 shadow-xl shadow-[#80298F]/10"
+        className="mt-4 mb-20 overflow-hidden rounded-2xl border-2 border-[#80298F]/30 shadow-xl shadow-[#80298F]/10 md:mb-24"
         aria-live="polite"
       >
         <FeedbackHeader
@@ -250,7 +250,7 @@ function ChapterFeedback() {
 
   return (
     <section
-      className={`my-12 overflow-hidden rounded-2xl border-2 shadow-xl transition-shadow ${
+      className={`mt-4 mb-20 overflow-hidden rounded-2xl border-2 shadow-xl transition-shadow md:mb-24 ${
         expanded
           ? 'border-[#80298F]/40 shadow-[#80298F]/10'
           : 'border-[#80298F]/35 shadow-[#80298F]/15 ring-2 ring-[#80298F]/10 ring-offset-2 ring-offset-white'

@@ -16,6 +16,7 @@ import Footer from './Footer';
 import { useUserAnswers } from '../hooks/useUserAnswers';
 import { usePagination } from '../hooks/usePagination';
 import { useScrollPosition } from '../hooks/useScrollPosition';
+import ScrollPageIndicator from './ScrollPageIndicator';
 import { TeacherAnswers } from './TeacherAnswers';
 import ConversaVai from './ConversaVai';
 import ConversaVem from './ConversaVem';
@@ -48,6 +49,7 @@ function Book() {
 
   return (
     <div className="min-h-screen w-full bg-gray-200">
+      <ScrollPageIndicator />
       {/* Sem overflow-hidden: a bandeira da paginação não pode ser cortada pela borda da coluna */}
       <div
         className="mx-auto w-full overflow-visible bg-white shadow-2xl md:max-w-[63%]"
