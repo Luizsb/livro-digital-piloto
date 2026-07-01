@@ -72,6 +72,19 @@ Persistido em `sessionStorage`. F5 com sessão ativa **não** finaliza (ver MVP-
 | Botão de exportação | `src/components/ExportEventsButton.tsx` |
 | Painel de eventos | `src/components/EventsPanelButton.tsx` + `EventReportPanel.tsx` |
 
+## Painel em tempo real (`EventReportPanel.tsx`)
+
+Três blocos em **acordeão** (abrir um fecha os outros):
+
+| Seção | Conteúdo |
+|-------|----------|
+| O que está sendo coletado? | Catálogo de eventos ativos do piloto |
+| Resumo da coleta | Jornada, imagens, recursos, feedback, badges — com **timer de sessão** ao vivo |
+| Log de eventos | Lista cronológica com cores/ícones por tipo |
+
+- Timer: `useLiveSessionDuration.ts` (desde `session_started`; congela ao finalizar).
+- Resumo recolhido: tempo em roxo + métricas compactas na mesma linha (sem duplicar abaixo).
+
 ## Reset de sessão
 
 | Mecanismo | Comportamento |
@@ -106,5 +119,6 @@ Campos principais do payload:
 - [x] Export JSON funcional (com `events_exported` antes do download)
 - [x] Tela **Teste finalizado** após Finalizar teste
 - [x] Painel em tempo real com labels em português
+- [x] Painel com acordeão, timer de sessão e ícones por seção
 - [x] Reset manual e automático em dev
 - [x] Acesso ao dashboard a partir do gate

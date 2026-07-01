@@ -97,6 +97,7 @@ Definições, metadados e regras de disparo: ver [MVP-02-JORNADA-LEITURA.md](./M
 | `sessionStatus.ts` | Status `not_started` / `active` / `finished` |
 | `exportSessionReport.ts` | Export com `events_exported` antes do download |
 | `useSessionFinishOnUnload.ts` | `session_finished` ao fechar aba (exceto F5) |
+| `useLiveSessionDuration.ts` | Timer ao vivo no painel (desde `session_started`) |
 | `useStoredEvents.ts` | Hook para painel em tempo real |
 | `sortAnalyticsEvents.ts` | Ordenação narrativa no painel |
 | `analyticsConfig.ts` | **Parâmetros editáveis (tempos, limiares)** |

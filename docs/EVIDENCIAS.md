@@ -64,6 +64,7 @@ Sempre que houver mudança relevante no piloto:
 | Professor | `teacher_button_opened` / `teacher_button_closed` |
 | Encerramento | `feedback_submitted`, `chapter_finished`, `chapter_completed`, `session_finished` |
 | Tela pós-teste | **Teste finalizado** — exportar JSON ou iniciar novo teste (sem voltar ao livro) |
+| Painel em tempo real | Acordeão (catálogo / resumo / log), timer de sessão ao vivo, ícones por seção |
 | Dashboard | LD Insights em `#/dashboard` (também no gate de acesso) |
 
 ### Arquivos-chave (além dos MVPs originais)
@@ -77,12 +78,24 @@ Sempre que houver mudança relevante no piloto:
 | `exportSessionReport.ts` | Export JSON com `events_exported` antes do download |
 | `TestFinishedScreen.tsx` | Tela de encerramento após Finalizar teste |
 | `contentInteractionsSummary.ts` | Agregados ODA, Escola Digital e vídeo no export |
-| `EventReportPanel.tsx` | Painel em tempo real (resumo recolhível + log) |
+| `EventReportPanel.tsx` | Painel em tempo real — acordeão, timer de sessão, resumo e log |
+| `useLiveSessionDuration.ts` | Contador ao vivo desde `session_started` |
 | `parseReport.ts` | Enriquecimento de JSONs antigos no dashboard |
 
 ---
 
 ## Registro cronológico
+
+### 2026-06-30 — Painel de eventos: acordeão, timer e ícones
+
+**Tipo:** UX  
+**MVP:** 01 (transversal)  
+**Resumo:** `EventReportPanel` com três seções em acordeão (só uma aberta por vez): catálogo, resumo da coleta e log. Ícone por seção; chevron de expansão visível; timer de sessão ao vivo no resumo (roxo na linha compacta; banner completo ao expandir).  
+**Arquivos:** `EventReportPanel.tsx`, `useLiveSessionDuration.ts`, `lib/formatDuration.ts`  
+**Docs atualizados:** `EVIDENCIAS.md`, `MVP-01-BASE.md`, `RELATORIO-USO-LIVRO.md`  
+**Como validar:** Ver eventos → expandir cada seção (as outras fecham) → conferir timer subindo no resumo recolhido.
+
+---
 
 ### 2026-06-30 — Fluxo de finalização do teste + UX do gate
 

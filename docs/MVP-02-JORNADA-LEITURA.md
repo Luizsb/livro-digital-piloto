@@ -159,8 +159,9 @@ No painel (`sortAnalyticsEvents.ts`), em empate de timestamp:
 
 ## Painel — seção "Jornada de leitura"
 
-Exibido em `EventReportPanel.tsx`:
+Exibido em `EventReportPanel.tsx` (bloco **Resumo da coleta** do acordeão):
 
+- **Timer de sessão** ao vivo (desde `session_started`; congela ao finalizar)
 - Páginas visualizadas (contagem + lista)
 - Páginas concluídas (contagem + lista)
 - Taxa de conclusão = `concluídas / visualizadas × 100`
