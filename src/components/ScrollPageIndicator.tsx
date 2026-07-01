@@ -26,8 +26,8 @@ function getScrollbarThumbCenterY(): number {
 }
 
 /**
- * Indicador lateral de página ao rolar — estilo Google Docs ("8 de 12").
- * Aparece durante o scroll e some após breve pausa.
+ * Indicador lateral de página — estilo Google Docs ("8 de 12").
+ * Aparece somente ao trocar de página e some após breve pausa.
  */
 function ScrollPageIndicator() {
   const { defaultBookPage, lastPage } = getActiveChapterPageConfig();
@@ -35,20 +35,38 @@ function ScrollPageIndicator() {
   const [currentPage, setCurrentPage] = useState(defaultBookPage);
   const [thumbCenterY, setThumbCenterY] = useState(() => window.innerHeight / 2);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastPageRef = useRef(defaultBookPage);
+  const visibleRef = useRef(false);
 
   useEffect(() => {
-    const update = () => {
-      setCurrentPage(getActiveBookPage(defaultBookPage));
-      setThumbCenterY(getScrollbarThumbCenterY());
-      setVisible(true);
+    lastPageRef.current = getActiveBookPage(defaultBookPage);
 
+    const scheduleHide = () => {
       if (hideTimerRef.current) {
         clearTimeout(hideTimerRef.current);
       }
-
       hideTimerRef.current = setTimeout(() => {
+        visibleRef.current = false;
         setVisible(false);
       }, HIDE_DELAY_MS);
+    };
+
+    const update = () => {
+      const page = getActiveBookPage(defaultBookPage);
+
+      if (page !== lastPageRef.current) {
+        lastPageRef.current = page;
+        setCurrentPage(page);
+        setThumbCenterY(getScrollbarThumbCenterY());
+        visibleRef.current = true;
+        setVisible(true);
+        scheduleHide();
+        return;
+      }
+
+      if (visibleRef.current) {
+        setThumbCenterY(getScrollbarThumbCenterY());
+      }
     };
 
     window.addEventListener('scroll', update, { passive: true });
