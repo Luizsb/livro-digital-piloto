@@ -1,10 +1,14 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 
-/** Base do GitHub Pages (repositório: Luizsb/livro-digital-piloto). */
-export const GITHUB_PAGES_BASE = '/livro-digital-piloto/';
+/** Caminhos relativos — funcionam em qualquer subpasta do GitHub Pages. */
+export const GITHUB_PAGES_BASE = './';
 
 const isPagesBuild = process.env.GITHUB_PAGES === 'true';
+const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 /** Novo ID a cada `npm run dev` — o cliente usa isso para limpar dados de testes anteriores. */
 function devSessionPlugin() {
@@ -35,6 +39,21 @@ function rewriteRootAssetUrls(base: string): Plugin {
   };
 }
 
+/** GitHub Pages usa 404.html como fallback em rotas inexistentes. */
+function pages404Fallback(): Plugin {
+  return {
+    name: 'pages-404-fallback',
+    closeBundle() {
+      if (!isPagesBuild) return;
+      const distDir = path.join(projectRoot, 'dist');
+      const indexPath = path.join(distDir, 'index.html');
+      const fallbackPath = path.join(distDir, '404.html');
+      fs.copyFileSync(indexPath, fallbackPath);
+      fs.writeFileSync(path.join(distDir, '.nojekyll'), '');
+    },
+  };
+}
+
 export default defineConfig(({ command }) => {
   const base = isPagesBuild ? GITHUB_PAGES_BASE : '/';
 
@@ -42,6 +61,7 @@ export default defineConfig(({ command }) => {
     plugins: [
       react(),
       rewriteRootAssetUrls(base),
+      pages404Fallback(),
       ...(command === 'serve' ? [devSessionPlugin()] : []),
     ],
     define:
