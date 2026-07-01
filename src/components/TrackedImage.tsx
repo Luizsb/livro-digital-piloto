@@ -10,8 +10,10 @@ import {
 import { normalizeImageSrcPath } from '../analytics/contentInteractionTypes';
 import { useOptionalAnalytics } from '../analytics/AnalyticsProvider';
 import { subscribeToEventsUpdates } from '../analytics/trackEvent';
+import { ClosePillButton } from './ClosePillButton';
 
-export interface TrackedImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> {
+export interface TrackedImageProps
+  extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src' | 'title'> {
   imageId: string;
   page: number;
   /** Caminho em public/ (ex.: images/page_3_img.png) */
@@ -165,7 +167,7 @@ function TrackedImage({
             {...imgProps}
             src={resolvedSrc}
             alt={alt}
-            className={className}
+            className={`${className ?? ''}${enableZoom ? ' pointer-events-none' : ''}`.trim()}
             onError={handleImageError}
           />
           {enableZoom ? (
@@ -205,13 +207,11 @@ function TrackedImage({
             <span id={zoomTitleId} className="sr-only">
               Imagem ampliada{alt ? `: ${alt}` : ''}
             </span>
-            <button
-              type="button"
+            <ClosePillButton
+              ariaLabel="Fechar imagem ampliada"
               onClick={() => setIsZoomOpen(false)}
-              className="absolute right-3 top-3 z-10 rounded-full bg-[#80298F] px-3 py-1.5 text-xs font-semibold text-white shadow-md transition hover:bg-[#6b2278] sm:right-4 sm:top-4"
-            >
-              Fechar
-            </button>
+              className="absolute right-3 top-3 z-10 sm:right-4 sm:top-4"
+            />
             <div className="flex min-h-0 flex-1 items-center justify-center p-4 pt-12 sm:p-6 sm:pt-14">
               <img
                 src={resolvedSrc}

@@ -53,7 +53,7 @@ Documentação: [CONFIGURACAO-ANALYTICS.md](./CONFIGURACAO-ANALYTICS.md)
 
 **Metadata:** igual a `image_viewed`.
 
-**UI:** botão “Ampliar” + modal lightbox (não altera dimensões da imagem no fluxo do texto).
+**UI:** botão “Ampliar” + modal lightbox (não altera dimensões da imagem no fluxo do texto). Botão **Fechar** padronizado (`ClosePillButton`), `aria-label="Fechar imagem ampliada"`. Sem tooltip nativo com caminho do arquivo (`title` bloqueado na imagem).
 
 ---
 
@@ -190,9 +190,10 @@ Com link externo / QR:
 
 | Componente | Função |
 |------------|--------|
+| `ClosePillButton` | Botão roxo “Fechar” compartilhado (imagem ampliada, ODA, Escola Digital, painel de eventos) |
 | `TrackedImage` | Imagem com view + zoom |
 | `TrackedLink` | Link com `data-track-link-*` |
-| `GameModal` + `analyticsResource` | `resource_opened` na abertura + `resource_engagement_recorded` ao fechar |
+| `GameModal` + `analyticsResource` | `resource_opened` na abertura + `resource_engagement_recorded` ao fechar; prop `closeAriaLabel` por recurso |
 | `TrackedVideo` | Play, conclusão e progresso do vídeo Escola Digital |
 | `SessionLifecycle` | `useLinkClickTracking()` |
 

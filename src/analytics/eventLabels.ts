@@ -34,12 +34,14 @@ export const EVENT_CATALOG: Record<string, EventCatalogEntry> = {
   },
   [ANALYTICS_EVENT_NAMES.sessionResumed]: {
     label: 'Sessão retomada',
-    description: 'Participante recarregou a página (F5) com sessão ativa.',
+    description:
+      'Participante recarregou a página (F5) com sessão ativa; registra novo timing de carga.',
     active: true,
   },
   [ANALYTICS_EVENT_NAMES.bookOpened]: {
     label: 'Livro aberto',
-    description: 'Capítulo foi exibido após o código do participante.',
+    description:
+      'Capítulo exibido após o código do participante; registra tempo de carregamento (load, DOM, TTFB).',
     active: true,
   },
   [ANALYTICS_EVENT_NAMES.pageViewed]: {
@@ -172,15 +174,46 @@ export const EVENT_CATALOG: Record<string, EventCatalogEntry> = {
   },
   [ANALYTICS_EVENT_NAMES.eventsExported]: {
     label: 'Eventos exportados',
-    description: 'Relatório JSON foi baixado pelo botão de exportação.',
+    description:
+      'Relatório JSON baixado; inclui peso observado da sessão (bytes e recursos carregados).',
     active: true,
   },
   [ANALYTICS_EVENT_NAMES.sessionFinished]: {
     label: 'Sessão finalizada',
-    description: 'Fim da sessão de teste (distinto da conclusão pedagógica do capítulo).',
+    description:
+      'Fim da sessão de teste — duração, profundidade de leitura e peso observado dos recursos.',
     active: true,
   },
 };
+
+/** Ordem de exibição no painel “O que está sendo coletado?”. */
+const CATALOG_DISPLAY_ORDER: string[] = [
+  ANALYTICS_EVENT_NAMES.sessionStarted,
+  ANALYTICS_EVENT_NAMES.sessionResumed,
+  ANALYTICS_EVENT_NAMES.bookOpened,
+  ANALYTICS_EVENT_NAMES.pageViewed,
+  ANALYTICS_EVENT_NAMES.pageCompleted,
+  ANALYTICS_EVENT_NAMES.imageViewed,
+  ANALYTICS_EVENT_NAMES.imageZoomed,
+  ANALYTICS_EVENT_NAMES.imageLoadError,
+  ANALYTICS_EVENT_NAMES.resourceOpened,
+  ANALYTICS_EVENT_NAMES.resourceEngagementRecorded,
+  ANALYTICS_EVENT_NAMES.videoStarted,
+  ANALYTICS_EVENT_NAMES.videoCompleted,
+  ANALYTICS_EVENT_NAMES.videoProgressRecorded,
+  ANALYTICS_EVENT_NAMES.teacherButtonOpened,
+  ANALYTICS_EVENT_NAMES.teacherButtonClosed,
+  ANALYTICS_EVENT_NAMES.feedbackSubmitted,
+  ANALYTICS_EVENT_NAMES.chapterFinished,
+  ANALYTICS_EVENT_NAMES.chapterCompleted,
+  ANALYTICS_EVENT_NAMES.sessionFinished,
+  ANALYTICS_EVENT_NAMES.eventsExported,
+  ANALYTICS_EVENT_NAMES.assetLoadError,
+  ANALYTICS_EVENT_NAMES.runtimeError,
+  ANALYTICS_EVENT_NAMES.renderError,
+  ANALYTICS_EVENT_NAMES.linkOpenFailed,
+  ANALYTICS_EVENT_NAMES.resourceTimingSnapshot,
+];
 
 const CHAPTER_COMPLETION_STATUS_LABELS: Record<ChapterCompletionStatus, string> = {
   completed: 'Concluído',
@@ -436,5 +469,14 @@ export function formatMetadataForDisplay(metadata: Record<string, unknown>): str
 }
 
 export function getActiveEventCatalog(): EventCatalogEntry[] {
-  return Object.values(EVENT_CATALOG).filter((entry) => entry.active);
+  const ordered = CATALOG_DISPLAY_ORDER.filter(
+    (name) => EVENT_CATALOG[name]?.active,
+  ).map((name) => EVENT_CATALOG[name]);
+
+  const known = new Set(CATALOG_DISPLAY_ORDER);
+  const extras = Object.entries(EVENT_CATALOG)
+    .filter(([name, entry]) => entry.active && !known.has(name))
+    .map(([, entry]) => entry);
+
+  return [...ordered, ...extras];
 }

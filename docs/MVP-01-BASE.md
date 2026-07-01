@@ -101,6 +101,7 @@ Persistido em `sessionStorage`. F5 com sessão ativa **não** finaliza (ver MVP-
 | Tela pós-finalização | `src/components/TestFinishedScreen.tsx` |
 | Botão de exportação | `src/components/ExportEventsButton.tsx` |
 | Painel de eventos | `src/components/EventsPanelButton.tsx` + `EventReportPanel.tsx` |
+| Botão Fechar (modais) | `src/components/ClosePillButton.tsx` |
 
 ## Painel em tempo real (`EventReportPanel.tsx`)
 
@@ -108,9 +109,12 @@ Três blocos em **acordeão** (abrir um fecha os outros):
 
 | Seção | Conteúdo |
 |-------|----------|
-| O que está sendo coletado? | Catálogo de eventos ativos do piloto |
+| O que está sendo coletado? | Catálogo **ordenado** de todos os eventos ativos do piloto (25 tipos), com scroll e nota sobre métricas em metadata (TTFB, peso em bytes) |
 | Resumo da coleta | Jornada, imagens, recursos, feedback, badges — com **timer de sessão** ao vivo |
 | Log de eventos | Lista cronológica com cores/ícones por tipo |
+
+- Botão **Fechar** do cabeçalho: `ClosePillButton` roxo, `aria-label="Fechar painel de eventos"`.
+- Catálogo: ordem fixa em `eventLabels.ts` (`CATALOG_DISPLAY_ORDER`); descrições alinhadas à saúde técnica e encerramento.
 
 - Timer: `useLiveSessionDuration.ts` (desde `session_started`; congela ao finalizar).
 - Resumo recolhido: tempo em roxo + métricas compactas na mesma linha (sem duplicar abaixo).

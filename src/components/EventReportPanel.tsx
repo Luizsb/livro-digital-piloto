@@ -23,6 +23,7 @@ import { useLiveSessionDuration } from '../analytics/useLiveSessionDuration';
 import { getSessionStatus } from '../analytics/sessionStatus';
 import { formatDurationClock } from '../lib/formatDuration';
 import { formatDateTimeBr } from '../lib/formatDateTimeBr';
+import { ClosePillButton } from './ClosePillButton';
 
 interface EventReportPanelProps {
   events: AnalyticsEvent[];
@@ -478,25 +479,27 @@ function EventReportPanel({ events, onClose }: EventReportPanelProps) {
               {import.meta.env.DEV ? ' · dados zerados a cada reinício do servidor' : ''}
             </p>
           </div>
-          <button
-            type="button"
+          <ClosePillButton
+            ariaLabel="Fechar painel de eventos"
             onClick={onClose}
-            className="rounded-md px-2 py-1 text-sm text-slate-600 transition hover:bg-slate-100"
-          >
-            Fechar
-          </button>
+          />
         </header>
 
         <div className="flex min-h-0 flex-1 flex-col bg-slate-100/60">
           <AccordionSection
             sectionId="catalog"
             title="O que está sendo coletado?"
-            hint="Catálogo de eventos do piloto"
+            hint={`${activeCatalog.length} tipos de evento ativos — role para ver todos`}
             icon={<CatalogSectionIcon />}
             expanded={openSection === 'catalog'}
             onToggle={toggleSection}
           >
-            <ul className="space-y-2 px-4 py-3 text-xs text-slate-600">
+            <p className="border-b border-slate-100 px-4 py-2 text-xs text-slate-500">
+              Lista completa do piloto atual (jornada, conteúdo, feedback, encerramento e saúde
+              técnica). Métricas como TTFB e peso em bytes vêm na metadata de alguns eventos, não
+              como linhas separadas.
+            </p>
+            <ul className="max-h-64 space-y-2 overflow-y-auto px-4 py-3 text-xs text-slate-600">
               {activeCatalog.map((entry) => (
                 <li key={entry.label}>
                   <span className="font-semibold text-slate-800">{entry.label}</span>

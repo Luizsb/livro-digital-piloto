@@ -6,6 +6,7 @@ import {
   registerModalResourceSession,
 } from '../analytics/modalResourceTracking';
 import { useOptionalAnalytics } from '../analytics/AnalyticsProvider';
+import { ClosePillButton } from './ClosePillButton';
 
 interface GameModalAnalytics {
   linkId: string;
@@ -29,6 +30,8 @@ interface GameModalProps {
   children: ReactNode;
   /** Rastreamento MVP-03: abertura + tempo de uso ao fechar. */
   analyticsResource?: GameModalAnalytics;
+  /** Acessibilidade do botão Fechar (padrão: atividade interativa). */
+  closeAriaLabel?: string;
 }
 
 function GameModal({
@@ -39,6 +42,7 @@ function GameModal({
   thumbnailAlt,
   children,
   analyticsResource,
+  closeAriaLabel = 'Fechar atividade',
 }: GameModalProps) {
   const analytics = useOptionalAnalytics();
   const instanceId = useId();
@@ -133,7 +137,7 @@ function GameModal({
           <button
             type="button"
             className="absolute inset-0 bg-black/55 backdrop-blur-[2px]"
-            aria-label="Fechar atividade (fundo)"
+            aria-label={`${closeAriaLabel} (fundo)`}
             onClick={closeModal}
           />
           <div
@@ -145,25 +149,11 @@ function GameModal({
             <span id={titleId} className="sr-only">
               Atividade interativa
             </span>
-            <button
-              type="button"
+            <ClosePillButton
+              ariaLabel={closeAriaLabel}
               onClick={closeModal}
-              className="pointer-events-auto absolute right-3 top-3 z-[100] flex h-[46px] w-[46px] flex-shrink-0 items-center justify-center rounded-[46px] border-[3px] border-solid border-white bg-[#80298F] shadow-md transition hover:bg-[#6b2178] focus:outline-none focus:ring-2 focus:ring-white/80 focus:ring-offset-2 focus:ring-offset-transparent sm:right-4 sm:top-4"
-              aria-label="Fechar atividade"
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                className="aspect-[1/1] h-[14px] w-[14px] shrink-0"
-                aria-hidden
-              >
-                <path
-                  fill="#FFF"
-                  d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
-                />
-              </svg>
-            </button>
+              className="pointer-events-auto absolute right-3 top-3 z-[100] sm:right-4 sm:top-4"
+            />
             <div className="flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden [&_iframe]:block [&_iframe]:h-full [&_iframe]:min-h-0 [&_iframe]:w-full [&_iframe]:max-w-full [&_iframe]:border-0 [&_video]:h-full [&_video]:min-h-0 [&_video]:w-full">
               {children}
             </div>

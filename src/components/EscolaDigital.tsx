@@ -43,6 +43,7 @@ function EscolaDigital({
           thumbnailSrc={thumbnailSrc}
           thumbnailAlt={thumbnailAlt}
           introHint={introHint}
+          closeAriaLabel="Fechar Escola Digital"
           analyticsResource={{
             linkId: 'escola_digital_video',
             page: 3,

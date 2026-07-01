@@ -79,12 +79,23 @@ Sempre que houver mudança relevante no piloto:
 | `TestFinishedScreen.tsx` | Tela de encerramento após Finalizar teste |
 | `contentInteractionsSummary.ts` | Agregados ODA, Escola Digital e vídeo no export |
 | `EventReportPanel.tsx` | Painel em tempo real — acordeão, timer de sessão, resumo e log |
+| `ClosePillButton.tsx` | Botão Fechar padronizado em modais e painel de eventos |
 | `useLiveSessionDuration.ts` | Contador ao vivo desde `session_started` |
 | `parseReport.ts` | Enriquecimento de JSONs antigos no dashboard |
 
 ---
 
 ## Registro cronológico
+
+### 2026-06-30 — Botão Fechar padronizado e catálogo do painel de eventos
+
+**Tipo:** UX / acessibilidade  
+**MVP:** transversal (01 + 03)  
+**Resumo:** `ClosePillButton` roxo compartilhado em imagem ampliada (`aria-label="Fechar imagem ampliada"`), ODA (`Fechar atividade digital`), Escola Digital (`Fechar Escola Digital`) e painel **Eventos em tempo real** (`Fechar painel de eventos`). `TrackedImage` sem `title` na imagem (evita tooltip com caminho do arquivo no hover de Ampliar/Fechar). Catálogo “O que está sendo coletado?” ordenado (25 eventos), com scroll e descrições atualizadas (timing, peso observado).  
+**Arquivos:** `ClosePillButton.tsx`, `TrackedImage.tsx`, `GameModal.tsx`, `Book.tsx`, `EscolaDigital.tsx`, `EventReportPanel.tsx`, `eventLabels.ts`  
+**Docs:** `MVP-01-BASE.md`, `MVP-03-INTERACOES-CONTEUDO.md`, `EVIDENCIAS.md`
+
+---
 
 ### 2026-07-01 — Saúde técnica na navegação (Fases 1 e 2)
 

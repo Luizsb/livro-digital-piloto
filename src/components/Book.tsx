@@ -487,6 +487,7 @@ function Book() {
                     thumbnailSrc="images/thumbODA.svg"
                     introTitle="Explorando o comércio do passado"
                     introHint="Clique para jogar"
+                    closeAriaLabel="Fechar atividade digital"
                     analyticsResource={{
                       linkId: 'oda_page_10_comercio',
                       page: 10,
