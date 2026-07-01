@@ -10,14 +10,11 @@ export interface SessionDeviceContext {
   screen_height: number;
   viewport_width: number;
   viewport_height: number;
-  pixel_ratio: number;
   is_touch_device: boolean;
   /** Idioma do livro/app (`<html lang>`). */
   app_language: string;
   /** Idioma principal configurado no navegador (`navigator.language`). */
   browser_language: string;
-  /** Lista de idiomas aceitos pelo navegador, em ordem de preferência. */
-  browser_languages: string;
 }
 
 export const DEVICE_TYPE_LABELS: Record<DeviceType, string> = {
@@ -79,20 +76,16 @@ function parseBrowser(ua: string): { name: string; version: string } {
   return { name: 'Outro', version: '' };
 }
 
-function captureBrowserLanguageList(): string[] {
-  if (typeof navigator === 'undefined') return [];
-  if (navigator.languages?.length) {
-    return navigator.languages.map((lang) => String(lang));
-  }
-  if (navigator.language) return [navigator.language];
-  return [];
-}
-
 function resolveAppLanguage(): string {
   if (typeof document !== 'undefined' && document.documentElement.lang) {
     return document.documentElement.lang;
   }
   return 'pt-BR';
+}
+
+function resolveBrowserLanguage(): string {
+  if (typeof navigator === 'undefined') return '—';
+  return navigator.language || '—';
 }
 
 /** Snapshot do ambiente no início da sessão (sem gravar user-agent bruto). */
@@ -107,12 +100,6 @@ export function captureSessionDeviceContext(): SessionDeviceContext {
     typeof window !== 'undefined' && window.screen ? window.screen.height : 0;
   const viewport_width = typeof window !== 'undefined' ? window.innerWidth : 0;
   const viewport_height = typeof window !== 'undefined' ? window.innerHeight : 0;
-  const pixel_ratio =
-    typeof window !== 'undefined' && window.devicePixelRatio
-      ? Math.round(window.devicePixelRatio * 100) / 100
-      : 1;
-
-  const browserLanguages = captureBrowserLanguageList();
 
   return {
     device_type,
@@ -124,14 +111,12 @@ export function captureSessionDeviceContext(): SessionDeviceContext {
     screen_height,
     viewport_width,
     viewport_height,
-    pixel_ratio,
     is_touch_device:
       typeof navigator !== 'undefined'
         ? navigator.maxTouchPoints > 0 || 'ontouchstart' in window
         : false,
     app_language: resolveAppLanguage(),
-    browser_language: browserLanguages[0] ?? '—',
-    browser_languages: browserLanguages.join(', ') || '—',
+    browser_language: resolveBrowserLanguage(),
   };
 }
 

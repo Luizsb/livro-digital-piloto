@@ -283,18 +283,6 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
                 {summary.browser_language ?? '—'}
               </dd>
             </div>
-            <div className="col-span-2 sm:col-span-3 lg:col-span-4">
-              <dt className="text-slate-500">Preferências de idioma (navegador)</dt>
-              <dd className="mt-1 font-semibold text-[#80298F]">
-                {summary.browser_languages ?? '—'}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">Densidade de pixels</dt>
-              <dd className="mt-1 font-semibold text-[#80298F]">
-                {summary.pixel_ratio ? `${summary.pixel_ratio}×` : '—'}
-              </dd>
-            </div>
           </dl>
         </Section>
       ) : null}

@@ -227,11 +227,9 @@ const METADATA_LABELS: Record<string, string> = {
   screen_height: 'Altura da tela (px)',
   viewport_width: 'Largura da janela (px)',
   viewport_height: 'Altura da janela (px)',
-  pixel_ratio: 'Densidade de pixels',
   is_touch_device: 'Tela touch',
   app_language: 'Idioma do app',
   browser_language: 'Idioma do navegador',
-  browser_languages: 'Idiomas do navegador',
   language: 'Idioma do navegador (legado)',
 };
 
