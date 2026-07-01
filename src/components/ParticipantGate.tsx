@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useRef, useState, type ReactNode } from 'react';
 import { ANALYTICS_EVENT_NAMES } from '../analytics/eventTypes';
+import { capturePageLoadTiming } from '../analytics/captureLoadTiming';
 import { useAnalytics } from '../analytics/AnalyticsProvider';
 import {
   markSessionEventTracked,
@@ -57,7 +58,10 @@ function ParticipantGate({ children, showFinishScreen }: ParticipantGateProps) {
         } else {
           bookOpenedRef.current = true;
           markSessionEventTracked(sessionId, ANALYTICS_EVENT_NAMES.bookOpened);
-          track(ANALYTICS_EVENT_NAMES.bookOpened);
+          track(ANALYTICS_EVENT_NAMES.bookOpened, {
+            ...(capturePageLoadTiming() ?? {}),
+            load_trigger: 'book_opened',
+          });
         }
       }
 

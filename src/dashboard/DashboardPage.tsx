@@ -15,6 +15,9 @@ import {
   extractZoomedImageIds,
   formatDuration,
   formatExportedAt,
+  formatBytes,
+  formatLoadTimeMs,
+  getLoadTimeRating,
   formatWouldUseAgain,
   getChapterStatusBadgeClass,
   getChapterStatusLabel,
@@ -26,6 +29,7 @@ import {
   formatBrowserLabel,
   formatScreenResolution,
 } from '../analytics/deviceContext';
+import { MetricTerm, TECHNICAL_HEALTH_HINTS } from './InfoHint';
 
 function StatusMetricCard({ status }: { status: ChapterStatusLabel }) {
   return (
@@ -173,6 +177,7 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
   const chapterStatus = getChapterStatusLabel(summary);
   const sessionInsight = buildSessionInsight(parsed);
   const commentText = feedbackComments[0]?.comment;
+  const loadTimeRating = getLoadTimeRating(summary.page_load_time_ms);
 
   const deviceEmoji =
     summary.device_type === 'mobile'
@@ -287,7 +292,230 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
         </Section>
       ) : null}
 
+      <Section title="Saúde técnica na navegação">
+        <p className="mb-4 text-sm text-slate-600">
+          Problemas e tempos observados durante o uso real do livro — sem varredura automática do
+          conteúdo. O peso em bytes reflete apenas o que foi carregado nesta sessão (páginas
+          visitadas); cache local pode zerar a transferência de rede.
+        </p>
+        {!summary.has_technical_issues &&
+        summary.page_load_time_ms == null &&
+        summary.session_bytes_transferred == null ? (
+          <p className="text-sm text-slate-500">
+            Nenhum problema técnico registrado nesta sessão.
+          </p>
+        ) : null}
+        <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3 lg:grid-cols-4">
+          <div>
+            <dt className="text-slate-500">
+              <MetricTerm
+                label="Tempo de carregamento"
+                hint={TECHNICAL_HEALTH_HINTS.loadTime}
+              />
+            </dt>
+            <dd className="mt-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-semibold text-[#80298F]">
+                  {formatLoadTimeMs(summary.page_load_time_ms)}
+                </span>
+                {loadTimeRating ? (
+                  <span
+                    className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${loadTimeRating.badgeClass}`}
+                  >
+                    {loadTimeRating.label}
+                  </span>
+                ) : null}
+              </div>
+              {loadTimeRating ? (
+                <p className="mt-1 text-xs text-slate-500">{loadTimeRating.hint}</p>
+              ) : null}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">
+              <MetricTerm label="DOM pronto" hint={TECHNICAL_HEALTH_HINTS.domReady} />
+            </dt>
+            <dd className="mt-1 font-semibold text-[#80298F]">
+              {formatLoadTimeMs(summary.dom_content_loaded_ms)}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">
+              <MetricTerm label="TTFB" hint={TECHNICAL_HEALTH_HINTS.ttfb} />
+            </dt>
+            <dd className="mt-1 font-semibold text-[#80298F]">
+              {formatLoadTimeMs(summary.ttfb_ms)}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">
+              <MetricTerm
+                label="Peso observado (sessão)"
+                hint={TECHNICAL_HEALTH_HINTS.sessionWeight}
+              />
+            </dt>
+            <dd className="mt-1 font-semibold text-[#80298F]">
+              {formatBytes(summary.session_bytes_transferred)}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">
+              <MetricTerm
+                label="Peso de imagens (sessão)"
+                hint={TECHNICAL_HEALTH_HINTS.imageWeight}
+              />
+            </dt>
+            <dd className="mt-1 font-semibold text-[#80298F]">
+              {formatBytes(summary.session_image_bytes_transferred)}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">
+              <MetricTerm
+                label="Recursos carregados"
+                hint={TECHNICAL_HEALTH_HINTS.resourcesLoaded}
+              />
+            </dt>
+            <dd className="mt-1 font-semibold text-[#80298F]">
+              {typeof summary.resources_loaded_count === 'number'
+                ? summary.resources_loaded_count
+                : '—'}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">
+              <MetricTerm label="Erros de script" hint={TECHNICAL_HEALTH_HINTS.scriptErrors} />
+            </dt>
+            <dd className="mt-1 font-semibold text-[#80298F]">
+              {summary.runtime_errors_count ?? 0}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">
+              <MetricTerm
+                label="Falhas de renderização"
+                hint={TECHNICAL_HEALTH_HINTS.renderErrors}
+              />
+            </dt>
+            <dd className="mt-1 font-semibold text-[#80298F]">
+              {summary.render_errors_count ?? 0}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">
+              <MetricTerm label="Assets não carregados" hint={TECHNICAL_HEALTH_HINTS.missingAssets} />
+            </dt>
+            <dd className="mt-1 font-semibold text-[#80298F]">
+              {summary.asset_load_errors_count ?? 0}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">
+              <MetricTerm label="Imagens com erro" hint={TECHNICAL_HEALTH_HINTS.brokenImages} />
+            </dt>
+            <dd className="mt-1 font-semibold text-[#80298F]">
+              {summary.images_with_errors.length}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">
+              <MetricTerm
+                label="Links internos quebrados"
+                hint={TECHNICAL_HEALTH_HINTS.brokenLinks}
+              />
+            </dt>
+            <dd className="mt-1 font-semibold text-[#80298F]">
+              {summary.links_open_failed_count ?? 0}
+            </dd>
+          </div>
+        </dl>
+        {summary.bytes_from_cache_only ? (
+          <p className="mt-3 text-xs text-slate-500">
+            Os recursos desta sessão vieram principalmente do cache do navegador — o peso em bytes
+            pode aparecer como 0 B mesmo com imagens exibidas.
+          </p>
+        ) : null}
+        {summary.largest_images_loaded?.length ? (
+          <div className="mt-4">
+            <p className="text-sm font-medium text-slate-700">
+              Maiores imagens carregadas na sessão
+            </p>
+            <ul className="mt-2 space-y-1 text-sm text-slate-600">
+              {summary.largest_images_loaded.map((image) => (
+                <li key={image.src}>
+                  <span className="font-medium">{formatBytes(image.bytes)}</span> — {image.src}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {summary.images_with_errors.length > 0 ? (
+          <p className="mt-4 text-sm text-slate-700">
+            <span className="font-medium">Imagens quebradas:</span>{' '}
+            {summary.images_with_errors.join(', ')}
+          </p>
+        ) : null}
+        {summary.runtime_error_messages?.length ? (
+          <div className="mt-4">
+            <p className="text-sm font-medium text-slate-700">Mensagens de erro (script)</p>
+            <ul className="mt-2 list-inside list-disc text-sm text-slate-600">
+              {summary.runtime_error_messages.map((message) => (
+                <li key={message}>{message}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {summary.render_error_boundaries?.length ? (
+          <p className="mt-4 text-sm text-slate-700">
+            <span className="font-medium">Áreas com falha de renderização:</span>{' '}
+            {summary.render_error_boundaries.join(', ')}
+            {summary.render_error_pages?.length ? (
+              <>
+                {' '}
+                (páginas: {summary.render_error_pages.join(', ')})
+              </>
+            ) : null}
+          </p>
+        ) : null}
+        {summary.links_open_failed?.length ? (
+          <div className="mt-4">
+            <p className="text-sm font-medium text-slate-700">Links internos que falharam</p>
+            <ul className="mt-2 space-y-1 text-sm text-slate-600">
+              {summary.links_open_failed.map((failure) => (
+                <li key={failure.link_id}>
+                  <span className="font-medium">{failure.link_id}</span> (p. {failure.page}) —{' '}
+                  {failure.href}
+                  {failure.http_status != null ? ` [HTTP ${failure.http_status}]` : ''}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {summary.asset_load_failures?.length ? (
+          <div className="mt-4">
+            <p className="text-sm font-medium text-slate-700">Assets que falharam</p>
+            <ul className="mt-2 space-y-1 text-sm text-slate-600">
+              {summary.asset_load_failures.map((failure) => (
+                <li key={`${failure.asset_type}:${failure.src}`}>
+                  <span className="font-medium">{failure.asset_type}</span> — {failure.src}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </Section>
+
       <Section title="Jornada de leitura">
+        <p className="mb-4 text-sm text-slate-600">
+          Páginas do livro percorridas nesta sessão
+          {pageJourney.length > 0 ? (
+            <>
+              {' '}
+              (pág. {pageJourney[0].page} a pág. {pageJourney[pageJourney.length - 1].page})
+            </>
+          ) : null}
+          . O emoji em cada cartão indica o status (legenda).
+        </p>
         <div className="mb-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-600">
           {(Object.keys(PAGE_JOURNEY_LABELS) as Array<keyof typeof PAGE_JOURNEY_LABELS>).map(
             (status) => (
@@ -304,32 +532,29 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
           {pageJourney.map((item) => {
             const statusLabel = PAGE_JOURNEY_LABELS[item.status];
             return (
-            <div
-              key={item.page}
-              className={`rounded-lg border px-2 py-3 text-center text-sm font-semibold ${
-                item.status === 'completed'
-                  ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
-                  : item.status === 'viewed'
-                    ? 'border-[#80298F]/30 bg-[#F9DDFF]/40 text-[#80298F]'
-                    : 'border-slate-200 bg-slate-50 text-slate-400'
-              }`}
-            >
-              <div className="text-xl leading-none" aria-hidden>
-                {statusLabel.emoji}
+              <div
+                key={item.page}
+                title={`Página ${item.page} — ${statusLabel.legend}`}
+                aria-label={`Página ${item.page} do livro: ${statusLabel.legend}`}
+                className={`rounded-lg border px-2 py-2.5 text-center text-sm font-semibold ${
+                  item.status === 'completed'
+                    ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                    : item.status === 'viewed'
+                      ? 'border-[#80298F]/30 bg-[#F9DDFF]/40 text-[#80298F]'
+                      : 'border-slate-200 bg-slate-50 text-slate-400'
+                }`}
+              >
+                <div className="text-lg leading-none" aria-hidden>
+                  {statusLabel.emoji}
+                </div>
+                <div className="mt-1.5 text-[10px] font-medium uppercase tracking-wide opacity-80">
+                  Pág.
+                </div>
+                <div className="text-lg font-bold leading-tight">{item.page}</div>
               </div>
-              <div className="mt-1 text-lg font-bold">{item.page}</div>
-              <div className="mt-1 text-[10px] font-normal">{statusLabel.card}</div>
-            </div>
             );
           })}
         </div>
-        <p className="mt-4 text-sm text-slate-600">
-          <span className="font-medium">Visualizadas:</span>{' '}
-          {summary.pages_viewed.join(', ') || '—'}
-          <br />
-          <span className="font-medium">Concluídas:</span>{' '}
-          {summary.pages_completed.join(', ') || '—'}
-        </p>
       </Section>
 
       <Section title="Status do capítulo">

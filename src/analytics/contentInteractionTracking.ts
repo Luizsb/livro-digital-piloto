@@ -105,3 +105,29 @@ export function trackImageZoomed({
     src,
   });
 }
+
+export interface TrackImageLoadErrorInput {
+  sessionId: string;
+  imageId: string;
+  page: number;
+  src: string;
+  track: (eventName: string, metadata?: Record<string, unknown>) => void;
+}
+
+/** Falha ao carregar imagem rastreada — observada na navegação do participante. */
+export function trackImageLoadError({
+  sessionId,
+  imageId,
+  page,
+  src,
+  track,
+}: TrackImageLoadErrorInput): void {
+  const dedupeKey = `${ANALYTICS_EVENT_NAMES.imageLoadError}_${imageId}`;
+  trackOncePerSession(sessionId, dedupeKey, () => {
+    track(ANALYTICS_EVENT_NAMES.imageLoadError, {
+      image_id: imageId,
+      page,
+      src,
+    });
+  });
+}

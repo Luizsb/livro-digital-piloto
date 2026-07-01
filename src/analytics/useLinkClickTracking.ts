@@ -6,6 +6,7 @@ import {
   trackResourceEngagementRecorded,
   trackResourceOpened,
 } from './contentInteractionTracking';
+import { validateTrackedLinkAfterClick } from './linkOpenValidation';
 import { useOptionalAnalytics } from './AnalyticsProvider';
 
 const TRACK_LINK_SELECTOR = '[data-track-link-id]';
@@ -42,11 +43,22 @@ export function useLinkClickTracking(): void {
 
       if (!linkId || page === null) return;
 
+      const href = getHrefFromElement(target);
+
       trackResourceOpened({
         linkId,
         page,
         type,
-        href: getHrefFromElement(target),
+        href,
+        track: analytics.track,
+      });
+
+      void validateTrackedLinkAfterClick({
+        sessionId: analytics.sessionId,
+        linkId,
+        page,
+        type,
+        href,
         track: analytics.track,
       });
     };

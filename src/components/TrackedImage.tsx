@@ -5,6 +5,7 @@ import { isPageTrackingReady } from '../analytics/analyticsBootstrap';
 import {
   trackImageViewedOnce,
   trackImageZoomed,
+  trackImageLoadError,
 } from '../analytics/contentInteractionTracking';
 import { normalizeImageSrcPath } from '../analytics/contentInteractionTypes';
 import { useOptionalAnalytics } from '../analytics/AnalyticsProvider';
@@ -131,6 +132,18 @@ function TrackedImage({
     setIsZoomOpen(true);
   };
 
+  const handleImageError = () => {
+    if (!analytics) return;
+
+    trackImageLoadError({
+      sessionId: analytics.sessionId,
+      imageId,
+      page,
+      src: srcPath,
+      track: analytics.track,
+    });
+  };
+
   const zoomButtonPosition =
     zoomPlacement === 'top-right' ? 'top-2 right-2' : 'bottom-2 right-2';
   const zoomButtonVisibility = alwaysShowZoomButton
@@ -153,6 +166,7 @@ function TrackedImage({
             src={resolvedSrc}
             alt={alt}
             className={className}
+            onError={handleImageError}
           />
           {enableZoom ? (
             <button
@@ -203,6 +217,7 @@ function TrackedImage({
                 src={resolvedSrc}
                 alt={alt}
                 className="max-h-full max-w-full object-contain"
+                onError={handleImageError}
               />
             </div>
           </div>

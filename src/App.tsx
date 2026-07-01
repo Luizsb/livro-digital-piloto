@@ -6,6 +6,7 @@ import EventsPanelButton from './components/EventsPanelButton';
 import FinishTestButton from './components/FinishTestButton';
 import SessionLifecycle from './components/SessionLifecycle';
 import DashboardPage from './dashboard/DashboardPage';
+import AnalyticsErrorBoundary from './components/AnalyticsErrorBoundary';
 import { AnalyticsProvider, useAnalytics } from './analytics/AnalyticsProvider';
 
 function useHashView(): 'book' | 'dashboard' {
@@ -68,7 +69,9 @@ function BookAppContent() {
   return (
     <ParticipantGate showFinishScreen={showFinishScreen}>
       <SessionLifecycle />
-      <Book />
+      <AnalyticsErrorBoundary boundary="book">
+        <Book />
+      </AnalyticsErrorBoundary>
       <BookSessionControls onFinished={handleFinished} />
     </ParticipantGate>
   );
@@ -80,7 +83,9 @@ function BookAppContent() {
 function App() {
   return (
     <AnalyticsProvider>
-      <BookAppContent />
+      <AnalyticsErrorBoundary boundary="app">
+        <BookAppContent />
+      </AnalyticsErrorBoundary>
     </AnalyticsProvider>
   );
 }

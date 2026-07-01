@@ -67,8 +67,34 @@ export const EVENT_CATALOG: Record<string, EventCatalogEntry> = {
   },
   [ANALYTICS_EVENT_NAMES.imageLoadError]: {
     label: 'Erro ao carregar imagem',
-    description: 'Uma imagem não carregou corretamente.',
-    active: false,
+    description: 'Imagem rastreada não carregou durante a navegação do participante.',
+    active: true,
+  },
+  [ANALYTICS_EVENT_NAMES.assetLoadError]: {
+    label: 'Asset não carregou',
+    description: 'Script, folha de estilo ou imagem sem rastreio falhou ao carregar.',
+    active: true,
+  },
+  [ANALYTICS_EVENT_NAMES.runtimeError]: {
+    label: 'Erro de script',
+    description: 'Erro de JavaScript ou promise rejeitada observado na sessão.',
+    active: true,
+  },
+  [ANALYTICS_EVENT_NAMES.renderError]: {
+    label: 'Erro de renderização',
+    description: 'Componente React não pôde ser exibido (Error Boundary).',
+    active: true,
+  },
+  [ANALYTICS_EVENT_NAMES.resourceTimingSnapshot]: {
+    label: 'Peso observado na sessão',
+    description:
+      'Bytes transferidos e imagens carregadas durante a navegação (Performance API), ao encerrar ou exportar.',
+    active: true,
+  },
+  [ANALYTICS_EVENT_NAMES.linkOpenFailed]: {
+    label: 'Link interno quebrado',
+    description: 'Link same-origin clicado pelo participante não respondeu (HTTP erro).',
+    active: true,
   },
   [ANALYTICS_EVENT_NAMES.resourceOpened]: {
     label: 'Recurso aberto',
@@ -231,6 +257,24 @@ const METADATA_LABELS: Record<string, string> = {
   app_language: 'Idioma do app',
   browser_language: 'Idioma do navegador',
   language: 'Idioma do navegador (legado)',
+  page_load_time_ms: 'Tempo de carregamento (ms)',
+  dom_content_loaded_ms: 'DOM pronto (ms)',
+  ttfb_ms: 'TTFB (ms)',
+  load_trigger: 'Gatilho do timing',
+  error_message: 'Mensagem de erro',
+  error_kind: 'Tipo de erro',
+  source: 'Origem do erro',
+  line: 'Linha',
+  column: 'Coluna',
+  boundary: 'Área do app',
+  component_stack: 'Stack do componente',
+  asset_type: 'Tipo de asset',
+  session_bytes_transferred: 'Bytes transferidos na sessão',
+  session_image_bytes_transferred: 'Bytes de imagens na sessão',
+  resources_loaded_count: 'Recursos carregados',
+  largest_images: 'Maiores imagens carregadas',
+  bytes_from_cache_only: 'Recursos do cache',
+  http_status: 'Status HTTP',
 };
 
 function formatMetadataValue(key: string, value: unknown): string {

@@ -10,6 +10,7 @@ Projeto independente em `Documentos/livro-digital-piloto`. O **livro-bett** perm
 | MVP-02 | [MVP-02-JORNADA-LEITURA.md](./MVP-02-JORNADA-LEITURA.md) | ✅ Implementado |
 | MVP-03 | [MVP-03-INTERACOES-CONTEUDO.md](./MVP-03-INTERACOES-CONTEUDO.md) | ✅ Implementado |
 | MVP-04 | [MVP-04-FEEDBACK.md](./MVP-04-FEEDBACK.md) | ✅ Implementado |
+| MVP-05 | [MVP-05-SAUDE-TECNICA.md](./MVP-05-SAUDE-TECNICA.md) | ✅ Implementado |
 | Migração DIA LD | [GUIA-MIGRACAO-DIA-LD.md](./GUIA-MIGRACAO-DIA-LD.md) | Referência para portar |
 | Dashboard | [DASHBOARD-MVP.md](./DASHBOARD-MVP.md) | LD Insights — visualizar JSON |
 | Configuração | [CONFIGURACAO-ANALYTICS.md](./CONFIGURACAO-ANALYTICS.md) | **Limiares e tempos editáveis** |
@@ -68,7 +69,12 @@ App.tsx
 | `feedback_submitted` | Feedback enviado | 04 | ✅ |
 | `chapter_finished` | Capítulo finalizado | 04 | ✅ |
 | `chapter_completed` | Capítulo concluído | 04 | ✅ |
-| `image_load_error` | Erro ao carregar imagem | 03 | ⏳ |
+| `image_load_error` | Erro ao carregar imagem | 05 | ✅ |
+| `asset_load_error` | Asset não carregou | 05 | ✅ |
+| `runtime_error` | Erro de script | 05 | ✅ |
+| `render_error` | Erro de renderização | 05 | ✅ |
+| `resource_timing_snapshot` | Peso observado na sessão | 05 | ✅ |
+| `link_open_failed` | Link interno quebrado | 05 | ✅ |
 | `teacher_button_opened` | Botão do professor aberto | 05 | ✅ |
 | `teacher_button_closed` | Botão do professor fechado | 05 | ✅ |
 | `activity_started` | Atividade iniciada | 06 | ⏳ |

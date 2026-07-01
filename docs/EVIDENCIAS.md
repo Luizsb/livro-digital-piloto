@@ -86,6 +86,17 @@ Sempre que houver mudança relevante no piloto:
 
 ## Registro cronológico
 
+### 2026-07-01 — Saúde técnica na navegação (Fases 1 e 2)
+
+**Tipo:** feature  
+**MVP:** 05  
+**Resumo:** Coleta de erros e performance **só do que o participante vivencia**: `image_load_error`, `runtime_error`, `render_error`, `asset_load_error`; timing em `book_opened`/`session_resumed`; `resource_timing_snapshot` (peso observado) e `link_open_failed` ao exportar/finalizar. LD Insights: seção **Saúde técnica** com status de carregamento, botões **(i)** nas métricas, jornada de leitura com emoji por página.  
+**Arquivos:** `captureLoadTiming.ts`, `captureResourceTiming.ts`, `technicalHealthSummary.ts`, `resourceTimingSnapshot.ts`, `linkOpenValidation.ts`, `useRuntimeErrorTracking.ts`, `AnalyticsErrorBoundary.tsx`, `InfoHint.tsx`, `DashboardPage.tsx`, …  
+**Docs atualizados:** `MVP-05-SAUDE-TECNICA.md`, `EVIDENCIAS.md`, `DASHBOARD-MVP.md`, `RELATORIO-USO-LIVRO.md`  
+**Como validar:** Sessão P01 → navegar → exportar JSON → dashboard com peso/recursos, TTFB com (i), emojis nas páginas.
+
+---
+
 ### 2026-07-01 — Ambiente de acesso (dispositivo, SO, navegador)
 
 **Tipo:** feature  
@@ -257,8 +268,8 @@ Sempre que houver mudança relevante no piloto:
 
 | Item | MVP | Status |
 |------|-----|--------|
+| Saúde técnica na navegação (Fases 1–2) | 05 | ✅ Ver `MVP-05-SAUDE-TECNICA.md` |
 | Atividades interativas (`activity_started` / `activity_completed`) | 06 | ⏳ Planejado |
-| `image_load_error` | 03 | ⏳ Planejado |
 | Git LFS para vídeo grande (opcional) | infra | ⏳ Avaliar |
 
 ---

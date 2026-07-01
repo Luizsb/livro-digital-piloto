@@ -224,6 +224,38 @@ export function buildAlerts(summary: EventSummary): DashboardAlert[] {
     });
   }
 
+  if (summary.runtime_errors_count > 0) {
+    alerts.push({
+      id: 'runtime_errors',
+      message: `Foram registrados ${summary.runtime_errors_count} erro(s) de script na sessão.`,
+      severity: 'warning',
+    });
+  }
+
+  if (summary.render_errors_count > 0) {
+    alerts.push({
+      id: 'render_errors',
+      message: 'Houve falha de renderização em parte do livro.',
+      severity: 'warning',
+    });
+  }
+
+  if (summary.asset_load_errors_count > 0) {
+    alerts.push({
+      id: 'asset_load_errors',
+      message: 'Um ou mais assets (script, CSS ou imagem) não carregaram.',
+      severity: 'warning',
+    });
+  }
+
+  if (summary.links_open_failed_count > 0) {
+    alerts.push({
+      id: 'link_open_failed',
+      message: 'Um ou mais links internos falharam ao ser acessados.',
+      severity: 'warning',
+    });
+  }
+
   return alerts;
 }
 
@@ -234,7 +266,14 @@ const INTERPRETATION_ALERT_IDS = new Set([
   'teacher_not_used',
 ]);
 
-const TECHNICAL_ALERT_IDS = new Set(['no_export_event', 'image_errors']);
+const TECHNICAL_ALERT_IDS = new Set([
+  'no_export_event',
+  'image_errors',
+  'runtime_errors',
+  'render_errors',
+  'asset_load_errors',
+  'link_open_failed',
+]);
 
 export function buildInterpretationAlerts(summary: EventSummary): DashboardAlert[] {
   return buildAlerts(summary).filter((alert) => INTERPRETATION_ALERT_IDS.has(alert.id));

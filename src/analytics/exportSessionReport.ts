@@ -1,5 +1,9 @@
 import { ANALYTICS_EVENT_NAMES } from './eventTypes';
 import { getAndIncrementExportCount } from './sessionDedup';
+import {
+  captureResourceTimingMetadata,
+  trackResourceTimingSnapshotOnce,
+} from './resourceTimingSnapshot';
 import { loadStoredEvents } from './trackEvent';
 import { buildExportPayload, downloadEventsJson, type ExportPayload } from './exportEvents';
 
@@ -20,6 +24,9 @@ export function exportSessionReport(
   track: (eventName: string, metadata?: Record<string, unknown>) => void,
   options: ExportSessionReportOptions = {},
 ): ExportPayload {
+  trackResourceTimingSnapshotOnce(sessionId, track);
+  const resourceTiming = captureResourceTimingMetadata();
+
   const eventCountBeforeExport = loadStoredEvents().length;
   const exportCount = getAndIncrementExportCount(sessionId);
 
@@ -29,6 +36,7 @@ export function exportSessionReport(
     export_format: 'json',
     export_source: options.export_source ?? 'manual_button',
     export_count: exportCount,
+    ...resourceTiming,
   });
 
   return downloadEventsJson();
@@ -40,6 +48,9 @@ export function buildExportPayloadAfterTrack(
   track: (eventName: string, metadata?: Record<string, unknown>) => void,
   options: ExportSessionReportOptions = {},
 ): ExportPayload {
+  trackResourceTimingSnapshotOnce(sessionId, track);
+  const resourceTiming = captureResourceTimingMetadata();
+
   const eventCountBeforeExport = loadStoredEvents().length;
   const exportCount = getAndIncrementExportCount(sessionId);
 
@@ -49,6 +60,7 @@ export function buildExportPayloadAfterTrack(
     export_format: 'json',
     export_source: options.export_source ?? 'manual_button',
     export_count: exportCount,
+    ...resourceTiming,
   });
 
   return buildExportPayload();

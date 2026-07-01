@@ -35,6 +35,7 @@ import {
   type SessionStatus,
 } from './sessionStatus';
 import { captureSessionDeviceContext } from './deviceContext';
+import { capturePageLoadTiming } from './captureLoadTiming';
 
 interface AnalyticsContextValue {
   sessionId: string;
@@ -142,7 +143,10 @@ export function AnalyticsProvider({
     if (nav?.type !== 'reload') return;
 
     sessionResumedRef.current = true;
-    track(ANALYTICS_EVENT_NAMES.sessionResumed);
+    track(ANALYTICS_EVENT_NAMES.sessionResumed, {
+      ...(capturePageLoadTiming() ?? {}),
+      load_trigger: 'session_resumed',
+    });
   }, [participantId, sessionId, track]);
 
   const value = useMemo(

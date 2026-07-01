@@ -12,6 +12,7 @@ import {
 } from './sessionDedup';
 import { completeActivePageOnSessionEnd } from './pageCompletion';
 import { closeAllOpenTeacherButtons } from './teacherButtonTracking';
+import { trackResourceTimingSnapshotOnce, captureResourceTimingMetadata } from './resourceTimingSnapshot';
 import { flushAllOpenVideoSessions } from './videoTracking';
 import { flushAllOpenModalResourceSessions } from './modalResourceTracking';
 import { getReadingDepthLabel } from './readingQuality';
@@ -38,6 +39,8 @@ export function finishSessionOnUnload(
     closeAllOpenTeacherButtons(track);
     completeActivePageOnSessionEnd(sessionId, track);
 
+    trackResourceTimingSnapshotOnce(sessionId, track);
+
     const metadata = buildSessionFinishMetadata(sessionId);
     track(ANALYTICS_EVENT_NAMES.sessionFinished, {
       duration_seconds: metadata.duration_seconds,
@@ -47,6 +50,7 @@ export function finishSessionOnUnload(
       avg_seconds_per_completed_page: metadata.avg_seconds_per_completed_page,
       reading_depth: metadata.reading_depth,
       reading_depth_label: getReadingDepthLabel(metadata.reading_depth),
+      ...captureResourceTimingMetadata(),
     });
 
     const finishedAt = new Date().toISOString();
@@ -96,6 +100,8 @@ export function finishTestFromButton(
 
   markSessionEventTracked(sessionId, ANALYTICS_EVENT_NAMES.sessionFinished);
 
+  trackResourceTimingSnapshotOnce(sessionId, track);
+
   const sessionMetadata = buildSessionFinishMetadata(sessionId);
   track(ANALYTICS_EVENT_NAMES.sessionFinished, {
     duration_seconds: sessionMetadata.duration_seconds,
@@ -105,6 +111,7 @@ export function finishTestFromButton(
     avg_seconds_per_completed_page: sessionMetadata.avg_seconds_per_completed_page,
     reading_depth: sessionMetadata.reading_depth,
     reading_depth_label: getReadingDepthLabel(sessionMetadata.reading_depth),
+    ...captureResourceTimingMetadata(),
   });
 
   const finishedAt = new Date().toISOString();

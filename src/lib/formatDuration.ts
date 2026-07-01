@@ -7,6 +7,13 @@ export function formatDuration(seconds: number | null): string {
   return rest > 0 ? `${minutes}min ${rest}s` : `${minutes}min`;
 }
 
+/** Tempo de carregamento da página (Performance API). */
+export function formatLoadTimeMs(ms: number | null | undefined): string {
+  if (ms == null || ms <= 0) return '—';
+  if (ms < 1000) return `${ms} ms`;
+  return `${(ms / 1000).toFixed(1)} s`;
+}
+
 /** Relógio MM:SS ou H:MM:SS para contador ao vivo. */
 export function formatDurationClock(seconds: number): string {
   const hours = Math.floor(seconds / 3600);

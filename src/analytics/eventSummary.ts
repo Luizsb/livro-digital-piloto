@@ -10,8 +10,12 @@ import {
   extractDeviceContextFromMetadata,
   type SessionDeviceSummary,
 } from './deviceContextSummary';
+import {
+  buildTechnicalHealthSummary,
+  type TechnicalHealthSummary,
+} from './technicalHealthSummary';
 
-export interface EventSummary extends TeacherButtonSummary, Partial<SessionDeviceSummary> {
+export interface EventSummary extends TeacherButtonSummary, Partial<SessionDeviceSummary>, TechnicalHealthSummary {
   exported_at: string;
   book_id: string;
   chapter_id: string;
@@ -133,6 +137,7 @@ export function buildEventSummary(): EventSummary {
   const pages_completed_count = pagesCompleted.size;
   const chapterPages = buildChapterPageSnapshot(BOOK_PILOT.book_id, BOOK_PILOT.chapter_id);
   const teacherButton = buildTeacherButtonSummary(events);
+  const technicalHealth = buildTechnicalHealthSummary(events);
 
   return {
     exported_at: new Date().toISOString(),
@@ -177,5 +182,8 @@ export function buildEventSummary(): EventSummary {
     chapter_completed_count: chapterCompletedCount,
     ...(deviceContext ?? {}),
     ...chapterPages,
+    ...technicalHealth,
+    has_technical_issues:
+      technicalHealth.has_technical_issues || imageErrors.size > 0,
   };
 }

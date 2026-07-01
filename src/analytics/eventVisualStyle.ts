@@ -14,6 +14,7 @@ export type EventVisualCategory =
   | 'teacher'
   | 'feedback'
   | 'chapter'
+  | 'technical'
   | 'other';
 
 export interface EventVisualStyle {
@@ -91,6 +92,14 @@ const CATEGORY_STYLES: Record<EventVisualCategory, Omit<EventVisualStyle, 'categ
     badgeClass: 'bg-violet-100 text-violet-800',
     iconWrapClass: 'bg-violet-100 text-violet-700',
   },
+  technical: {
+    icon: '!',
+    borderClass: 'border-l-red-500',
+    bgClass: 'bg-red-50/80',
+    titleClass: 'text-red-800',
+    badgeClass: 'bg-red-100 text-red-800',
+    iconWrapClass: 'bg-red-100 text-red-700',
+  },
   other: {
     icon: '•',
     borderClass: 'border-l-slate-300',
@@ -111,7 +120,12 @@ const EVENT_NAME_CATEGORY: Partial<Record<string, EventVisualCategory>> = {
   [ANALYTICS_EVENT_NAMES.pageCompleted]: 'journey',
   [ANALYTICS_EVENT_NAMES.imageViewed]: 'image',
   [ANALYTICS_EVENT_NAMES.imageZoomed]: 'image',
-  [ANALYTICS_EVENT_NAMES.imageLoadError]: 'image',
+  [ANALYTICS_EVENT_NAMES.imageLoadError]: 'technical',
+  [ANALYTICS_EVENT_NAMES.assetLoadError]: 'technical',
+  [ANALYTICS_EVENT_NAMES.runtimeError]: 'technical',
+  [ANALYTICS_EVENT_NAMES.renderError]: 'technical',
+  [ANALYTICS_EVENT_NAMES.resourceTimingSnapshot]: 'technical',
+  [ANALYTICS_EVENT_NAMES.linkOpenFailed]: 'technical',
   [ANALYTICS_EVENT_NAMES.linkClicked]: 'resource',
   [ANALYTICS_EVENT_NAMES.videoStarted]: 'video',
   [ANALYTICS_EVENT_NAMES.videoCompleted]: 'video',

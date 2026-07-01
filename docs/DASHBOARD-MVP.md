@@ -32,6 +32,7 @@ Relatórios antigos ou sem `session_finished` são completados em `parseReport.t
 | **Profundidade de leitura** | `summary` → `session_finished` → `chapter_finished` → `chapter_completed` |
 | **Duração da sessão** | `session_finished.duration_seconds` → intervalo `session_started` até `chapter_finished` → primeiro/último evento |
 | **Ambiente / idiomas** | `summary` ou metadata de `session_started`; JSONs antigos com só `language` tratam como idioma do navegador |
+| **Saúde técnica** | `resource_timing_snapshot` → `events_exported` / `session_finished`; erros e timing nos eventos da sessão |
 
 ## Seções
 
@@ -40,7 +41,8 @@ Relatórios antigos ou sem `session_finished` são completados em `parseReport.t
 | Cards principais | Participante, duração, páginas, status (badge), profundidade, feedback, usaria novamente |
 | Resumo interpretativo | Texto narrativo executivo da sessão (destaque visual após os cards) |
 | Ambiente de acesso | Dispositivo, SO, navegador, resolução, touch, idioma do app e do navegador (`session_started`) |
-| Jornada de leitura | Grid páginas 3–12 com emojis: ✅ Concluída · 👁️ Apenas visualizada · ⚪ Não visualizada |
+| Saúde técnica na navegação | Tempo de carga (com status Bom/Moderado/Lento), peso observado, erros, links quebrados; botão **(i)** explica cada métrica (ex.: TTFB) |
+| Jornada de leitura | Páginas do livro (pág. 3–12): legenda + cartões com emoji, **Pág.** e número |
 | Status do capítulo | Badge + insight + taxa de conclusão |
 | Imagens no capítulo | Exposição (`image_viewed`) vs interação intencional (`image_zoomed`) |
 | Recursos externos | ODA e Escola Digital (modal + reprodução do vídeo) |
@@ -65,5 +67,6 @@ src/dashboard/
   parseReport.ts
   reportExtractors.ts
   reportInsights.ts
+  InfoHint.tsx
   types.ts
 ```

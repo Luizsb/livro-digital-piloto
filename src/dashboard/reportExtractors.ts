@@ -8,7 +8,12 @@ import {
 } from '../analytics/chapterPageConfig';
 import { getReadingDepthLabel, type ReadingDepth } from '../analytics/readingQuality';
 import { formatDateTimeBr } from '../lib/formatDateTimeBr';
+import { formatLoadTimeMs } from '../lib/formatDuration';
+import { formatBytes } from '../lib/formatBytes';
+import { getLoadTimeRating } from '../lib/loadTimeRating';
 import type { PageJourneyItem } from './types';
+
+export { formatLoadTimeMs, formatBytes, getLoadTimeRating };
 
 const FINISH_EVENTS_FOR_DEPTH = [
   ANALYTICS_EVENT_NAMES.sessionFinished,
@@ -151,17 +156,14 @@ export const PAGE_JOURNEY_LABELS = {
   completed: {
     emoji: '✅',
     legend: 'Concluída',
-    card: 'Concluída',
   },
   viewed: {
     emoji: '👁️',
     legend: 'Apenas visualizada',
-    card: 'Visualizada',
   },
   not_viewed: {
     emoji: '⚪',
     legend: 'Não visualizada',
-    card: 'Não vista',
   },
 } as const;
 
