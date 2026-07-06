@@ -3,6 +3,7 @@ import {
   getMinCompletionRateForChapter,
   resolveChapterPageBounds,
 } from '@book/chapter/chapterPageConfig';
+import { buildDigitalResourceCoverageRows } from '@book/chapter/chapterManifest';
 import type { EventSummary } from '@analytics/sessionSummary';
 import type { DashboardAlert, HealthCheckItem, ParsedDashboardReport } from './types';
 import {
@@ -57,7 +58,7 @@ export function buildChapterStatusInsight(summary: EventSummary): string {
 }
 
 export function buildSessionInsight(parsed: ParsedDashboardReport): string {
-  const { summary, events } = parsed;
+  const { summary, events, chapterManifest } = parsed;
   const participant = getParticipantLabel(summary);
   const totalPages =
     summary.chapter_total_pages ?? getChapterTotalPages(resolveChapterPageBounds(summary));
@@ -143,9 +144,19 @@ export function buildSessionInsight(parsed: ParsedDashboardReport): string {
       );
     }
     if ((summary.expected_resources_count ?? 0) > 0) {
-      const opened =
-        (summary.expected_resources_count ?? 0) - (summary.resources_not_opened?.length ?? 0);
-      coverageParts.push(`${opened}/${summary.expected_resources_count} recursos digitais abertos`);
+      if (chapterManifest) {
+        for (const row of buildDigitalResourceCoverageRows(
+          chapterManifest,
+          summary.resources_not_opened ?? [],
+        )) {
+          const opened = row.expected - row.missing.length;
+          coverageParts.push(`${opened}/${row.expected} ${row.label.toLowerCase()} aberto(s)`);
+        }
+      } else {
+        const opened =
+          (summary.expected_resources_count ?? 0) - (summary.resources_not_opened?.length ?? 0);
+        coverageParts.push(`${opened}/${summary.expected_resources_count} recursos digitais abertos`);
+      }
     }
     if ((summary.expected_teacher_buttons_count ?? 0) > 0) {
       const used =

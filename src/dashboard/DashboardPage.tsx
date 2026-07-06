@@ -1,5 +1,9 @@
 import { useMemo, useRef, useState, type DragEvent } from 'react';
 import { getChapterTotalPages, resolveChapterPageBounds } from '@book/chapter/chapterPageConfig';
+import {
+  buildDigitalResourceCoverageRows,
+  type ChapterManifest,
+} from '@book/chapter/chapterManifest';
 import { parseReportFile, parseMultipleReportFiles, ReportParseError } from './parseReport';
 import type { DashboardViewMode, ParsedDashboardReport } from './types';
 import { aggregateSessionReports } from './buildGroupReport';
@@ -169,7 +173,13 @@ function MetricCard({
   );
 }
 
-function ChapterCoverageSection({ summary }: { summary: ParsedDashboardReport['summary'] }) {
+function ChapterCoverageSection({
+  summary,
+  chapterManifest,
+}: {
+  summary: ParsedDashboardReport['summary'];
+  chapterManifest: ChapterManifest | null;
+}) {
   if (typeof summary.expected_pages_count !== 'number') {
     return (
       <Section title="Cobertura do capítulo">
@@ -179,6 +189,14 @@ function ChapterCoverageSection({ summary }: { summary: ParsedDashboardReport['s
       </Section>
     );
   }
+
+  const digitalResourceRows =
+    chapterManifest != null
+      ? buildDigitalResourceCoverageRows(
+          chapterManifest,
+          summary.resources_not_opened ?? [],
+        )
+      : [];
 
   const coverageRows = [
     {
@@ -193,12 +211,12 @@ function ChapterCoverageSection({ summary }: { summary: ParsedDashboardReport['s
       rate: summary.image_exposure_coverage_rate,
       missing: summary.images_not_exposed ?? [],
     },
-    {
-      label: 'Recursos abertos',
-      expected: summary.expected_resources_count ?? 0,
-      rate: summary.resource_open_coverage_rate,
-      missing: summary.resources_not_opened ?? [],
-    },
+    ...digitalResourceRows.map((row) => ({
+      label: row.label,
+      expected: row.expected,
+      rate: row.coverage_rate,
+      missing: row.missing,
+    })),
     {
       label: 'Seções do professor usadas',
       expected: summary.expected_teacher_buttons_count ?? 0,
@@ -286,7 +304,7 @@ function Section({
 }
 
 function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
-  const { report, summary, events, feedbackComments, warnings } = parsed;
+  const { report, summary, events, feedbackComments, warnings, chapterManifest } = parsed;
   const [showComment, setShowComment] = useState(false);
   const totalPages =
     summary.chapter_total_pages ?? getChapterTotalPages(resolveChapterPageBounds(summary));
@@ -751,7 +769,7 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
         </dl>
       </Section>
 
-      <ChapterCoverageSection summary={summary} />
+      <ChapterCoverageSection summary={summary} chapterManifest={chapterManifest} />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Section title="Imagens no capítulo">
@@ -815,7 +833,7 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
           </div>
         </Section>
 
-        <Section title="Recursos externos">
+        <Section title="Recursos digitais">
           <dl className="mb-4 grid grid-cols-2 gap-3 text-sm">
             <div>
               <dt className="text-slate-500">Recursos abertos</dt>

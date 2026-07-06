@@ -10,13 +10,63 @@ import type { AnalyticsEvent } from '@analytics/sessionTypes';
  *
  * Documentação: docs/CATÁLOGO-EVENTOS-E-RELATÓRIOS.md § Manifest do capítulo
  */
+export type DigitalResourceKind = 'video' | 'oda' | 'other';
+
+export const DIGITAL_RESOURCE_LABELS: Record<string, string> = {
+  escola_digital_video: 'Vídeo Escola Digital',
+  oda_page_10_comercio: 'ODA',
+};
+
+export function getDigitalResourceKind(resourceId: string): DigitalResourceKind {
+  if (resourceId === 'escola_digital_video') return 'video';
+  if (resourceId.startsWith('oda_')) return 'oda';
+  return 'other';
+}
+
+export interface DigitalResourceCoverageRow {
+  kind: Exclude<DigitalResourceKind, 'other'>;
+  label: string;
+  expected: number;
+  coverage_rate: number | null;
+  missing: string[];
+}
+
+export function buildDigitalResourceCoverageRows(
+  manifest: ChapterManifest,
+  resourcesNotOpened: string[],
+): DigitalResourceCoverageRow[] {
+  const notOpened = new Set(resourcesNotOpened);
+  const byKind: Record<'video' | 'oda', string[]> = { video: [], oda: [] };
+
+  for (const id of manifest.expected_resources) {
+    const kind = getDigitalResourceKind(id);
+    if (kind === 'video' || kind === 'oda') byKind[kind].push(id);
+  }
+
+  return (['video', 'oda'] as const)
+    .map((kind) => {
+      const expected = byKind[kind];
+      const missing = expected.filter((id) => notOpened.has(id));
+      return {
+        kind,
+        label: kind === 'video' ? 'Vídeo Escola Digital' : 'ODA',
+        expected: expected.length,
+        coverage_rate: coverageRate(expected.length - missing.length, expected.length),
+        missing: missing.map((id) => DIGITAL_RESOURCE_LABELS[id] ?? id),
+      };
+    })
+    .filter((row) => row.expected > 0);
+}
+
 export interface ChapterManifest {
   book_id: string;
   chapter_id: string;
   pages: number[];
   expected_images: string[];
+  /** Recursos digitais previstos (vídeo, ODA, links externos, etc.). */
   expected_resources: string[];
   expected_teacher_buttons: string[];
+  /** Atividades interativas com resposta (futuro: activity_started). */
   expected_activities: string[];
 }
 
@@ -63,7 +113,7 @@ export const CHAPTER_MANIFEST_REGISTRY: Record<string, ChapterManifest> = {
       'page_8_rota_seda',
       'page_9_nau_cabral',
     ],
-    expected_resources: ['escola_digital_video'],
+    expected_resources: ['escola_digital_video', 'oda_page_10_comercio'],
     expected_teacher_buttons: [
       'teacher_section_page_3',
       'teacher_section_page_4',
@@ -73,7 +123,7 @@ export const CHAPTER_MANIFEST_REGISTRY: Record<string, ChapterManifest> = {
       'teacher_section_page_11',
       'teacher_section_page_12',
     ],
-    expected_activities: ['oda_page_10_comercio'],
+    expected_activities: [],
   },
 };
 
@@ -129,9 +179,7 @@ function collectOpenedResourceIds(events: AnalyticsEvent[]): Set<string> {
   const opened = new Set<string>();
   for (const event of events) {
     if (!isResourceOpenedEvent(event)) continue;
-    const meta = event.metadata ?? {};
-    if (meta.type === 'oda_opened') continue;
-    const linkId = meta.link_id;
+    const linkId = event.metadata?.link_id;
     if (typeof linkId === 'string') opened.add(linkId);
   }
   return opened;
