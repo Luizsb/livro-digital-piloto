@@ -1,6 +1,6 @@
 import type { GroupReport } from './types';
 import { formatDuration, formatWouldUseAgain } from './reportExtractors';
-import { PAGE_COMPLETION_RATE_LABEL } from '../ld/metricDisplayLabels';
+import { PAGE_COMPLETION_RATE_LABEL } from '@analytics/metricDisplayLabels';
 
 function MetricCard({
   label,

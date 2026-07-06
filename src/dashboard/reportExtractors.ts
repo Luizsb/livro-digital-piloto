@@ -1,20 +1,20 @@
-import { ANALYTICS_EVENT_NAMES } from '../ld/sessionTypes';
-import type { AnalyticsEvent } from '../ld/sessionTypes';
-import type { EventSummary } from '../ld/sessionSummary';
+import { ANALYTICS_EVENT_NAMES } from '@analytics/sessionTypes';
+import type { AnalyticsEvent } from '@analytics/sessionTypes';
+import type { EventSummary } from '@analytics/sessionSummary';
 import {
   getActiveChapterPageConfig,
   listChapterPageNumbers,
   resolveChapterPageBounds,
-} from '../ld/chapterPageConfig';
-import { getReadingDepthLabel, type ReadingDepth } from '../ld/readingQuality';
-import { formatDateTimeBr } from '../lib/formatDateTimeBr';
-import { formatLoadTimeMs } from '../lib/formatDuration';
-import { formatBytes } from '../lib/formatBytes';
-import { getLoadTimeRating } from '../lib/loadTimeRating';
-import type { SessionVisibilityMetrics } from '../ld/sessionVisibilityMetrics';
-import { buildVisibilityMetricsFromParts } from '../ld/sessionVisibilityMetrics';
+} from '@book/chapter/chapterPageConfig';
+import { getReadingDepthLabel, type ReadingDepth } from '@analytics/readingQuality';
+import { formatDateTimeBr } from '@shared/lib/formatDateTimeBr';
+import { formatLoadTimeMs } from '@shared/lib/formatDuration';
+import { formatBytes } from '@shared/lib/formatBytes';
+import { getLoadTimeRating } from '@shared/lib/loadTimeRating';
+import type { SessionVisibilityMetrics } from '@analytics/sessionVisibilityMetrics';
+import { buildVisibilityMetricsFromParts } from '@analytics/sessionVisibilityMetrics';
 import type { PageJourneyItem } from './types';
-import { buildSessionJourneyMetrics } from '../ld/sessionJourneyMetrics';
+import { buildSessionJourneyMetrics } from '@analytics/sessionJourneyMetrics';
 
 export { formatLoadTimeMs, formatBytes, getLoadTimeRating };
 

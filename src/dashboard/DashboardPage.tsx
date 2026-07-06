@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, type DragEvent } from 'react';
-import { getChapterTotalPages, resolveChapterPageBounds } from '../ld/chapterPageConfig';
+import { getChapterTotalPages, resolveChapterPageBounds } from '@book/chapter/chapterPageConfig';
 import { parseReportFile, parseMultipleReportFiles, ReportParseError } from './parseReport';
 import type { DashboardViewMode, ParsedDashboardReport } from './types';
 import { aggregateSessionReports } from './buildGroupReport';
@@ -40,7 +40,7 @@ import {
 import {
   formatBrowserLabel,
   formatScreenResolution,
-} from '../ld/deviceContext';
+} from '@analytics/deviceContext';
 import { MetricTerm, TECHNICAL_HEALTH_HINTS } from './InfoHint';
 import {
   MODAL_TIME_LABEL,
@@ -50,7 +50,7 @@ import {
   VIDEO_COMPLETED_LABEL,
   VIDEO_MAX_PROGRESS_LABEL,
   VIDEO_WATCH_TIME_LABEL,
-} from '../ld/metricDisplayLabels';
+} from '@analytics/metricDisplayLabels';
 
 function StatusMetricCard({ status }: { status: ChapterStatusLabel }) {
   return (

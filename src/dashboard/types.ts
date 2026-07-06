@@ -1,8 +1,8 @@
-import type { ExportPayload } from '../ld/exportEvents';
-import type { EventSummary } from '../ld/sessionSummary';
-import type { FeedbackCommentRecord } from '../ld/feedbackComments';
-import type { AnalyticsEvent } from '../ld/sessionTypes';
-import type { ChapterManifest } from '../ld/chapterManifest';
+import type { ExportPayload } from '@analytics/exportEvents';
+import type { EventSummary } from '@analytics/sessionSummary';
+import type { FeedbackCommentRecord } from '@analytics/feedbackComments';
+import type { AnalyticsEvent } from '@analytics/sessionTypes';
+import type { ChapterManifest } from '@book/chapter/chapterManifest';
 
 export type DashboardReport = ExportPayload;
 

@@ -61,6 +61,16 @@ export default defineConfig(({ command }) => {
   const base = isPagesBuild ? GITHUB_PAGES_BASE : '/';
 
   return {
+    resolve: {
+      alias: {
+        '@app': path.resolve(projectRoot, 'src/app'),
+        '@book': path.resolve(projectRoot, 'src/book'),
+        '@analytics': path.resolve(projectRoot, 'src/analytics'),
+        '@analytics-ui': path.resolve(projectRoot, 'src/analytics-ui'),
+        '@dashboard': path.resolve(projectRoot, 'src/dashboard'),
+        '@shared': path.resolve(projectRoot, 'src/shared'),
+      },
+    },
     plugins: [
       react(),
       rewriteRootAssetUrls(base),

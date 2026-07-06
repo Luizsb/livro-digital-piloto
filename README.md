@@ -99,28 +99,55 @@ Guia completo: **[docs/CONFIGURACAO-ANALYTICS.md](docs/CONFIGURACAO-ANALYTICS.md
 
 ## Estrutura
 
+O código está separado em **domínios** com aliases de import (`@app`, `@book`, `@analytics`, etc.):
+
 ```text
 src/
-  ld/
-    ldConfig.ts             ← limiares universais (tempo, taxa %, scroll…)
-    chapterPageConfig.ts    ← ★ páginas por livro/capítulo (registry)
-    chapterManifest.ts      ← ★ inventário rastreável por capítulo (manifest)
-    chapterMetrics.ts       ← aplica regras de chapter_completed
-    collectionQuality.ts    ← validação de integridade no summary
-    readingQuality.ts     ← aplica readingQuality.*
-    bookPageScroll.ts     ← aplica scroll.*
-    …                     ← demais módulos importam ldConfig
-  components/
-    Book.tsx              ← conteúdo do capítulo
-    TrackedImage.tsx       ← imagens com view + zoom (MVP-03)
-    TrackedLink.tsx        ← links rastreáveis (MVP-03)
-    TrackedVideo.tsx       ← play e conclusão do vídeo Escola Digital (MVP-03)
-    ParticipantGate.tsx       ← P fixo + número; link dashboard
-    TestFinishedScreen.tsx    ← tela após Finalizar teste
-    EventReportPanel.tsx      ← painel em tempo real
-    ExportEventsButton.tsx
+  app/                    ← shell: rotas, gates, piloto, hub do projeto
+    App.tsx
+    ParticipantGate.tsx
+    TestPilotRoute.tsx
+    ProjectHubPage.tsx
+    …
+
+  book/                   ← conteúdo do livro digital
+    components/           ← UI do capítulo, questões, seções pedagógicas
+    chapter/              ← config de páginas e manifest do capítulo piloto
+    data/                 ← banco de questões
+    hooks/                ← respostas, scroll, paginação
+    types/
+    oda/                  ← atividades interativas (ODAs)
+
+  analytics/              ← inteligência: sessão, eventos, métricas, export
+    SessionProvider.tsx
+    recordEvent.ts
+    exportSessionReport.ts
+    …
+
+  analytics-ui/           ← UI de coleta (painéis, botões, wrappers rastreados)
+    TrackedImage.tsx
+    EventReportPanel.tsx
     FinishTestButton.tsx
-    ChapterFeedback.tsx      ← feedback final (MVP-04)
+    …
+
+  dashboard/              ← LD Insights (visualização de JSON exportado)
+
+  shared/                 ← utilitários transversais
+    lib/
+    utils/
+    constants/
+```
+
+| Alias | Pasta | Responsabilidade |
+|-------|-------|------------------|
+| `@app` | `app/` | Roteamento e fluxos de entrada |
+| `@book` | `book/` | Livro, capítulo, questões, ODAs |
+| `@analytics` | `analytics/` | Coleta, sessão, métricas, export JSON |
+| `@analytics-ui` | `analytics-ui/` | Componentes visuais da instrumentação |
+| `@dashboard` | `dashboard/` | Relatórios e LD Insights |
+| `@shared` | `shared/` | Formatação, URLs públicas, helpers |
+
+```text
 docs/                     ← especificações por MVP + guia DIA LD
     EVIDENCIAS.md         ← ★ histórico de mudanças (atualizar sempre)
 ```

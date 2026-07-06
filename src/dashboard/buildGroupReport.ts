@@ -10,8 +10,8 @@ import {
   getChapterStatusLabel,
   getParticipantLabel,
 } from './reportExtractors';
-import { formatBrowserLabel } from '../ld/deviceContext';
-import { formatDateTimeBr } from '../lib/formatDateTimeBr';
+import { formatBrowserLabel } from '@analytics/deviceContext';
+import { formatDateTimeBr } from '@shared/lib/formatDateTimeBr';
 
 const RELIABLE_QUALITY_THRESHOLD = 85;
 

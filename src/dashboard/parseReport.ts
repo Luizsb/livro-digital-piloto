@@ -1,22 +1,22 @@
-import type { EventSummary } from '../ld/sessionSummary';
-import { buildContentInteractionsSummary } from '../ld/contentInteractionsSummary';
-import { buildTeacherButtonSummary } from '../ld/teacherButtonSummary';
+import type { EventSummary } from '@analytics/sessionSummary';
+import { buildContentInteractionsSummary } from '@analytics/contentInteractionsSummary';
+import { buildTeacherButtonSummary } from '@analytics/teacherButtonSummary';
 import {
   enrichEventForExport,
   enrichFeedbackCommentForExport,
-} from '../ld/exportEvents';
-import type { AnalyticsEvent } from '../ld/sessionTypes';
-import type { FeedbackCommentRecord } from '../ld/feedbackComments';
-import { ANALYTICS_TIMEZONE_BR, formatDateTimeBr } from '../lib/formatDateTimeBr';
+} from '@analytics/exportEvents';
+import type { AnalyticsEvent } from '@analytics/sessionTypes';
+import type { FeedbackCommentRecord } from '@analytics/feedbackComments';
+import { ANALYTICS_TIMEZONE_BR, formatDateTimeBr } from '@shared/lib/formatDateTimeBr';
 import { enrichSummaryReadingMetrics, enrichSummaryVisibilityMetrics, enrichSummaryJourneyMetrics } from './reportExtractors';
-import { enrichSummaryDeviceContext } from '../ld/deviceContextSummary';
-import { enrichSummaryTechnicalHealth } from '../ld/technicalHealthSummary';
-import { buildCollectionQuality } from '../ld/collectionQuality';
+import { enrichSummaryDeviceContext } from '@analytics/deviceContextSummary';
+import { enrichSummaryTechnicalHealth } from '@analytics/technicalHealthSummary';
+import { buildCollectionQuality } from '@analytics/collectionQuality';
 import {
   buildChapterCoverageSummary,
   tryGetChapterManifest,
   type ChapterManifest,
-} from '../ld/chapterManifest';
+} from '@book/chapter/chapterManifest';
 import type { ParsedDashboardReport, DashboardReport } from './types';
 
 export class ReportParseError extends Error {

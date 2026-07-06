@@ -2,14 +2,14 @@ import {
   getChapterTotalPages,
   getMinCompletionRateForChapter,
   resolveChapterPageBounds,
-} from '../ld/chapterPageConfig';
-import type { EventSummary } from '../ld/sessionSummary';
+} from '@book/chapter/chapterPageConfig';
+import type { EventSummary } from '@analytics/sessionSummary';
 import type { DashboardAlert, HealthCheckItem, ParsedDashboardReport } from './types';
 import {
   buildCollectionQualityChecks,
   type EventIntegrityStatus,
   type QualityCheckItem,
-} from '../ld/collectionQuality';
+} from '@analytics/collectionQuality';
 import {
   extractSessionDurationSeconds,
   extractSessionVisibleSeconds,
@@ -17,7 +17,7 @@ import {
   getChapterStatusLabel,
   getParticipantLabel,
 } from './reportExtractors';
-import { formatBrowserLabel } from '../ld/deviceContext';
+import { formatBrowserLabel } from '@analytics/deviceContext';
 
 export function buildChapterStatusInsight(summary: EventSummary): string {
   const bounds = resolveChapterPageBounds(summary);
