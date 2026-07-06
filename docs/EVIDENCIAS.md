@@ -14,8 +14,10 @@ Sempre que houver mudança relevante no piloto:
 1. **Adicione uma entrada** na seção [Registro cronológico](#registro-cronológico) (mais recente no topo).
 2. **Atualize o doc de MVP** correspondente (ex.: nova métrica → `MVP-03-INTERACOES-CONTEUDO.md`).
 3. Se mudou limiar ou parâmetro → `CONFIGURACAO-ANALYTICS.md` e `analyticsConfig.ts`.
-4. Se mudou evento ou label → `eventLabels.ts` e tabela em `RELATORIO-USO-LIVRO.md`.
+4. Se mudou evento ou label → `sessionLabels.ts` e tabela em `RELATORIO-USO-LIVRO.md` / `CATÁLOGO-EVENTOS-E-RELATÓRIOS.md`.
 5. Se mudou dashboard → `DASHBOARD-MVP.md`.
+6. Se mudou validação de integridade → `collectionQuality.ts` e seção **Qualidade da coleta** no catálogo.
+7. Se mudou inventário do capítulo (páginas, imagens, recursos) → `chapterManifest.ts` e seção **Manifest** no catálogo.
 
 ### Modelo de entrada
 
@@ -41,6 +43,7 @@ Sempre que houver mudança relevante no piloto:
 | [MVP-01 … MVP-05](./MVP-01-BASE.md) | Especificação por fase | Regra de negócio ou critério de aceite |
 | [CONFIGURACAO-ANALYTICS.md](./CONFIGURACAO-ANALYTICS.md) | Limiares editáveis | Mudança em `analyticsConfig.ts` |
 | [DASHBOARD-MVP.md](./DASHBOARD-MVP.md) | LD Insights | Nova seção ou métrica no dashboard |
+| [CATÁLOGO-EVENTOS-E-RELATÓRIOS.md](./CATÁLOGO-EVENTOS-E-RELATÓRIOS.md) | Catálogo único, KPIs, qualidade da coleta, **uso vs aprendizagem** | Novo evento, campo do summary, regra de validação ou interpretação |
 | [README.md](../README.md) | Porta de entrada do projeto | Fase atual, links, estrutura |
 
 ---
@@ -49,7 +52,7 @@ Sempre que houver mudança relevante no piloto:
 
 **Fase:** MVP-05 concluído + extensões MVP-03 (vídeo e modal robusto)  
 **Capítulo piloto:** `cap07_historia_ai43` / `cap07` (páginas 3–12)  
-**Última atualização deste doc:** 2026-07-01  
+**Última atualização deste doc:** 2026-07-06  
 **Deploy público:** https://luizsb.github.io/livro-digital-piloto/
 
 ### Funcionalidades ativas
@@ -66,6 +69,8 @@ Sempre que houver mudança relevante no piloto:
 | Tela pós-teste | **Teste finalizado** — exportar JSON ou iniciar novo teste (sem voltar ao livro) |
 | Painel em tempo real | Acordeão (catálogo / resumo / log), timer de sessão ao vivo, ícones por seção |
 | Dashboard | LD Insights em `#/dashboard` (também no gate de acesso) |
+| Qualidade da coleta | `data_quality_score` e validações de integridade no `summary` + seção no LD Insights |
+| Manifest do capítulo | `chapter_manifest` no export + cobertura (`*_coverage_rate`) no `summary` |
 
 ### Arquivos-chave (além dos MVPs originais)
 
@@ -81,11 +86,139 @@ Sempre que houver mudança relevante no piloto:
 | `EventReportPanel.tsx` | Painel em tempo real — acordeão, timer de sessão, resumo e log |
 | `ClosePillButton.tsx` | Botão Fechar padronizado em modais e painel de eventos |
 | `useLiveSessionDuration.ts` | Contador ao vivo desde `session_started` |
+| `sessionVisibleTime.ts` | Tempo visível na aba (pausa ao trocar de guia) |
 | `parseReport.ts` | Enriquecimento de JSONs antigos no dashboard |
+| `collectionQuality.ts` | Score e validações de integridade dos eventos no export |
+| `chapterManifest.ts` | Inventário do capítulo + taxas de cobertura no summary |
 
 ---
 
 ## Registro cronológico
+
+### 2026-07-06 — Remoção de `page_revisited`
+
+**Tipo:** decisão de produto / simplificação  
+**MVP:** jornada  
+**Resumo:** Removidos evento `page_revisited` e derivados (`page_revisited_count`, `pages_revisited`, badges no dashboard). Scroll não é proxy confiável de intenção de revisita; cobertura segue em `page_viewed`, permanência em `page_completed`, abandono em `abandonment_page`.  
+**Docs:** `CATÁLOGO-EVENTOS-E-RELATÓRIOS.md`, `EVIDENCIAS.md`
+
+---
+
+### 2026-07-06 — Correção `page_viewed` / `page_revisited`
+
+**Tipo:** bugfix  
+**MVP:** jornada  
+**Resumo:** Oscilação na borda do scroll gerava `page_viewed` prematuro e centenas de `page_revisited` falsos. Agora a página precisa estabilizar 250 ms (`scroll.pageCommitDelayMs`) antes de registrar evento; revisita só ao rolar **para trás** a uma página já vista. `revisit_count` = ordinal do retorno na sessão (1º, 2º…).  
+**Docs:** `CONFIGURACAO-ANALYTICS.md`, `CATÁLOGO-EVENTOS-E-RELATÓRIOS.md`
+
+---
+
+### 2026-07-06 — Relatório multi-sessão (grupo de teste)
+
+**Tipo:** feature  
+**MVP:** dashboard  
+**Resumo:** Modo **Grupo de teste** no LD Insights: carregar vários JSONs e gerar relatório consolidado (KPIs médios, heatmap de páginas, feedback agregado, tabela por participante). Arquivos inválidos são listados sem bloquear o lote.  
+**Docs:** `DASHBOARD-MVP.md`, `EVIDENCIAS.md`
+
+---
+
+### 2026-07-06 — Revisita, abandono e inatividade
+
+**Tipo:** feature  
+**MVP:** jornada / sessão  
+**Resumo:** Novo evento `page_revisited` ao voltar a página já vista. Métricas derivadas `last_page_viewed`, `abandoned_before_end`, `abandonment_page` em `chapter_finished` / `session_finished` / summary. Inatividade na aba visível: `idle_started`, `idle_finished`, `idle_time_seconds` (limiar 60 s em `ldConfig.idle`). Dashboard: card tempo inativo, abandono e badges ↩ na jornada.  
+**Docs:** `CATÁLOGO-EVENTOS-E-RELATÓRIOS.md`, `CONFIGURACAO-ANALYTICS.md`, `EVIDENCIAS.md`
+
+---
+
+### 2026-07-06 — Cards do dashboard LD Insights (tempo e feedback)
+
+**Tipo:** UX  
+**MVP:** dashboard  
+**Resumo:** Um único card **Tempo no livro** quando a aba ficou sempre em foco; cards separados (visível, fora da aba, duração) só quando houve saída da guia. Removidos cards duplicados de feedback do topo (ficam na seção Feedback). Removida lista “Maiores imagens carregadas” da saúde técnica.  
+**Docs:** `DASHBOARD-MVP.md`, `EVIDENCIAS.md`
+
+---
+
+### 2026-07-06 — Rótulos de métricas (dashboard e catálogo)
+
+**Tipo:** docs / UX  
+**MVP:** transversal  
+**Resumo:** Padronização de rótulos: “Taxa de conclusão de páginas”, explicação fixa de `reading_depth`, “Tempo no modal” vs métricas de vídeo (Tempo assistido, Progresso máximo, Vídeo concluído), reforço de “Imagem exposta” e destaque de `teacher_button_usage_by_section`. Código: `metricDisplayLabels.ts`, `escola_digital_video_watch_total_seconds` no summary.  
+**Docs:** `CATÁLOGO-EVENTOS-E-RELATÓRIOS.md`, `MVP-02-JORNADA-LEITURA.md`, `DASHBOARD-MVP.md`, `EVIDENCIAS.md`
+
+---
+
+### 2026-07-06 — Regra conceitual: uso, atenção e aprendizagem
+
+**Tipo:** documentação  
+**MVP:** transversal  
+**Resumo:** Seção no catálogo que diferencia o que os eventos atuais permitem afirmar (uso, exposição, engajamento) do que ainda não pode ser inferido (aprendizagem, compreensão, domínio). Inclui frase-guia para relatórios e IA, mapa de camadas, lista de eventos `activity_*` planejados e requisito de validação pedagógica/jurídica.  
+**Docs:** `CATÁLOGO-EVENTOS-E-RELATÓRIOS.md`, `RELATORIO-USO-LIVRO.md`, `DASHBOARD-MVP.md`, `EVIDENCIAS.md`
+
+---
+
+### 2026-07-06 — Manifest do capítulo e cobertura editorial
+
+**Tipo:** feature / métrica  
+**MVP:** transversal (02–05)  
+**Resumo:** Novo **manifest do capítulo** (`chapter_manifest` no export) declara o que o capítulo deveria conter: páginas, imagens, recursos, botões do professor e atividades. O `summary` passa a incluir contagens esperadas, taxas de cobertura (`image_exposure_coverage_rate`, `resource_open_coverage_rate`, etc.) e listas do que faltou. LD Insights exibe seção **Cobertura do capítulo**. Evita interpretação errada (ex.: “nenhuma atividade” quando o capítulo não tem atividades).  
+**Arquivos:** `chapterManifest.ts`, `sessionSummary.ts`, `exportEvents.ts`, `parseReport.ts`, `DashboardPage.tsx`, `reportInsights.ts`, `reportExtractors.ts`  
+**Docs:** `CATÁLOGO-EVENTOS-E-RELATÓRIOS.md`, `DASHBOARD-MVP.md`, `MVP-01-BASE.md`, `EVIDENCIAS.md`  
+**Como validar:** exportar JSON → conferir `chapter_manifest` e campos `expected_*` / `*_coverage_rate` → abrir LD Insights → seção Cobertura do capítulo.
+
+---
+
+### 2026-07-06 — Qualidade da coleta (integridade dos eventos)
+
+**Tipo:** feature / métrica  
+**MVP:** transversal (01–06)  
+**Resumo:** Nova camada **Qualidade da coleta** valida integridade dos eventos antes de interpretar relatórios. O `summary` do export passa a incluir `data_quality_score`, `event_integrity_status` e listas de avisos (`missing_expected_events`, `duplicate_event_warnings`, `inconsistent_event_warnings`, `unexpected_event_warnings`). LD Insights exibe seção dedicada com score, status e checks por categoria (sessão, jornada, conteúdo, professor). JSONs antigos são revalidados em `parseReport.ts`.  
+**Arquivos:** `collectionQuality.ts`, `sessionSummary.ts`, `parseReport.ts`, `reportInsights.ts`, `DashboardPage.tsx`  
+**Docs:** `CATÁLOGO-EVENTOS-E-RELATÓRIOS.md`, `DASHBOARD-MVP.md`, `MVP-01-BASE.md`, `EVIDENCIAS.md`  
+**Como validar:** exportar JSON após sessão completa → abrir LD Insights → conferir score e seção **Qualidade da coleta**; simular sessão incompleta (sem `session_finished`) e verificar avisos.
+
+---
+
+### 2026-07-06 — Correção do timer congelado no painel de eventos
+
+**Tipo:** fix  
+**MVP:** 01 + 02  
+**Resumo:** Timer do painel **Eventos em tempo real** parava de subir enquanto eventos continuavam sendo capturados (estado `visibleSinceMs` perdido após HMR ou recuperação de sessão). Implementada auto-recuperação do relógio (`ensureActiveVisibleClock`) e retomada após F5.  
+**Arquivos:** `sessionVisibleTime.ts`, `useLiveSessionDuration.ts`, `SessionProvider.tsx`  
+**Docs:** `EVIDENCIAS.md`  
+**Como validar:** abrir livro → Ver eventos → timer sobe a cada segundo com aba visível; F5 com sessão ativa → timer retoma.
+
+---
+
+### 2026-07-06 — Catálogo único de eventos e relatórios
+
+**Tipo:** documentação  
+**MVP:** transversal  
+**Resumo:** `CATÁLOGO-EVENTOS-E-RELATÓRIOS.md` — referência única com 25 eventos ativos, metadata, KPIs, relatórios por público (aluno, professor, escola, editorial), modelo do export e prompt para IA.  
+**Docs:** `README.md`, `RELATORIO-USO-LIVRO.md`, `EVIDENCIAS.md`
+
+---
+
+### 2026-07-06 — Tempo visível no export, summary e dashboard
+
+**Tipo:** feature / métrica  
+**MVP:** 01 + 02  
+**Resumo:** `session_finished` e `summary` passam a diferenciar duração total (`duration_seconds`), tempo visível (`visible_time_seconds`), tempo fora da aba (`hidden_time_seconds`), proporção (`visible_time_ratio`) e `visibility_change_count`. LD Insights exibe cards dedicados, insight usa tempo visível e alerta interpretativo quando houve saída da aba.  
+**Arquivos:** `sessionVisibleTime.ts`, `sessionVisibilityMetrics.ts`, `sessionFinishMetrics.ts`, `sessionSummary.ts`, `reportExtractors.ts`, `reportInsights.ts`, `DashboardPage.tsx`, `parseReport.ts`  
+**Docs:** `MVP-02-JORNADA-LEITURA.md`, `DASHBOARD-MVP.md`, `EVIDENCIAS.md`
+
+---
+
+### 2026-07-06 — Timer de sessão só com aba visível
+
+**Tipo:** feature / métrica  
+**MVP:** 01 + 02  
+**Resumo:** O timer do painel e o `duration_seconds` do `session_finished` contam apenas enquanto a aba do livro está em foco. Ao trocar de guia, o relógio pausa; o tempo mínimo de `page_completed` também não avança fora da tela. Implementação via Page Visibility API (`sessionVisibleTime.ts`).  
+**Arquivos:** `sessionVisibleTime.ts`, `useLiveSessionDuration.ts`, `sessionFinishMetrics.ts`, `pageReadingState.ts`, `EventReportPanel.tsx`, `AnalyticsProvider.tsx`, `finishSession.ts`  
+**Docs:** `MVP-01-BASE.md`, `MVP-02-JORNADA-LEITURA.md`, `EVIDENCIAS.md`
+
+---
 
 ### 2026-06-30 — Botão Fechar padronizado e catálogo do painel de eventos
 
@@ -279,8 +412,9 @@ Sempre que houver mudança relevante no piloto:
 
 | Item | MVP | Status |
 |------|-----|--------|
+| Catálogo único eventos + relatórios | transversal | ✅ `CATÁLOGO-EVENTOS-E-RELATÓRIOS.md` |
 | Saúde técnica na navegação (Fases 1–2) | 06 | ✅ Ver `MVP-06-SAUDE-TECNICA.md` |
-| Atividades interativas (`activity_started` / `activity_completed`) | 07 | ⏳ Planejado |
+| Camada de atividades (`activity_viewed` … `activity_completed`) | 07+ | ⏳ Planejado — validação pedagógica/jurídica antes de alunos reais |
 | Git LFS para vídeo grande (opcional) | infra | ⏳ Avaliar |
 
 ---

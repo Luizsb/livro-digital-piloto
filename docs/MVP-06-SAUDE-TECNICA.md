@@ -42,14 +42,16 @@ Seção **Saúde técnica na navegação**:
 
 - Status do tempo de carregamento: Bom (≤2,5 s) · Moderado (≤4 s) · Lento
 - Botão **(i)** em cada métrica com explicação (ex.: TTFB)
-- Alertas técnicos em **Saúde da coleta**
+- Alertas técnicos na seção **Saúde da coleta** (problemas de carga, erros, links)
+
+> **Distinção:** **Saúde técnica** (este MVP) = performance e erros na navegação. **Qualidade da coleta** = integridade e consistência dos eventos (`collectionQuality.ts`) — ver [CATÁLOGO-EVENTOS-E-RELATÓRIOS.md](./CATÁLOGO-EVENTOS-E-RELATÓRIOS.md#qualidade-da-coleta).
 
 Enriquecimento: `technicalHealthSummary.ts` + `parseReport.ts`.
 
 ## Código
 
 ```text
-src/analytics/
+src/ld/
   captureLoadTiming.ts
   captureResourceTiming.ts
   technicalHealthSummary.ts

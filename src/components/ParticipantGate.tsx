@@ -1,13 +1,13 @@
 import { FormEvent, useEffect, useRef, useState, type ReactNode } from 'react';
-import { ANALYTICS_EVENT_NAMES } from '../analytics/eventTypes';
-import { capturePageLoadTiming } from '../analytics/captureLoadTiming';
-import { useAnalytics } from '../analytics/AnalyticsProvider';
+import { ANALYTICS_EVENT_NAMES } from '../ld/sessionTypes';
+import { capturePageLoadTiming } from '../ld/captureLoadTiming';
+import { useAnalytics } from '../ld/SessionProvider';
 import {
   markSessionEventTracked,
   wasSessionEventTracked,
-} from '../analytics/sessionDedup';
-import { reloadForNewSession } from '../analytics/resetAnalytics';
-import { subscribeToEventsUpdates } from '../analytics/trackEvent';
+} from '../ld/sessionDedup';
+import { reloadForNewSession } from '../ld/resetLdStorage';
+import { subscribeToEventsUpdates } from '../ld/recordEvent';
 import TestFinishedScreen from './TestFinishedScreen';
 
 interface ParticipantGateProps {

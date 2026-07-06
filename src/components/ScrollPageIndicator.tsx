@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { getActiveBookPage } from '../analytics/bookPageScroll';
-import { getActiveChapterPageConfig } from '../analytics/chapterPageConfig';
+import { getActiveBookPage } from '../ld/bookPageScroll';
+import { getActiveChapterPageConfig } from '../ld/chapterPageConfig';
 
 const HIDE_DELAY_MS = 900;
 const MIN_THUMB_PX = 48;

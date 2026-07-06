@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useAnalytics } from '../analytics/AnalyticsProvider';
-import { exportSessionReport, type ExportSource } from '../analytics/exportSessionReport';
+import { useAnalytics } from '../ld/SessionProvider';
+import { exportSessionReport, type ExportSource } from '../ld/exportSessionReport';
 
 interface ExportEventsButtonProps {
   exportSource?: ExportSource;

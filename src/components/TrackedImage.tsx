@@ -1,15 +1,15 @@
 import { useEffect, useId, useRef, useState, type ImgHTMLAttributes, type ReactNode } from 'react';
 import { publicUrl } from '../lib/publicUrl';
-import { ANALYTICS_CONFIG } from '../analytics/analyticsConfig';
-import { isPageTrackingReady } from '../analytics/analyticsBootstrap';
+import { ANALYTICS_CONFIG } from '../ld/ldConfig';
+import { isPageTrackingReady } from '../ld/ldBootstrap';
 import {
   trackImageViewedOnce,
   trackImageZoomed,
   trackImageLoadError,
-} from '../analytics/contentInteractionTracking';
-import { normalizeImageSrcPath } from '../analytics/contentInteractionTypes';
-import { useOptionalAnalytics } from '../analytics/AnalyticsProvider';
-import { subscribeToEventsUpdates } from '../analytics/trackEvent';
+} from '../ld/contentInteractionTracking';
+import { normalizeImageSrcPath } from '../ld/contentInteractionTypes';
+import { useOptionalAnalytics } from '../ld/SessionProvider';
+import { subscribeToEventsUpdates } from '../ld/recordEvent';
 import { ClosePillButton } from './ClosePillButton';
 
 export interface TrackedImageProps

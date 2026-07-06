@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useStoredEvents } from '../analytics/useStoredEvents';
+import { useStoredEvents } from '../ld/useStoredEvents';
 import EventReportPanel from './EventReportPanel';
 
 function EventsPanelButton() {

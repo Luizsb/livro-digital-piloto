@@ -56,7 +56,8 @@ Consolidação: `src/analytics/teacherButtonSummary.ts`
 
 - Seção **Botão do professor** com aberturas, tempo total e seções.
 - **Resumo interpretativo** menciona uso ou ausência do botão.
-- **Saúde da coleta:** ✓ quando houve uso; ℹ em alertas de interpretação quando não houve acesso.
+- **Qualidade da coleta:** validações de integridade (sessão, jornada, conteúdo, professor) — ver `collectionQuality.ts` e LD Insights.
+- **Saúde da coleta:** checklist rápido do ciclo de vida; ℹ em alertas de interpretação quando não houve acesso.
 
 ## Código
 

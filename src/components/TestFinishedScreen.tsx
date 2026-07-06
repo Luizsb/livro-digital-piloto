@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useAnalytics } from '../analytics/AnalyticsProvider';
-import { exportSessionReport } from '../analytics/exportSessionReport';
-import { reloadForNewSession } from '../analytics/resetAnalytics';
+import { useAnalytics } from '../ld/SessionProvider';
+import { exportSessionReport } from '../ld/exportSessionReport';
+import { reloadForNewSession } from '../ld/resetLdStorage';
 
 function TestFinishedScreen() {
   const { track, sessionId, participantId } = useAnalytics();

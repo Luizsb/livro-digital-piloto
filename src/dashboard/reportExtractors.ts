@@ -1,17 +1,20 @@
-import { ANALYTICS_EVENT_NAMES } from '../analytics/eventTypes';
-import type { AnalyticsEvent } from '../analytics/eventTypes';
-import type { EventSummary } from '../analytics/eventSummary';
+import { ANALYTICS_EVENT_NAMES } from '../ld/sessionTypes';
+import type { AnalyticsEvent } from '../ld/sessionTypes';
+import type { EventSummary } from '../ld/sessionSummary';
 import {
   getActiveChapterPageConfig,
   listChapterPageNumbers,
   resolveChapterPageBounds,
-} from '../analytics/chapterPageConfig';
-import { getReadingDepthLabel, type ReadingDepth } from '../analytics/readingQuality';
+} from '../ld/chapterPageConfig';
+import { getReadingDepthLabel, type ReadingDepth } from '../ld/readingQuality';
 import { formatDateTimeBr } from '../lib/formatDateTimeBr';
 import { formatLoadTimeMs } from '../lib/formatDuration';
 import { formatBytes } from '../lib/formatBytes';
 import { getLoadTimeRating } from '../lib/loadTimeRating';
+import type { SessionVisibilityMetrics } from '../ld/sessionVisibilityMetrics';
+import { buildVisibilityMetricsFromParts } from '../ld/sessionVisibilityMetrics';
 import type { PageJourneyItem } from './types';
+import { buildSessionJourneyMetrics } from '../ld/sessionJourneyMetrics';
 
 export { formatLoadTimeMs, formatBytes, getLoadTimeRating };
 
@@ -63,7 +66,34 @@ export function extractReadingDepth(
   return {};
 }
 
+export function extractSessionFinishedMetadata(
+  events: AnalyticsEvent[],
+): Partial<SessionVisibilityMetrics> | null {
+  const sessionFinished = findLastEvent(events, ANALYTICS_EVENT_NAMES.sessionFinished);
+  if (!sessionFinished) return null;
+
+  const meta = sessionFinished.metadata ?? {};
+  const duration =
+    typeof meta.duration_seconds === 'number' ? meta.duration_seconds : 0;
+  const visible =
+    typeof meta.visible_time_seconds === 'number'
+      ? meta.visible_time_seconds
+      : duration;
+
+  return buildVisibilityMetricsFromParts(
+    duration,
+    visible,
+    typeof meta.visibility_change_count === 'number' ? meta.visibility_change_count : 0,
+  );
+}
+
+/** Duração total da sessão (relógio de parede). */
 export function extractSessionDurationSeconds(events: AnalyticsEvent[]): number | null {
+  const finishMeta = extractSessionFinishedMetadata(events);
+  if (finishMeta?.duration_seconds != null && finishMeta.duration_seconds > 0) {
+    return finishMeta.duration_seconds;
+  }
+
   const sessionFinished = findLastEvent(events, ANALYTICS_EVENT_NAMES.sessionFinished);
   const duration = sessionFinished?.metadata?.duration_seconds;
   if (typeof duration === 'number' && duration > 0) {
@@ -98,6 +128,80 @@ export function extractSessionDurationSeconds(events: AnalyticsEvent[]): number 
   }
 
   return typeof duration === 'number' ? duration : null;
+}
+
+/** Tempo com a aba do livro visível — métrica principal de leitura. */
+export function extractSessionVisibleSeconds(
+  events: AnalyticsEvent[],
+  summary?: Pick<EventSummary, 'visible_time_seconds' | 'duration_seconds'>,
+): number | null {
+  if (typeof summary?.visible_time_seconds === 'number') {
+    return summary.visible_time_seconds;
+  }
+
+  const finishMeta = extractSessionFinishedMetadata(events);
+  if (finishMeta?.visible_time_seconds != null) {
+    return finishMeta.visible_time_seconds;
+  }
+
+  return extractSessionDurationSeconds(events);
+}
+
+export function extractSessionHiddenSeconds(
+  events: AnalyticsEvent[],
+  summary?: Pick<EventSummary, 'hidden_time_seconds' | 'duration_seconds' | 'visible_time_seconds'>,
+): number | null {
+  if (typeof summary?.hidden_time_seconds === 'number') {
+    return summary.hidden_time_seconds;
+  }
+
+  const finishMeta = extractSessionFinishedMetadata(events);
+  if (finishMeta?.hidden_time_seconds != null) {
+    return finishMeta.hidden_time_seconds;
+  }
+
+  const duration = extractSessionDurationSeconds(events);
+  const visible = extractSessionVisibleSeconds(events, summary);
+  if (duration === null || visible === null) return null;
+  return Math.max(0, duration - visible);
+}
+
+export function extractVisibleTimeRatio(
+  events: AnalyticsEvent[],
+  summary?: Pick<EventSummary, 'visible_time_ratio' | 'duration_seconds' | 'visible_time_seconds'>,
+): number | null {
+  if (typeof summary?.visible_time_ratio === 'number') {
+    return summary.visible_time_ratio;
+  }
+
+  const finishMeta = extractSessionFinishedMetadata(events);
+  if (finishMeta?.visible_time_ratio != null) {
+    return finishMeta.visible_time_ratio;
+  }
+
+  const duration = extractSessionDurationSeconds(events);
+  const visible = extractSessionVisibleSeconds(events, summary);
+  if (duration === null || visible === null || duration <= 0) return null;
+  return Math.round((visible / duration) * 1000) / 1000;
+}
+
+export function formatVisibleTimePercent(ratio: number | null): string {
+  if (ratio === null) return '—';
+  return `${Math.round(ratio * 100)}%`;
+}
+
+export function enrichSummaryVisibilityMetrics(
+  summary: EventSummary,
+  events: AnalyticsEvent[],
+): EventSummary {
+  if (typeof summary.visible_time_seconds === 'number') {
+    return summary;
+  }
+
+  const finishMeta = extractSessionFinishedMetadata(events);
+  if (!finishMeta) return summary;
+
+  return { ...summary, ...finishMeta };
 }
 
 export function enrichSummaryReadingMetrics(
@@ -141,6 +245,31 @@ export function extractZoomedImageIds(events: AnalyticsEvent[]): string[] {
   return [...ids].sort();
 }
 
+export function enrichSummaryJourneyMetrics(
+  summary: EventSummary,
+  events: AnalyticsEvent[],
+): EventSummary {
+  if (typeof summary.abandoned_before_end === 'boolean') {
+    return summary;
+  }
+
+  const journey = buildSessionJourneyMetrics(
+    events,
+    summary.chapter_total_pages ?? getChapterPageNumbers(summary).length,
+  );
+  const sessionFinished = findLastEvent(events, ANALYTICS_EVENT_NAMES.sessionFinished);
+  const idle_time_seconds =
+    typeof sessionFinished?.metadata?.idle_time_seconds === 'number'
+      ? sessionFinished.metadata.idle_time_seconds
+      : summary.idle_time_seconds;
+
+  return {
+    ...summary,
+    ...journey,
+    ...(idle_time_seconds !== undefined ? { idle_time_seconds } : {}),
+  };
+}
+
 export function buildPageJourney(summary: EventSummary): PageJourneyItem[] {
   const viewed = new Set(summary.pages_viewed);
   const completed = new Set(summary.pages_completed);
@@ -150,6 +279,11 @@ export function buildPageJourney(summary: EventSummary): PageJourneyItem[] {
     if (viewed.has(page)) return { page, status: 'viewed' as const };
     return { page, status: 'not_viewed' as const };
   });
+}
+
+export function formatCoverageRate(rate: number | null | undefined): string {
+  if (rate === null || rate === undefined) return 'N/A';
+  return `${rate}%`;
 }
 
 export const PAGE_JOURNEY_LABELS = {

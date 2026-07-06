@@ -2,16 +2,22 @@ import {
   getChapterTotalPages,
   getMinCompletionRateForChapter,
   resolveChapterPageBounds,
-} from '../analytics/chapterPageConfig';
-import type { EventSummary } from '../analytics/eventSummary';
+} from '../ld/chapterPageConfig';
+import type { EventSummary } from '../ld/sessionSummary';
 import type { DashboardAlert, HealthCheckItem, ParsedDashboardReport } from './types';
 import {
+  buildCollectionQualityChecks,
+  type EventIntegrityStatus,
+  type QualityCheckItem,
+} from '../ld/collectionQuality';
+import {
   extractSessionDurationSeconds,
+  extractSessionVisibleSeconds,
   formatDuration,
   getChapterStatusLabel,
   getParticipantLabel,
 } from './reportExtractors';
-import { formatBrowserLabel } from '../analytics/deviceContext';
+import { formatBrowserLabel } from '../ld/deviceContext';
 
 export function buildChapterStatusInsight(summary: EventSummary): string {
   const bounds = resolveChapterPageBounds(summary);
@@ -25,7 +31,15 @@ export function buildChapterStatusInsight(summary: EventSummary): string {
 
   if (summary.chapter_finished_count > 0 && summary.completion_rate < minCompletionRate) {
     const depth = summary.reading_depth_label ?? 'leitura não classificada';
-    return `Capítulo finalizado, mas não concluído plenamente. O participante visualizou ${summary.pages_viewed_count} de ${totalPages} páginas, concluiu ${summary.completion_rate}% delas e realizou ${depth.toLowerCase()}.`;
+    let text = `Capítulo finalizado, mas não concluído plenamente. O participante visualizou ${summary.pages_viewed_count} de ${totalPages} páginas, concluiu ${summary.completion_rate}% delas e realizou ${depth.toLowerCase()}.`;
+    if (summary.abandoned_before_end && summary.abandonment_page != null) {
+      text += ` A última página em que esteve foi a pág. ${summary.abandonment_page} (não chegou ao fim do capítulo).`;
+    }
+    return text;
+  }
+
+  if (summary.abandoned_before_end && summary.abandonment_page != null) {
+    return `O participante não visualizou todas as páginas do capítulo. A última página em que esteve foi a pág. ${summary.abandonment_page}.`;
   }
 
   if (
@@ -50,6 +64,7 @@ export function buildSessionInsight(parsed: ParsedDashboardReport): string {
   const viewedPct =
     totalPages > 0 ? Math.round((summary.pages_viewed_count / totalPages) * 100) : 0;
   const duration = formatDuration(extractSessionDurationSeconds(events));
+  const visibleDuration = formatDuration(extractSessionVisibleSeconds(events, summary));
   const depth = summary.reading_depth_label ?? 'não classificada';
   const status = getChapterStatusLabel(summary).toLowerCase();
   const deviceLine =
@@ -63,7 +78,21 @@ export function buildSessionInsight(parsed: ParsedDashboardReport): string {
     ? formatWouldUseAgain(summary.feedback.would_use_again)
     : null;
 
-  let text = `O participante ${participant} visualizou ${viewedPct}% das páginas do capítulo, concluiu ${summary.completion_rate}%, foi exposto a ${summary.images_viewed_unique_count} imagem(ns) e interagiu com ${summary.image_zoom_unique_count} delas por meio de zoom, abriu ${summary.resources_opened_total} recurso(s) digital(is) e finalizou o capítulo com status ${status}. A sessão durou ${duration} e foi classificada como ${depth}.${deviceLine}`;
+  let text = `O participante ${participant} visualizou ${viewedPct}% das páginas do capítulo, com taxa de conclusão de páginas de ${summary.completion_rate}%, foi exposto a ${summary.images_viewed_unique_count} imagem(ns) e interagiu com ${summary.image_zoom_unique_count} delas por meio de zoom, abriu ${summary.resources_opened_total} recurso(s) digital(is) e finalizou o capítulo com status ${status}.`;
+  if (duration !== visibleDuration) {
+    text += ` O tempo visível no livro foi ${visibleDuration} e o participante passou ${duration} no total da sessão (incluindo tempo fora da aba).`;
+  } else {
+    text += ` O tempo no livro foi ${visibleDuration}.`;
+  }
+  text += ` A leitura foi classificada como ${depth}.${deviceLine}`;
+
+  if (typeof summary.idle_time_seconds === 'number' && summary.idle_time_seconds > 0) {
+    text += ` Permaneceu cerca de ${formatDuration(summary.idle_time_seconds)} sem interagir com a aba visível.`;
+  }
+
+  if (summary.abandoned_before_end && summary.abandonment_page != null) {
+    text += ` Não percorreu o capítulo até o fim — última página em que esteve: pág. ${summary.abandonment_page}.`;
+  }
 
   if (summary.feedback.submitted) {
     text += ` O feedback geral foi ${feedbackRating}`;
@@ -104,6 +133,36 @@ export function buildSessionInsight(parsed: ParsedDashboardReport): string {
     }
   }
 
+  if (typeof summary.expected_pages_count === 'number') {
+    const coverageParts: string[] = [];
+    if ((summary.expected_images_count ?? 0) > 0) {
+      const exposed =
+        (summary.expected_images_count ?? 0) - (summary.images_not_exposed?.length ?? 0);
+      coverageParts.push(
+        `${exposed}/${summary.expected_images_count} imagens rastreáveis expostas`,
+      );
+    }
+    if ((summary.expected_resources_count ?? 0) > 0) {
+      const opened =
+        (summary.expected_resources_count ?? 0) - (summary.resources_not_opened?.length ?? 0);
+      coverageParts.push(`${opened}/${summary.expected_resources_count} recursos digitais abertos`);
+    }
+    if ((summary.expected_teacher_buttons_count ?? 0) > 0) {
+      const used =
+        (summary.expected_teacher_buttons_count ?? 0) -
+        (summary.teacher_buttons_not_used?.length ?? 0);
+      coverageParts.push(
+        `${used}/${summary.expected_teacher_buttons_count} seções do professor consultadas`,
+      );
+    }
+    if (coverageParts.length > 0) {
+      text += ` Em relação ao inventário do capítulo: ${coverageParts.join('; ')}.`;
+    }
+    if ((summary.expected_activities_count ?? 0) === 0) {
+      text += ' Este capítulo não possui atividades interativas rastreáveis nesta versão.';
+    }
+  }
+
   return text;
 }
 
@@ -113,13 +172,57 @@ function formatWouldUseAgain(value: string | undefined): string {
   return map[value] ?? value;
 }
 
+const QUALITY_CATEGORY_LABELS: Record<QualityCheckItem['category'], string> = {
+  session: 'Sessão',
+  journey: 'Jornada',
+  content: 'Conteúdo',
+  teacher: 'Professor',
+};
+
+export function getIntegrityStatusLabel(status: EventIntegrityStatus): string {
+  if (status === 'ok') return 'Confiável';
+  if (status === 'warning') return 'Atenção';
+  return 'Comprometida';
+}
+
+export function getIntegrityStatusClass(status: EventIntegrityStatus): string {
+  if (status === 'ok') return 'text-emerald-700 bg-emerald-50 border-emerald-200';
+  if (status === 'warning') return 'text-amber-800 bg-amber-50 border-amber-200';
+  return 'text-red-800 bg-red-50 border-red-200';
+}
+
+export function buildQualityChecksByCategory(
+  events: ParsedDashboardReport['events'],
+  summary: EventSummary,
+): Record<QualityCheckItem['category'], QualityCheckItem[]> {
+  const checks = buildCollectionQualityChecks(events, summary);
+  return {
+    session: checks.filter((item) => item.category === 'session'),
+    journey: checks.filter((item) => item.category === 'journey'),
+    content: checks.filter((item) => item.category === 'content'),
+    teacher: checks.filter((item) => item.category === 'teacher'),
+  };
+}
+
+export { QUALITY_CATEGORY_LABELS };
+
 export function buildHealthChecks(summary: EventSummary): HealthCheckItem[] {
   const by = summary.by_event_name;
   const has = (name: string) => (by[name] ?? 0) > 0;
 
-  return [
+  const lifecycle: HealthCheckItem[] = [
     { id: 'session_started', label: 'Sessão iniciada', ok: has('session_started') },
     { id: 'book_opened', label: 'Livro aberto', ok: has('book_opened') },
+    { id: 'session_finished', label: 'Sessão finalizada', ok: has('session_finished') },
+    { id: 'events_exported', label: 'Eventos exportados', ok: has('events_exported') },
+  ];
+
+  if (typeof summary.data_quality_score === 'number') {
+    return lifecycle;
+  }
+
+  return [
+    ...lifecycle,
     {
       id: 'page_viewed',
       label: 'Páginas visualizadas',
@@ -159,16 +262,6 @@ export function buildHealthChecks(summary: EventSummary): HealthCheckItem[] {
       label: 'Capítulo finalizado',
       ok: summary.chapter_finished_count > 0,
     },
-    {
-      id: 'session_finished',
-      label: 'Sessão finalizada',
-      ok: has('session_finished'),
-    },
-    {
-      id: 'events_exported',
-      label: 'Eventos exportados',
-      ok: has('events_exported'),
-    },
   ];
 }
 
@@ -189,6 +282,16 @@ export function buildAlerts(summary: EventSummary): DashboardAlert[] {
       id: 'quick_scan',
       message: `Leitura classificada como ${depthLabel}.`,
       severity: 'warning',
+    });
+  }
+
+  const hiddenSeconds = summary.hidden_time_seconds;
+  if (typeof hiddenSeconds === 'number' && hiddenSeconds > 0) {
+    alerts.push({
+      id: 'tab_hidden',
+      message:
+        'O participante saiu da aba durante a sessão. O tempo visível foi usado para análise de leitura.',
+      severity: 'info',
     });
   }
 
@@ -262,6 +365,7 @@ export function buildAlerts(summary: EventSummary): DashboardAlert[] {
 const INTERPRETATION_ALERT_IDS = new Set([
   'partial_chapter',
   'quick_scan',
+  'tab_hidden',
   'open_comment',
   'teacher_not_used',
 ]);

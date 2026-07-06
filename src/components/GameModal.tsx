@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useId, useState, type ReactNode } from 'react';
 import { publicUrl } from '../lib/publicUrl';
-import type { LinkTrackType } from '../analytics/contentInteractionTypes';
+import type { LinkTrackType } from '../ld/contentInteractionTypes';
 import {
   endModalResourceSession,
   registerModalResourceSession,
-} from '../analytics/modalResourceTracking';
-import { useOptionalAnalytics } from '../analytics/AnalyticsProvider';
+} from '../ld/modalResourceTracking';
+import { useOptionalAnalytics } from '../ld/SessionProvider';
 import { ClosePillButton } from './ClosePillButton';
 
 interface GameModalAnalytics {

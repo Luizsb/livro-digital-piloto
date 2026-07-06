@@ -1,10 +1,10 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
-import { getActiveBookPage } from '../analytics/bookPageScroll';
-import { ANALYTICS_EVENT_NAMES } from '../analytics/eventTypes';
-import { getLastActivePage } from '../analytics/pageReadingState';
-import { useOptionalAnalytics } from '../analytics/AnalyticsProvider';
-import { isSessionCollecting } from '../analytics/sessionStatus';
-import { trackOncePerSession } from '../analytics/sessionDedup';
+import { getActiveBookPage } from '../ld/bookPageScroll';
+import { ANALYTICS_EVENT_NAMES } from '../ld/sessionTypes';
+import { getLastActivePage } from '../ld/pageReadingState';
+import { useOptionalAnalytics } from '../ld/SessionProvider';
+import { isSessionCollecting } from '../ld/sessionStatus';
+import { trackOncePerSession } from '../ld/sessionDedup';
 
 const MAX_MESSAGE_LENGTH = 200;
 const MAX_STACK_LENGTH = 300;

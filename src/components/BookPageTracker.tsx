@@ -1,5 +1,5 @@
-import { useBookPageTracking } from '../analytics/useBookPageTracking';
-import { getActiveChapterPageConfig } from '../analytics/chapterPageConfig';
+import { useBookPageTracking } from '../ld/useBookPageTracking';
+import { getActiveChapterPageConfig } from '../ld/chapterPageConfig';
 
 /**
  * Rastreia page_viewed e page_completed via scroll (mesma regra da paginação do livro).

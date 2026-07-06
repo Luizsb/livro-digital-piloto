@@ -1,16 +1,22 @@
-import type { EventSummary } from '../analytics/eventSummary';
-import { buildContentInteractionsSummary } from '../analytics/contentInteractionsSummary';
-import { buildTeacherButtonSummary } from '../analytics/teacherButtonSummary';
+import type { EventSummary } from '../ld/sessionSummary';
+import { buildContentInteractionsSummary } from '../ld/contentInteractionsSummary';
+import { buildTeacherButtonSummary } from '../ld/teacherButtonSummary';
 import {
   enrichEventForExport,
   enrichFeedbackCommentForExport,
-} from '../analytics/exportEvents';
-import type { AnalyticsEvent } from '../analytics/eventTypes';
-import type { FeedbackCommentRecord } from '../analytics/feedbackComments';
+} from '../ld/exportEvents';
+import type { AnalyticsEvent } from '../ld/sessionTypes';
+import type { FeedbackCommentRecord } from '../ld/feedbackComments';
 import { ANALYTICS_TIMEZONE_BR, formatDateTimeBr } from '../lib/formatDateTimeBr';
-import { enrichSummaryReadingMetrics } from './reportExtractors';
-import { enrichSummaryDeviceContext } from '../analytics/deviceContextSummary';
-import { enrichSummaryTechnicalHealth } from '../analytics/technicalHealthSummary';
+import { enrichSummaryReadingMetrics, enrichSummaryVisibilityMetrics, enrichSummaryJourneyMetrics } from './reportExtractors';
+import { enrichSummaryDeviceContext } from '../ld/deviceContextSummary';
+import { enrichSummaryTechnicalHealth } from '../ld/technicalHealthSummary';
+import { buildCollectionQuality } from '../ld/collectionQuality';
+import {
+  buildChapterCoverageSummary,
+  tryGetChapterManifest,
+  type ChapterManifest,
+} from '../ld/chapterManifest';
 import type { ParsedDashboardReport, DashboardReport } from './types';
 
 export class ReportParseError extends Error {
@@ -71,6 +77,7 @@ function enrichEscolaDigitalVideoSummary(
       escola_digital_video_completed_count: 0,
       escola_digital_video_watched_to_end: false,
       escola_digital_video_max_progress_percent: 0,
+      escola_digital_video_watch_total_seconds: 0,
     };
   }
 
@@ -81,6 +88,79 @@ function enrichEscolaDigitalVideoSummary(
     escola_digital_video_completed_count: content.escola_digital_video_completed_count,
     escola_digital_video_watched_to_end: content.escola_digital_video_watched_to_end,
     escola_digital_video_max_progress_percent: content.escola_digital_video_max_progress_percent,
+    escola_digital_video_watch_total_seconds: content.escola_digital_video_watch_total_seconds,
+  };
+}
+
+function enrichCollectionQualitySummary(
+  summary: EventSummary,
+  events: AnalyticsEvent[],
+): EventSummary {
+  if (typeof summary.data_quality_score === 'number') {
+    return summary;
+  }
+  if (events.length === 0) {
+    return {
+      ...summary,
+      data_quality_score: 0,
+      event_integrity_status: 'error',
+      missing_expected_events: [],
+      duplicate_event_warnings: [],
+      inconsistent_event_warnings: [],
+      unexpected_event_warnings: [],
+    };
+  }
+  return {
+    ...summary,
+    ...buildCollectionQuality(events, summary),
+  };
+}
+
+function isValidChapterManifest(value: unknown): value is ChapterManifest {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.book_id === 'string' &&
+    typeof value.chapter_id === 'string' &&
+    Array.isArray(value.pages) &&
+    Array.isArray(value.expected_images) &&
+    Array.isArray(value.expected_resources) &&
+    Array.isArray(value.expected_teacher_buttons) &&
+    Array.isArray(value.expected_activities)
+  );
+}
+
+function resolveChapterManifest(
+  raw: Record<string, unknown>,
+  summary: EventSummary,
+): ChapterManifest | null {
+  if (isValidChapterManifest(raw.chapter_manifest)) {
+    return raw.chapter_manifest;
+  }
+  return tryGetChapterManifest(summary.book_id, summary.chapter_id);
+}
+
+function enrichChapterCoverageSummary(
+  summary: EventSummary,
+  events: AnalyticsEvent[],
+  manifest: ChapterManifest | null,
+): EventSummary {
+  if (typeof summary.expected_pages_count === 'number' || !manifest) {
+    return summary;
+  }
+  if (events.length === 0) {
+    return summary;
+  }
+  return {
+    ...summary,
+    ...buildChapterCoverageSummary(manifest, {
+      book_id: summary.book_id,
+      chapter_id: summary.chapter_id,
+      pages_viewed: summary.pages_viewed,
+      pages_completed: summary.pages_completed,
+      images_viewed_unique: summary.images_viewed_unique,
+      activities_started: summary.activities_started,
+      events,
+    }),
   };
 }
 
@@ -105,11 +185,23 @@ export function parseReportJson(raw: unknown): ParsedDashboardReport {
     );
   }
 
-  const summary = enrichSummaryTechnicalHealth(
-    enrichSummaryDeviceContext(
-      enrichSummaryReadingMetrics(
-        enrichEscolaDigitalVideoSummary(
-          enrichTeacherButtonSummary(raw.summary, events),
+  const summary = enrichChapterCoverageSummary(
+    enrichCollectionQualitySummary(
+      enrichSummaryTechnicalHealth(
+        enrichSummaryDeviceContext(
+          enrichSummaryReadingMetrics(
+            enrichSummaryJourneyMetrics(
+              enrichSummaryVisibilityMetrics(
+                enrichEscolaDigitalVideoSummary(
+                  enrichTeacherButtonSummary(raw.summary, events),
+                  events,
+                ),
+                events,
+              ),
+              events,
+            ),
+            events,
+          ),
           events,
         ),
         events,
@@ -117,6 +209,7 @@ export function parseReportJson(raw: unknown): ParsedDashboardReport {
       events,
     ),
     events,
+    resolveChapterManifest(raw, raw.summary),
   );
   const feedbackComments = Array.isArray(raw.feedback_comments)
     ? (raw.feedback_comments as FeedbackCommentRecord[])
@@ -131,6 +224,8 @@ export function parseReportJson(raw: unknown): ParsedDashboardReport {
       ? raw.summary.exported_at_br
       : formatDateTimeBr(summary.exported_at);
 
+  const chapterManifest = resolveChapterManifest(raw, summary);
+
   const report: DashboardReport = {
     exported_at: exportedAt,
     exported_at_br: exportedAtBr,
@@ -138,6 +233,7 @@ export function parseReportJson(raw: unknown): ParsedDashboardReport {
     book_id: typeof raw.book_id === 'string' ? raw.book_id : '—',
     chapter_id: typeof raw.chapter_id === 'string' ? raw.chapter_id : '—',
     event_count: typeof raw.event_count === 'number' ? raw.event_count : events.length,
+    ...(chapterManifest ? { chapter_manifest: chapterManifest } : {}),
     summary: {
       ...summary,
       exported_at_br: summaryExportedAtBr,
@@ -152,6 +248,7 @@ export function parseReportJson(raw: unknown): ParsedDashboardReport {
     events,
     feedbackComments,
     warnings,
+    chapterManifest,
   };
 }
 
@@ -165,5 +262,35 @@ export async function parseReportFile(file: File): Promise<ParsedDashboardReport
       'Não foi possível carregar o relatório. Verifique se o arquivo é um JSON exportado pelo Livro Digital Piloto.',
     );
   }
-  return parseReportJson(parsed);
+  const result = parseReportJson(parsed);
+  return { ...result, sourceFileName: file.name };
+}
+
+export interface MultiReportParseResult {
+  sessions: ParsedDashboardReport[];
+  loadErrors: { fileName: string; message: string }[];
+}
+
+export async function parseMultipleReportFiles(
+  files: File[],
+): Promise<MultiReportParseResult> {
+  const sessions: ParsedDashboardReport[] = [];
+  const loadErrors: { fileName: string; message: string }[] = [];
+
+  for (const file of files) {
+    try {
+      const parsed = await parseReportFile(file);
+      sessions.push(parsed);
+    } catch (err) {
+      loadErrors.push({
+        fileName: file.name,
+        message:
+          err instanceof ReportParseError
+            ? err.message
+            : 'Não foi possível carregar o relatório.',
+      });
+    }
+  }
+
+  return { sessions, loadErrors };
 }

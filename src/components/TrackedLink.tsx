@@ -1,5 +1,5 @@
 import type { AnchorHTMLAttributes, ReactNode } from 'react';
-import type { LinkTrackType } from '../analytics/contentInteractionTypes';
+import type { LinkTrackType } from '../ld/contentInteractionTypes';
 
 export interface TrackedLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   linkId: string;

@@ -24,6 +24,7 @@ Salve e recarregue o app após editar. Não duplique números em outros arquivos
 | `scroll.*` | `page_viewed` | `bookPageScroll.ts` |
 | `image.*` | `image_viewed` (exposição) | `TrackedImage.tsx` |
 | `readingQuality.*` | `session_finished.reading_depth` | `readingQuality.ts` — ver [MVP-02](./MVP-02-JORNADA-LEITURA.md) |
+| `idle.thresholdSeconds` | `idle_started`, `idle_finished`, `idle_time_seconds` | `sessionIdleTime.ts` |
 
 ### `chapterPageConfig.ts` — por livro + capítulo
 
@@ -56,6 +57,7 @@ Tempo mínimo na página para `page_completed` (avançar, Finalizar teste, fecha
 | `triggerMinPx` | `56` | Limite inferior do gatilho (px) |
 | `triggerMaxPx` | `160` | Limite superior |
 | `triggerViewportRatio` | `0.1` | 10% da altura da janela |
+| `pageCommitDelayMs` | `250` | Tempo com a página estável antes de `page_viewed` |
 
 ---
 
@@ -87,6 +89,14 @@ Classificação por `avg_seconds_per_viewed_page` ao encerrar a sessão. Detalhe
 
 ---
 
+### `idle.thresholdSeconds` (padrão: `60`)
+
+Segundos sem interação (mouse, teclado, scroll, clique ou toque) **com a aba visível** para emitir `idle_started`. Ao retomar, emite `idle_finished` com `idle_duration_seconds`. O total acumulado vai em `session_finished.idle_time_seconds`.
+
+Implementação: `sessionIdleTime.ts`, `useIdleTracking.ts` (via `SessionLifecycle`).
+
+---
+
 ## Páginas por capítulo (`chapterPageConfig.ts`)
 
 Exemplo do capítulo piloto atual:
@@ -104,6 +114,7 @@ Exemplo do capítulo piloto atual:
 1. Defina `book_id` / `chapter_id` em `eventTypes.ts` (`BOOK_PILOT` ou provider).
 2. Adicione entrada em `CHAPTER_PAGE_REGISTRY`.
 3. Coloque `data-book-page={N}` em `Pagination` / `BookPageTracker` entre `firstPage` e `lastPage`.
+4. Adicione entrada em `CHAPTER_MANIFEST_REGISTRY` (`chapterManifest.ts`) com imagens, recursos, botões do professor e atividades rastreáveis.
 
 ### Regra de `chapter_completed`
 

@@ -7,7 +7,7 @@ import FinishTestButton from './components/FinishTestButton';
 import SessionLifecycle from './components/SessionLifecycle';
 import DashboardPage from './dashboard/DashboardPage';
 import AnalyticsErrorBoundary from './components/AnalyticsErrorBoundary';
-import { AnalyticsProvider, useAnalytics } from './analytics/AnalyticsProvider';
+import { SessionProvider, useAnalytics } from './ld/SessionProvider';
 
 function useHashView(): 'book' | 'dashboard' {
   const [view, setView] = useState<'book' | 'dashboard'>(() =>
@@ -82,11 +82,11 @@ function BookAppContent() {
  */
 function App() {
   return (
-    <AnalyticsProvider>
+    <SessionProvider>
       <AnalyticsErrorBoundary boundary="app">
         <BookAppContent />
       </AnalyticsErrorBoundary>
-    </AnalyticsProvider>
+    </SessionProvider>
   );
 }
 

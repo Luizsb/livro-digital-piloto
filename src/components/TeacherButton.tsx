@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { publicUrl } from '../lib/publicUrl';
-import { useOptionalAnalytics } from '../analytics/AnalyticsProvider';
+import { useOptionalAnalytics } from '../ld/SessionProvider';
 import {
   buildTeacherButtonIds,
   closeTeacherButtonBySection,
   trackTeacherButtonOpened,
-} from '../analytics/teacherButtonTracking';
+} from '../ld/teacherButtonTracking';
 
 interface TeacherButtonProps {
     title?: string;

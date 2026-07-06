@@ -15,6 +15,7 @@ Projeto independente em `Documentos/livro-digital-piloto`. O **livro-bett** perm
 | Migração DIA LD | [GUIA-MIGRACAO-DIA-LD.md](./GUIA-MIGRACAO-DIA-LD.md) | Referência para portar |
 | Dashboard | [DASHBOARD-MVP.md](./DASHBOARD-MVP.md) | LD Insights — visualizar JSON |
 | Configuração | [CONFIGURACAO-ANALYTICS.md](./CONFIGURACAO-ANALYTICS.md) | **Limiares e tempos editáveis** |
+| **Catálogo eventos e relatórios** | **[CATÁLOGO-EVENTOS-E-RELATÓRIOS.md](./CATÁLOGO-EVENTOS-E-RELATÓRIOS.md)** | **Referência única para IA e design de relatórios** |
 | **Evidências / evolução** | **[EVIDENCIAS.md](./EVIDENCIAS.md)** | **Histórico de mudanças — manter atualizado** |
 
 ## Como rodar
@@ -78,11 +79,14 @@ App.tsx
 | `link_open_failed` | Link interno quebrado | 06 | ✅ |
 | `teacher_button_opened` | Botão do professor aberto | 05 | ✅ |
 | `teacher_button_closed` | Botão do professor fechado | 05 | ✅ |
-| `activity_started` | Atividade iniciada | 06 | ⏳ |
-| `activity_completed` | Atividade concluída | 06 | ⏳ |
+| `activity_viewed` | Atividade exibida | 07+ | ⏳ |
+| `activity_started` | Atividade iniciada | 07+ | ⏳ |
+| `activity_answer_changed` | Resposta alterada | 07+ | ⏳ |
+| `activity_submitted` | Atividade enviada | 07+ | ⏳ |
+| `activity_completed` | Atividade concluída | 07+ | ⏳ |
 | `accessibility_changed` | Acessibilidade alterada | 07 | ⏳ |
 
-Definições, metadados e regras de disparo: ver [MVP-02-JORNADA-LEITURA.md](./MVP-02-JORNADA-LEITURA.md) e `src/analytics/eventLabels.ts`.
+Definições, metadados e regras de disparo: ver [CATÁLOGO-EVENTOS-E-RELATÓRIOS.md](./CATÁLOGO-EVENTOS-E-RELATÓRIOS.md), [MVP-02-JORNADA-LEITURA.md](./MVP-02-JORNADA-LEITURA.md) e `src/ld/sessionLabels.ts`.
 
 ## Camada `src/analytics/`
 
@@ -125,6 +129,12 @@ Ver [CONFIGURACAO-ANALYTICS.md](./CONFIGURACAO-ANALYTICS.md) para alterar crité
 - **Identificadores:** `book_id`: `cap07_historia_ai43` · `chapter_id`: `cap07`
 - **Source:** `react_mvp`
 
+## Interpretação dos dados
+
+Os eventos atuais medem **uso, exposição, interação e sinais de engajamento** — não aprendizagem nem compreensão. A camada de aprendizagem só deve ser considerada após implementação controlada das atividades e validação jurídica/pedagógica.
+
+Regra completa, listas do que afirmar / não afirmar e eventos `activity_*` planejados: **[CATÁLOGO-EVENTOS-E-RELATÓRIOS.md § Uso, atenção e aprendizagem](./CATÁLOGO-EVENTOS-E-RELATÓRIOS.md#uso-atenção-e-aprendizagem)**.
+
 ## Próximo passo
 
-**MVP-06** — Atividades interativas (`activity_started` / `activity_completed`).
+**Camada de atividades** — `activity_viewed`, `activity_started`, `activity_answer_changed`, `activity_submitted`, `activity_completed` (com validação pedagógica e jurídica antes de alunos reais).

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getActiveChapterPageConfig } from '../analytics/chapterPageConfig';
-import { getActiveBookPage } from '../analytics/bookPageScroll';
+import { getActiveChapterPageConfig } from '../ld/chapterPageConfig';
+import { getActiveBookPage } from '../ld/bookPageScroll';
 
 /**
  * Hook customizado para gerenciar paginação baseada em scroll

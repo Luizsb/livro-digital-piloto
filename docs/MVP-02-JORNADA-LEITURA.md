@@ -4,6 +4,8 @@
 
 Rastrear se o participante percorreu o conteúdo do capítulo: páginas visualizadas, páginas concluídas e encerramento da sessão — **sem alterar conteúdo pedagógico nem layout principal**.
 
+> **Camada de interpretação:** estes eventos medem **uso** e **sinais de atenção** (tempo visível), não aprendizagem. Ver [CATÁLOGO-EVENTOS-E-RELATÓRIOS.md § Uso, atenção e aprendizagem](./CATÁLOGO-EVENTOS-E-RELATÓRIOS.md#uso-atenção-e-aprendizagem).
+
 ## Eventos
 
 ### `page_viewed` — Página visualizada
@@ -55,7 +57,7 @@ Rastrear se o participante percorreu o conteúdo do capítulo: páginas visualiz
 | `time_threshold` | Chegou ao fim do capítulo (marcador `data-page-end`) |
 | `session_finished` | Encerrou a sessão ainda nesta página |
 
-`duration_seconds` = tempo entre `page_viewed` e `page_completed` (sempre ≥ 5 quando o evento é emitido).
+`duration_seconds` = tempo entre `page_viewed` e `page_completed` com a aba visível (pausa ao trocar de guia; sempre ≥ 5 s quando o evento é emitido).
 
 **Implementação:** `src/analytics/pageCompletion.ts` + `src/analytics/pageReadingState.ts`
 
@@ -83,6 +85,10 @@ Rastrear se o participante percorreu o conteúdo do capítulo: páginas visualiz
 ```json
 {
   "duration_seconds": 420,
+  "visible_time_seconds": 310,
+  "hidden_time_seconds": 110,
+  "visible_time_ratio": 0.738,
+  "visibility_change_count": 4,
   "pages_viewed_count": 10,
   "pages_completed_count": 8,
   "avg_seconds_per_viewed_page": 42.0,
@@ -93,7 +99,12 @@ Rastrear se o participante percorreu o conteúdo do capítulo: páginas visualiz
 
 | Campo | Cálculo |
 |-------|---------|
-| `avg_seconds_per_viewed_page` | `duration_seconds ÷ pages_viewed_count` |
+| `duration_seconds` | Tempo total da sessão (relógio de parede, início ao fim) |
+| `visible_time_seconds` | Tempo com a **aba do livro visível** (métrica principal de leitura) |
+| `hidden_time_seconds` | `duration_seconds − visible_time_seconds` |
+| `visible_time_ratio` | `visible_time_seconds ÷ duration_seconds` (0–1) |
+| `visibility_change_count` | Mudanças de visibilidade (Page Visibility API) |
+| `avg_seconds_per_viewed_page` | `visible_time_seconds ÷ pages_viewed_count` |
 | `avg_seconds_per_completed_page` | Média dos `duration_seconds` dos eventos `page_completed` |
 | `reading_depth` | Classificação por `avg_seconds_per_viewed_page` (não pela média de concluídas) |
 
@@ -164,7 +175,7 @@ Exibido em `EventReportPanel.tsx` (bloco **Resumo da coleta** do acordeão):
 - **Timer de sessão** ao vivo (desde `session_started`; congela ao finalizar)
 - Páginas visualizadas (contagem + lista)
 - Páginas concluídas (contagem + lista)
-- Taxa de conclusão = `concluídas / visualizadas × 100`
+- Taxa de conclusão **de páginas** = `concluídas / visualizadas × 100` (campo técnico: `completion_rate`). No dashboard: **não** usar só “Taxa de conclusão” — evita confusão com conclusão pedagógica do capítulo (`chapter_completed`).
 
 O `summary` do JSON exportado inclui os mesmos campos agregados.
 
@@ -265,6 +276,7 @@ O `summary` do JSON exportado inclui os mesmos campos agregados.
 | Ajuste 4 | Bootstrap gate: session → book → pages | `page_viewed` antes de `book_opened` |
 | Ajuste 5 | Mínimo 5s + `completion_reason` | Evitar conclusão de quem só passou pela página |
 | Ajuste 6 | Médias de tempo + `reading_depth` | `avg_seconds_per_viewed_page` e `avg_seconds_per_completed_page` no `session_finished` |
+| Ajuste 7 | Timer pausa fora da aba | `duration_seconds` e `page_completed` contam só com a guia do livro visível (`sessionVisibleTime.ts`) |
 
 ## Fora de escopo (MVP-02)
 

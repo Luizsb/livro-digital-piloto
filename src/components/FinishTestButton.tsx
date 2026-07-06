@@ -1,5 +1,5 @@
-import { useAnalytics } from '../analytics/AnalyticsProvider';
-import { finishTestFromButton } from '../analytics/finishSession';
+import { useAnalytics } from '../ld/SessionProvider';
+import { finishTestFromButton } from '../ld/finishSession';
 
 interface FinishTestButtonProps {
   onFinished?: () => void;

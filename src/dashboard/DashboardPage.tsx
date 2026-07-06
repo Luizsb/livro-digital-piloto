@@ -1,19 +1,30 @@
-import { useRef, useState } from 'react';
-import { getChapterTotalPages, resolveChapterPageBounds } from '../analytics/chapterPageConfig';
-import { parseReportFile, ReportParseError } from './parseReport';
-import type { ParsedDashboardReport } from './types';
+import { useMemo, useRef, useState } from 'react';
+import { getChapterTotalPages, resolveChapterPageBounds } from '../ld/chapterPageConfig';
+import { parseReportFile, parseMultipleReportFiles, ReportParseError } from './parseReport';
+import type { DashboardViewMode, ParsedDashboardReport } from './types';
+import { buildGroupTestReport } from './buildGroupReport';
+import GroupReportContent from './GroupReportContent';
 import {
   buildChapterStatusInsight,
   buildHealthChecks,
   buildInterpretationAlerts,
+  buildQualityChecksByCategory,
   buildSessionInsight,
   buildTechnicalAlerts,
+  getIntegrityStatusClass,
+  getIntegrityStatusLabel,
+  QUALITY_CATEGORY_LABELS,
 } from './reportInsights';
 import {
   buildPageJourney,
   extractSessionDurationSeconds,
+  extractSessionHiddenSeconds,
+  extractSessionVisibleSeconds,
+  extractVisibleTimeRatio,
   extractZoomedImageIds,
   formatDuration,
+  formatCoverageRate,
+  formatVisibleTimePercent,
   formatExportedAt,
   formatBytes,
   formatLoadTimeMs,
@@ -28,8 +39,17 @@ import {
 import {
   formatBrowserLabel,
   formatScreenResolution,
-} from '../analytics/deviceContext';
+} from '../ld/deviceContext';
 import { MetricTerm, TECHNICAL_HEALTH_HINTS } from './InfoHint';
+import {
+  MODAL_TIME_LABEL,
+  PAGE_COMPLETION_RATE_LABEL,
+  READING_DEPTH_EXPLANATION,
+  READING_DEPTH_LABEL,
+  VIDEO_COMPLETED_LABEL,
+  VIDEO_MAX_PROGRESS_LABEL,
+  VIDEO_WATCH_TIME_LABEL,
+} from '../ld/metricDisplayLabels';
 
 function StatusMetricCard({ status }: { status: ChapterStatusLabel }) {
   return (
@@ -148,6 +168,107 @@ function MetricCard({
   );
 }
 
+function ChapterCoverageSection({ summary }: { summary: ParsedDashboardReport['summary'] }) {
+  if (typeof summary.expected_pages_count !== 'number') {
+    return (
+      <Section title="Cobertura do capítulo">
+        <p className="text-sm text-slate-500">
+          Manifest do capítulo indisponível para este relatório.
+        </p>
+      </Section>
+    );
+  }
+
+  const coverageRows = [
+    {
+      label: 'Páginas visualizadas',
+      expected: summary.expected_pages_count,
+      rate: summary.pages_viewed_coverage_rate,
+      missing: summary.pages_not_viewed?.map((page) => `Pág. ${page}`) ?? [],
+    },
+    {
+      label: 'Imagens expostas',
+      expected: summary.expected_images_count ?? 0,
+      rate: summary.image_exposure_coverage_rate,
+      missing: summary.images_not_exposed ?? [],
+    },
+    {
+      label: 'Recursos abertos',
+      expected: summary.expected_resources_count ?? 0,
+      rate: summary.resource_open_coverage_rate,
+      missing: summary.resources_not_opened ?? [],
+    },
+    {
+      label: 'Seções do professor usadas',
+      expected: summary.expected_teacher_buttons_count ?? 0,
+      rate: summary.teacher_button_usage_coverage_rate,
+      missing: summary.teacher_buttons_not_used ?? [],
+    },
+    {
+      label: 'Atividades iniciadas',
+      expected: summary.expected_activities_count ?? 0,
+      rate: summary.activity_start_coverage_rate,
+      missing: summary.activities_not_started ?? [],
+    },
+  ];
+
+  return (
+    <Section title="Cobertura do capítulo">
+      <p className="mb-4 text-sm text-slate-600">
+        Compara o que foi coletado com o inventário esperado do capítulo (manifest). Evita
+        interpretar &quot;nada aconteceu&quot; quando o capítulo simplesmente não tinha aquele
+        elemento.
+      </p>
+      <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {coverageRows.map((row) => (
+          <div
+            key={row.label}
+            className="rounded-xl border border-slate-200 bg-slate-50/80 p-4"
+          >
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              {row.label}
+            </dt>
+            <dd className="mt-1 font-mono text-2xl font-bold tabular-nums text-[#80298F]">
+              {row.expected > 0 ? formatCoverageRate(row.rate) : 'N/A'}
+            </dd>
+            <dd className="mt-1 text-sm text-slate-600">
+              {row.expected > 0
+                ? `Inventário: ${row.expected} · Faltando: ${row.missing.length}`
+                : 'Não previsto nesta versão do capítulo'}
+            </dd>
+            {row.missing.length > 0 ? (
+              <dd className="mt-2 text-xs text-amber-800">
+                {row.missing.join(', ')}
+              </dd>
+            ) : null}
+          </div>
+        ))}
+      </dl>
+    </Section>
+  );
+}
+
+function QualityWarningGroup({ title, items }: { title: string; items: string[] }) {
+  return (
+    <div>
+      <h3 className="mb-2 text-sm font-semibold text-slate-800">{title}</h3>
+      <ul className="space-y-1.5">
+        {items.map((item) => (
+          <li
+            key={item}
+            className="flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-950"
+          >
+            <span className="shrink-0 font-semibold" aria-hidden>
+              ⚠
+            </span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function Section({
   title,
   children,
@@ -169,9 +290,13 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
   const totalPages =
     summary.chapter_total_pages ?? getChapterTotalPages(resolveChapterPageBounds(summary));
   const duration = extractSessionDurationSeconds(events);
+  const visibleDuration = extractSessionVisibleSeconds(events, summary);
+  const hiddenDuration = extractSessionHiddenSeconds(events, summary);
+  const visibleRatio = extractVisibleTimeRatio(events, summary);
   const pageJourney = buildPageJourney(summary);
   const zoomedImages = extractZoomedImageIds(events);
   const healthChecks = buildHealthChecks(summary);
+  const qualityByCategory = buildQualityChecksByCategory(events, summary);
   const interpretationAlerts = buildInterpretationAlerts(summary);
   const technicalAlerts = buildTechnicalAlerts(summary);
   const chapterStatus = getChapterStatusLabel(summary);
@@ -201,7 +326,35 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
         <MetricCard label="Participante" value={getParticipantLabel(summary)} />
-        <MetricCard label="Duração da sessão" value={formatDuration(duration)} />
+        {hiddenDuration !== null && hiddenDuration > 0 ? (
+          <>
+            <MetricCard
+              label="Tempo visível no livro"
+              value={formatDuration(visibleDuration)}
+              hint="Com a aba do livro em foco"
+            />
+            <MetricCard
+              label="Tempo fora da aba"
+              value={formatDuration(hiddenDuration)}
+              hint="Participante em outra guia ou aplicativo"
+            />
+            <MetricCard
+              label="Duração da sessão"
+              value={formatDuration(duration)}
+              hint="Tempo visível + tempo fora da aba"
+            />
+            <MetricCard
+              label="Tempo visível (%)"
+              value={formatVisibleTimePercent(visibleRatio)}
+            />
+          </>
+        ) : (
+          <MetricCard
+            label="Tempo no livro"
+            value={formatDuration(visibleDuration)}
+            hint="Sessão inteira com a aba do livro em foco"
+          />
+        )}
         <MetricCard
           label="Páginas visualizadas"
           value={`${summary.pages_viewed_count}/${totalPages}`}
@@ -209,25 +362,24 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
         <MetricCard
           label="Páginas concluídas"
           value={`${summary.pages_completed_count}/${totalPages}`}
-          hint={`${summary.completion_rate}%`}
+        />
+        <MetricCard
+          label={PAGE_COMPLETION_RATE_LABEL}
+          value={`${summary.completion_rate}%`}
         />
         <StatusMetricCard status={chapterStatus} />
         <MetricCard
-          label="Profundidade de leitura"
+          label={READING_DEPTH_LABEL}
           value={summary.reading_depth_label ?? '—'}
+          hint={READING_DEPTH_EXPLANATION}
         />
-        <MetricCard
-          label="Feedback geral"
-          value={
-            summary.feedback.submitted && summary.feedback.rating
-              ? `${summary.feedback.rating}/5`
-              : 'Sem feedback'
-          }
-        />
-        <MetricCard
-          label="Usaria novamente"
-          value={formatWouldUseAgain(summary.feedback.would_use_again)}
-        />
+        {typeof summary.idle_time_seconds === 'number' && summary.idle_time_seconds > 0 ? (
+          <MetricCard
+            label="Tempo inativo"
+            value={formatDuration(summary.idle_time_seconds)}
+            hint="Sem mouse, teclado, scroll ou toque com a aba visível"
+          />
+        ) : null}
       </div>
 
       <SessionInsightBlock
@@ -435,20 +587,6 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
             pode aparecer como 0 B mesmo com imagens exibidas.
           </p>
         ) : null}
-        {summary.largest_images_loaded?.length ? (
-          <div className="mt-4">
-            <p className="text-sm font-medium text-slate-700">
-              Maiores imagens carregadas na sessão
-            </p>
-            <ul className="mt-2 space-y-1 text-sm text-slate-600">
-              {summary.largest_images_loaded.map((image) => (
-                <li key={image.src}>
-                  <span className="font-medium">{formatBytes(image.bytes)}</span> — {image.src}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
         {summary.images_with_errors.length > 0 ? (
           <p className="mt-4 text-sm text-slate-700">
             <span className="font-medium">Imagens quebradas:</span>{' '}
@@ -570,7 +708,7 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
         </p>
         <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <dt className="text-slate-500">Taxa de conclusão</dt>
+            <dt className="text-slate-500">{PAGE_COMPLETION_RATE_LABEL}</dt>
             <dd className="font-semibold text-[#80298F]">{summary.completion_rate}%</dd>
           </div>
           <div>
@@ -586,26 +724,49 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
             </dd>
           </div>
           <div>
-            <dt className="text-slate-500">Profundidade</dt>
+            <dt className="text-slate-500">{READING_DEPTH_LABEL}</dt>
             <dd className="font-semibold text-[#80298F]">
               {summary.reading_depth_label ?? '—'}
             </dd>
+            <dd className="mt-1 text-xs text-slate-500">{READING_DEPTH_EXPLANATION}</dd>
           </div>
+          {summary.last_page_viewed != null ? (
+            <div>
+              <dt className="text-slate-500">Última página vista</dt>
+              <dd className="font-semibold text-[#80298F]">Pág. {summary.last_page_viewed}</dd>
+            </div>
+          ) : null}
+          {summary.abandoned_before_end ? (
+            <div>
+              <dt className="text-slate-500">Abandonou antes do fim</dt>
+              <dd className="font-semibold text-amber-700">
+                Sim
+                {summary.abandonment_page != null
+                  ? ` (pág. ${summary.abandonment_page})`
+                  : ''}
+              </dd>
+            </div>
+          ) : null}
         </dl>
       </Section>
+
+      <ChapterCoverageSection summary={summary} />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Section title="Imagens no capítulo">
           <p className="mb-4 text-sm text-slate-600">
-            <span className="font-medium text-slate-700">Exposição</span> indica que a imagem
-            entrou na tela; <span className="font-medium text-slate-700">interação</span> registra
-            ação intencional (zoom).
+            <span className="font-medium text-slate-700">Imagem exposta</span> (`image_viewed`)
+            indica presença na viewport — não representa atenção.{' '}
+            <span className="font-medium text-slate-700">Interação</span> (zoom) registra ação
+            intencional.
           </p>
           <dl className="mb-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
             <div>
               <dt className="text-slate-500">Imagens expostas na leitura</dt>
               <dd className="font-semibold text-[#80298F]">
-                {summary.images_viewed_unique_count}
+                {typeof summary.expected_images_count === 'number' && summary.expected_images_count > 0
+                  ? `${summary.images_viewed_unique_count}/${summary.expected_images_count}`
+                  : summary.images_viewed_unique_count}
               </dd>
             </div>
             <div>
@@ -675,22 +836,34 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
                 Modal aberto: {summary.escola_digital_opened_count}×
               </p>
               <p className="text-sm text-slate-700">
-                Tempo no modal: {summary.escola_digital_engagement_total_seconds}s
+                {MODAL_TIME_LABEL}: {summary.escola_digital_engagement_total_seconds}s
               </p>
-              <p className="mt-2 text-sm text-slate-700">
-                Play no vídeo: {summary.escola_digital_video_play_count}×
-              </p>
-              <p className="text-sm text-slate-700">
-                Conclusão até o fim:{' '}
-                {summary.escola_digital_video_watched_to_end ? 'Sim' : 'Não'}
-                {summary.escola_digital_video_completed_count > 0
-                  ? ` (${summary.escola_digital_video_completed_count}×)`
-                  : ''}
-              </p>
-              {summary.escola_digital_video_max_progress_percent > 0 ? (
-                <p className="text-sm text-slate-700">
-                  Progresso máximo: {summary.escola_digital_video_max_progress_percent}%
-                </p>
+              {summary.escola_digital_video_play_count > 0 ||
+              summary.escola_digital_video_max_progress_percent > 0 ||
+              summary.escola_digital_video_watch_total_seconds > 0 ? (
+                <div className="mt-3 border-t border-[#80298F]/15 pt-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Vídeo no modal
+                  </p>
+                  {summary.escola_digital_video_watch_total_seconds > 0 ? (
+                    <p className="mt-1 text-sm text-slate-700">
+                      {VIDEO_WATCH_TIME_LABEL}: {summary.escola_digital_video_watch_total_seconds}s
+                    </p>
+                  ) : null}
+                  {summary.escola_digital_video_max_progress_percent > 0 ? (
+                    <p className="text-sm text-slate-700">
+                      {VIDEO_MAX_PROGRESS_LABEL}:{' '}
+                      {summary.escola_digital_video_max_progress_percent}%
+                    </p>
+                  ) : null}
+                  <p className="text-sm text-slate-700">
+                    {VIDEO_COMPLETED_LABEL}:{' '}
+                    {summary.escola_digital_video_watched_to_end ? 'Sim' : 'Não'}
+                    {summary.escola_digital_video_completed_count > 0
+                      ? ` (${summary.escola_digital_video_completed_count}×)`
+                      : ''}
+                  </p>
+                </div>
               ) : null}
             </div>
             <div className="rounded-xl border border-[#80298F]/20 bg-[#F9DDFF]/30 p-4">
@@ -699,7 +872,7 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
                 Aberto: {summary.oda_opened_count}×
               </p>
               <p className="text-sm text-slate-700">
-                Tempo: {summary.oda_engagement_total_seconds}s
+                {MODAL_TIME_LABEL}: {summary.oda_engagement_total_seconds}s
               </p>
             </div>
           </div>
@@ -709,6 +882,10 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
       <Section title="Botão do professor">
         {summary.teacher_button_opened_count > 0 ? (
           <>
+            <p className="mb-4 text-sm text-slate-600">
+              O detalhamento por seção (`teacher_button_usage_by_section`) é a visão principal —
+              inclui repetições na mesma página, tempo total e médio por abertura.
+            </p>
             <dl className="mb-6 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
               <div>
                 <dt className="text-slate-500">Aberturas totais</dt>
@@ -870,9 +1047,94 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
       </Section>
 
       <div className="grid gap-6 lg:grid-cols-2">
+        <Section title="Qualidade da coleta">
+          <p className="mb-4 text-sm text-slate-600">
+            Antes de interpretar os dados, valide se a sessão está confiável para relatórios.
+          </p>
+
+          <div className="mb-5 flex flex-wrap items-center gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Score de qualidade
+              </p>
+              <p className="font-mono text-3xl font-bold tabular-nums text-[#80298F]">
+                {summary.data_quality_score ?? '—'}
+              </p>
+            </div>
+            {summary.event_integrity_status ? (
+              <span
+                className={`rounded-full border px-3 py-1 text-sm font-semibold ${getIntegrityStatusClass(summary.event_integrity_status)}`}
+              >
+                {getIntegrityStatusLabel(summary.event_integrity_status)}
+              </span>
+            ) : null}
+          </div>
+
+          {(Object.keys(QUALITY_CATEGORY_LABELS) as Array<keyof typeof QUALITY_CATEGORY_LABELS>).map(
+            (category) => {
+              const items = qualityByCategory[category];
+              if (items.length === 0) return null;
+              return (
+                <div key={category} className="mb-4">
+                  <h3 className="mb-2 text-sm font-semibold text-slate-800">
+                    {QUALITY_CATEGORY_LABELS[category]}
+                  </h3>
+                  <ul className="space-y-2">
+                    {items.map((item) => (
+                      <li key={item.id} className="flex items-start gap-2 text-sm">
+                        <span
+                          className={`mt-0.5 shrink-0 ${item.ok ? 'text-emerald-600' : item.severity === 'critical' ? 'text-red-500' : 'text-amber-500'}`}
+                        >
+                          {item.ok ? '✓' : '✗'}
+                        </span>
+                        <span className={item.ok ? 'text-slate-800' : 'text-slate-600'}>
+                          {item.label}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            },
+          )}
+
+          {(summary.missing_expected_events?.length ?? 0) > 0 ||
+          (summary.duplicate_event_warnings?.length ?? 0) > 0 ||
+          (summary.inconsistent_event_warnings?.length ?? 0) > 0 ||
+          (summary.unexpected_event_warnings?.length ?? 0) > 0 ? (
+            <div className="mt-4 space-y-4 border-t border-slate-100 pt-4">
+              {summary.missing_expected_events && summary.missing_expected_events.length > 0 ? (
+                <QualityWarningGroup
+                  title="Eventos esperados ausentes"
+                  items={summary.missing_expected_events}
+                />
+              ) : null}
+              {summary.duplicate_event_warnings && summary.duplicate_event_warnings.length > 0 ? (
+                <QualityWarningGroup
+                  title="Possíveis duplicatas"
+                  items={summary.duplicate_event_warnings}
+                />
+              ) : null}
+              {summary.inconsistent_event_warnings &&
+              summary.inconsistent_event_warnings.length > 0 ? (
+                <QualityWarningGroup
+                  title="Inconsistências"
+                  items={summary.inconsistent_event_warnings}
+                />
+              ) : null}
+              {summary.unexpected_event_warnings && summary.unexpected_event_warnings.length > 0 ? (
+                <QualityWarningGroup
+                  title="Eventos inesperados"
+                  items={summary.unexpected_event_warnings}
+                />
+              ) : null}
+            </div>
+          ) : null}
+        </Section>
+
         <Section title="Saúde da coleta">
           <p className="mb-4 text-sm text-slate-600">
-            Validação técnica dos eventos registrados na sessão.
+            Checklist rápido do ciclo de vida da sessão exportada.
           </p>
           <ul className="space-y-2">
             {healthChecks.map((item) => (
@@ -917,20 +1179,32 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
 
 function DashboardPage() {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [mode, setMode] = useState<DashboardViewMode>('single');
   const [parsed, setParsed] = useState<ParsedDashboardReport | null>(null);
+  const [groupSessions, setGroupSessions] = useState<ParsedDashboardReport[]>([]);
+  const [groupLoadErrors, setGroupLoadErrors] = useState<{ fileName: string; message: string }[]>(
+    [],
+  );
   const [error, setError] = useState<string | null>(null);
-  const [fileName, setFileName] = useState<string | null>(null);
+  const [fileLabel, setFileLabel] = useState<string | null>(null);
 
-  const handleFile = async (file: File | null) => {
+  const groupReport = useMemo(
+    () => buildGroupTestReport(groupSessions, groupLoadErrors),
+    [groupSessions, groupLoadErrors],
+  );
+
+  const handleSingleFile = async (file: File | null) => {
     if (!file) return;
     setError(null);
     try {
       const result = await parseReportFile(file);
       setParsed(result);
-      setFileName(file.name);
+      setGroupSessions([]);
+      setGroupLoadErrors([]);
+      setFileLabel(file.name);
     } catch (err) {
       setParsed(null);
-      setFileName(null);
+      setFileLabel(null);
       setError(
         err instanceof ReportParseError
           ? err.message
@@ -938,6 +1212,54 @@ function DashboardPage() {
       );
     }
   };
+
+  const handleGroupFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setError(null);
+    const result = await parseMultipleReportFiles([...files]);
+    setGroupSessions(result.sessions);
+    setGroupLoadErrors(result.loadErrors);
+    setParsed(null);
+
+    if (result.sessions.length === 0) {
+      setFileLabel(null);
+      setError(
+        result.loadErrors.length > 0
+          ? 'Nenhum JSON válido no lote. Verifique os arquivos selecionados.'
+          : 'Selecione ao menos um arquivo JSON.',
+      );
+      return;
+    }
+
+    setFileLabel(
+      result.sessions.length === 1
+        ? result.sessions[0].sourceFileName ?? '1 sessão'
+        : `${result.sessions.length} sessões`,
+    );
+  };
+
+  const handleFileInput = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    if (mode === 'single') {
+      void handleSingleFile(files[0] ?? null);
+      return;
+    }
+    void handleGroupFiles(files);
+  };
+
+  const switchMode = (next: DashboardViewMode) => {
+    setMode(next);
+    setError(null);
+    setParsed(null);
+    setGroupSessions([]);
+    setGroupLoadErrors([]);
+    setFileLabel(null);
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
+  };
+
+  const hasContent = mode === 'single' ? parsed !== null : groupSessions.length > 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200">
@@ -948,33 +1270,72 @@ function DashboardPage() {
               LD Insights
             </p>
             <h1 className="text-2xl font-bold">Dashboard do Livro Digital</h1>
-            {parsed ? (
+            {hasContent ? (
               <p className="mt-1 text-sm text-white/90">
-                {parsed.report.book_id} · {parsed.report.chapter_id}
-                {parsed.report.exported_at
-                  ? ` · ${formatExportedAt(parsed.report.exported_at)}`
-                  : ''}
+                {mode === 'group' ? (
+                  <>
+                    Grupo de teste · {groupReport.bookId} · {groupReport.chapterId} ·{' '}
+                    {groupReport.sessionCount} sessão
+                    {groupReport.sessionCount === 1 ? '' : 'ões'}
+                  </>
+                ) : (
+                  <>
+                    {parsed!.report.book_id} · {parsed!.report.chapter_id}
+                    {parsed!.report.exported_at
+                      ? ` · ${formatExportedAt(parsed!.report.exported_at)}`
+                      : ''}
+                  </>
+                )}
               </p>
             ) : (
               <p className="mt-1 text-sm text-white/90">
-                Carregue um relatório JSON exportado pelo piloto
+                {mode === 'group'
+                  ? 'Carregue vários JSONs para o relatório do grupo de teste'
+                  : 'Carregue um relatório JSON exportado pelo piloto'}
               </p>
             )}
           </div>
           <div className="flex flex-wrap items-center gap-3">
+            <div className="flex rounded-lg border border-white/30 p-0.5">
+              <button
+                type="button"
+                onClick={() => switchMode('single')}
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                  mode === 'single' ? 'bg-white text-[#80298F]' : 'text-white hover:bg-white/10'
+                }`}
+              >
+                1 sessão
+              </button>
+              <button
+                type="button"
+                onClick={() => switchMode('group')}
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                  mode === 'group' ? 'bg-white text-[#80298F]' : 'text-white hover:bg-white/10'
+                }`}
+              >
+                Grupo de teste
+              </button>
+            </div>
             <input
               ref={inputRef}
               type="file"
               accept="application/json,.json"
+              multiple={mode === 'group'}
               className="hidden"
-              onChange={(e) => void handleFile(e.target.files?.[0] ?? null)}
+              onChange={(e) => handleFileInput(e.target.files)}
             />
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
               className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-[#80298F] shadow transition hover:bg-[#F9DDFF]"
             >
-              {fileName ? 'Trocar JSON' : 'Carregar relatório JSON'}
+              {fileLabel
+                ? mode === 'group'
+                  ? 'Trocar lote'
+                  : 'Trocar JSON'
+                : mode === 'group'
+                  ? 'Carregar JSONs do grupo'
+                  : 'Carregar relatório JSON'}
             </button>
             <a
               href="#/"
@@ -993,26 +1354,38 @@ function DashboardPage() {
           </div>
         ) : null}
 
-        {!parsed && !error ? (
+        {!hasContent && !error ? (
           <div className="rounded-2xl border-2 border-dashed border-[#80298F]/30 bg-white px-6 py-16 text-center shadow-sm">
             <p className="text-lg font-semibold text-slate-800">
-              Nenhum relatório carregado
+              {mode === 'group' ? 'Nenhum lote carregado' : 'Nenhum relatório carregado'}
             </p>
             <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
-              Exporte os eventos no piloto (botão &quot;Exportar eventos JSON&quot;) e carregue o
-              arquivo aqui para visualizar indicadores de uso, leitura e feedback.
+              {mode === 'group' ? (
+                <>
+                  Exporte um JSON por participante no piloto e selecione todos os arquivos de uma
+                  vez para gerar o relatório consolidado da turma.
+                </>
+              ) : (
+                <>
+                  Exporte os eventos no piloto (botão &quot;Exportar eventos JSON&quot;) e carregue o
+                  arquivo aqui para visualizar indicadores de uso, leitura e feedback.
+                </>
+              )}
             </p>
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
               className="mt-6 rounded-full bg-[#80298F] px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-[#6b2278]"
             >
-              Selecionar arquivo .json
+              {mode === 'group' ? 'Selecionar JSONs (.json)' : 'Selecionar arquivo .json'}
             </button>
           </div>
         ) : null}
 
-        {parsed ? <DashboardContent parsed={parsed} /> : null}
+        {mode === 'single' && parsed ? <DashboardContent parsed={parsed} /> : null}
+        {mode === 'group' && groupSessions.length > 0 ? (
+          <GroupReportContent report={groupReport} />
+        ) : null}
       </main>
     </div>
   );

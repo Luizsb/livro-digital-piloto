@@ -116,7 +116,7 @@ Três blocos em **acordeão** (abrir um fecha os outros):
 - Botão **Fechar** do cabeçalho: `ClosePillButton` roxo, `aria-label="Fechar painel de eventos"`.
 - Catálogo: ordem fixa em `eventLabels.ts` (`CATALOG_DISPLAY_ORDER`); descrições alinhadas à saúde técnica e encerramento.
 
-- Timer: `useLiveSessionDuration.ts` (desde `session_started`; congela ao finalizar).
+- Timer: `useLiveSessionDuration.ts` (desde `session_started`; congela ao finalizar). **Conta apenas com a aba do livro visível** — pausa ao trocar de guia (`sessionVisibleTime.ts`, Page Visibility API). O tempo mínimo de `page_completed` também pausa fora da aba.
 - Resumo recolhido: tempo em roxo + métricas compactas na mesma linha (sem duplicar abaixo).
 
 ## Reset de sessão
@@ -139,10 +139,25 @@ Campos principais do payload:
   "book_id": "cap07_historia_ai43",
   "chapter_id": "cap07",
   "event_count": 0,
-  "summary": { },
+  "chapter_manifest": {
+    "book_id": "cap07_historia_ai43",
+    "chapter_id": "cap07",
+    "pages": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    "expected_images": ["..."],
+    "expected_resources": ["escola_digital_video", "oda_page_10_comercio"],
+    "expected_teacher_buttons": ["..."],
+    "expected_activities": []
+  },
+  "summary": {
+    "data_quality_score": 92,
+    "expected_images_count": 5,
+    "image_exposure_coverage_rate": 100
+  },
   "events": [ ]
 }
 ```
+
+Campos de **qualidade da coleta** e **cobertura do capítulo** são calculados automaticamente em `buildEventSummary()`. Ver [CATÁLOGO-EVENTOS-E-RELATÓRIOS.md](./CATÁLOGO-EVENTOS-E-RELATÓRIOS.md).
 
 ## Critérios de aceite (MVP-01)
 
@@ -156,3 +171,4 @@ Campos principais do payload:
 - [x] Painel com acordeão, timer de sessão e ícones por seção
 - [x] Reset manual e automático em dev
 - [x] Acesso ao dashboard a partir do gate
+- [x] `summary` com qualidade da coleta e cobertura do manifest

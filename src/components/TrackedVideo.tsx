@@ -1,8 +1,8 @@
 import { useEffect, useId, useRef, type SyntheticEvent, type VideoHTMLAttributes } from 'react';
 
-import { useOptionalAnalytics } from '../analytics/AnalyticsProvider';
+import { useOptionalAnalytics } from '../ld/SessionProvider';
 
-import type { VideoAnalyticsIds } from '../analytics/videoTracking';
+import type { VideoAnalyticsIds } from '../ld/videoTracking';
 
 import {
 
@@ -18,7 +18,7 @@ import {
 
   updateVideoPlaybackState,
 
-} from '../analytics/videoTracking';
+} from '../ld/videoTracking';
 
 
 

@@ -1,8 +1,8 @@
 import { useMemo, useState, type FormEvent } from 'react';
-import { ANALYTICS_EVENT_NAMES } from '../analytics/eventTypes';
-import { trackFeedbackSubmitted, type WouldUseAgain } from '../analytics/feedbackTracking';
-import { useOptionalAnalytics } from '../analytics/AnalyticsProvider';
-import { useStoredEvents } from '../analytics/useStoredEvents';
+import { ANALYTICS_EVENT_NAMES } from '../ld/sessionTypes';
+import { trackFeedbackSubmitted, type WouldUseAgain } from '../ld/feedbackTracking';
+import { useOptionalAnalytics } from '../ld/SessionProvider';
+import { useStoredEvents } from '../ld/useStoredEvents';
 
 function FeedbackIcon({ className = 'h-8 w-8' }: { className?: string }) {
   return (
