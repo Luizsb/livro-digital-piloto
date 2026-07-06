@@ -6,18 +6,21 @@ import EventsPanelButton from './components/EventsPanelButton';
 import FinishTestButton from './components/FinishTestButton';
 import SessionLifecycle from './components/SessionLifecycle';
 import DashboardPage from './dashboard/DashboardPage';
+import ParticipantHubRoute from './components/ParticipantHubRoute';
 import AnalyticsErrorBoundary from './components/AnalyticsErrorBoundary';
 import { SessionProvider, useAnalytics } from './ld/SessionProvider';
 
-function useHashView(): 'book' | 'dashboard' {
-  const [view, setView] = useState<'book' | 'dashboard'>(() =>
-    window.location.hash.startsWith('#/dashboard') ? 'dashboard' : 'book',
-  );
+function useHashView(): 'book' | 'dashboard' | 'projeto' {
+  const resolveView = (): 'book' | 'dashboard' | 'projeto' => {
+    if (window.location.hash.startsWith('#/dashboard')) return 'dashboard';
+    if (window.location.hash.startsWith('#/projeto')) return 'projeto';
+    return 'book';
+  };
+
+  const [view, setView] = useState<'book' | 'dashboard' | 'projeto'>(resolveView);
 
   useEffect(() => {
-    const onHashChange = () => {
-      setView(window.location.hash.startsWith('#/dashboard') ? 'dashboard' : 'book');
-    };
+    const onHashChange = () => setView(resolveView());
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
@@ -37,6 +40,12 @@ function BookSessionControls({ onFinished }: { onFinished: () => void }) {
       <EventsPanelButton />
       <FinishTestButton onFinished={onFinished} />
       <ExportEventsButton />
+      <a
+        href="#/projeto"
+        className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-lg transition hover:bg-slate-50"
+      >
+        Sobre o projeto
+      </a>
       <a
         href="#/dashboard"
         className="rounded-lg border border-[#80298F]/30 bg-white px-4 py-2 text-sm font-semibold text-[#80298F] shadow-lg transition hover:bg-[#F9DDFF]"
@@ -64,6 +73,10 @@ function BookAppContent() {
 
   if (view === 'dashboard') {
     return <DashboardPage />;
+  }
+
+  if (view === 'projeto') {
+    return <ParticipantHubRoute />;
   }
 
   return (

@@ -1338,10 +1338,10 @@ function DashboardPage() {
                   : 'Carregar relatório JSON'}
             </button>
             <a
-              href="#/"
+              href="#/projeto"
               className="rounded-lg border border-white/40 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
             >
-              Voltar ao livro
+              Voltar à home
             </a>
           </div>
         </div>

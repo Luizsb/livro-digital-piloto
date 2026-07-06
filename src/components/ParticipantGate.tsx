@@ -6,9 +6,9 @@ import {
   markSessionEventTracked,
   wasSessionEventTracked,
 } from '../ld/sessionDedup';
-import { reloadForNewSession } from '../ld/resetLdStorage';
 import { subscribeToEventsUpdates } from '../ld/recordEvent';
 import TestFinishedScreen from './TestFinishedScreen';
+import ProjectHubPage from './ProjectHubPage';
 
 interface ParticipantGateProps {
   children: ReactNode;
@@ -95,67 +95,13 @@ function ParticipantGate({ children, showFinishScreen }: ParticipantGateProps) {
 
   if (!participantId || !isReady) {
     return (
-      <div className="min-h-screen w-full bg-gray-200 flex items-center justify-center p-6">
-        <div
-          className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl"
-          role="dialog"
-          aria-labelledby="participant-gate-title"
-        >
-          <h1
-            id="participant-gate-title"
-            className="mb-2 text-xl font-bold text-[#80298F]"
-          >
-            Acesso ao livro digital
-          </h1>
-          <p className="mb-6 text-sm text-slate-600">
-            Informe o número do seu participante para continuar.
-          </p>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <label className="block text-sm font-medium text-slate-800">
-              Código do participante
-              <div className="mt-2 flex overflow-hidden rounded-lg border border-slate-300 focus-within:border-[#80298F] focus-within:ring-2 focus-within:ring-[#80298F]/30">
-                <span className="flex items-center bg-slate-100 px-4 text-lg font-semibold tracking-wide text-[#80298F]">
-                  P
-                </span>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={participantNumber}
-                  onChange={(e) => handleNumberChange(e.target.value)}
-                  placeholder="01"
-                  maxLength={2}
-                  autoComplete="off"
-                  className="w-full border-0 px-4 py-3 text-lg tracking-wide focus:outline-none focus:ring-0"
-                />
-              </div>
-            </label>
-            {error ? <p className="text-sm text-red-600">{error}</p> : null}
-            <button
-              type="submit"
-              className="w-full rounded-lg bg-[#80298F] px-4 py-3 font-semibold text-white transition hover:bg-[#6b2278]"
-            >
-              Entrar no capítulo
-            </button>
-          </form>
-          <a
-            href="#/dashboard"
-            className="mt-4 flex w-full items-center justify-center rounded-lg border border-[#80298F]/30 bg-white px-4 py-3 text-sm font-semibold text-[#80298F] transition hover:bg-[#F9DDFF]"
-          >
-            Abrir dashboard (LD Insights)
-          </a>
-          <p className="mt-4 text-center text-xs text-slate-500">
-            Dados antigos na mesma aba?{' '}
-            <button
-              type="button"
-              className="font-semibold text-[#80298F] underline hover:no-underline"
-              onClick={() => reloadForNewSession()}
-            >
-              Limpar e começar de novo
-            </button>
-          </p>
-        </div>
-      </div>
+      <ProjectHubPage
+        participantNumber={participantNumber}
+        onParticipantNumberChange={handleNumberChange}
+        onSubmit={handleSubmit}
+        error={error}
+        participantId={participantId}
+      />
     );
   }
 
