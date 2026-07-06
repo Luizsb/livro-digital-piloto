@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 
-/** Caminhos relativos — funcionam em qualquer subpasta do GitHub Pages. */
-export const GITHUB_PAGES_BASE = './';
+/** Base absoluta do GitHub Pages — assets funcionam em subrotas como /teste/. */
+export const GITHUB_PAGES_BASE = '/livro-digital-piloto/';
 
 const isPagesBuild = process.env.GITHUB_PAGES === 'true';
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
