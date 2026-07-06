@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState, type ReactNode } from 'react';
 import { reloadForNewSession } from '../ld/resetLdStorage';
 import { publicUrl } from '../lib/publicUrl';
+import { REPORT_CARDS, STAKEHOLDER_CARDS } from './projectHubContent';
 
 const SECTIONS = [
   {
@@ -47,6 +48,16 @@ const SECTIONS = [
       <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
         <path d="M4 16l5-5 4 3 7-8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M14 6h6v6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    id: 'relatorios',
+    label: 'Relatórios',
+    icon: (
+      <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path d="M7 4h7l5 5v11a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+        <path d="M14 4v5h5M9 13h6M9 17h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     ),
   },
@@ -119,34 +130,6 @@ const MATURITY_STAGES = [
   },
 ] as const;
 
-const VALUE_ACTORS = [
-  {
-    actor: 'Produto',
-    emoji: '🏢',
-    text: 'Entender quais recursos valem a pena manter, ampliar ou revisar com base no uso real.',
-  },
-  {
-    actor: 'Escola',
-    emoji: '🏫',
-    text: 'Ter visão de como a tecnologia está sendo adotada em sala e quais barreiras aparecem no dia a dia.',
-  },
-  {
-    actor: 'Professor',
-    emoji: '👨‍🏫',
-    text: 'Saber se o aluno percorreu o capítulo, se consultou apoio e onde pode precisar de retomada.',
-  },
-  {
-    actor: 'Editorial',
-    emoji: '✏️',
-    text: 'Identificar trechos com abandono ou pouco engajamento e orientar revisões de conteúdo.',
-  },
-  {
-    actor: 'Tecnologia',
-    emoji: '📱',
-    text: 'Detectar lentidão, erros e diferenças entre dispositivos antes que virem problema em escala.',
-  },
-] as const;
-
 function HubIcon({ className = 'h-6 w-6' }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -166,6 +149,28 @@ function SectionTitle({ children }: { children: ReactNode }) {
     <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold text-slate-900 md:text-3xl">
       {children}
     </h2>
+  );
+}
+
+function BenefitItem({ children }: { children: ReactNode }) {
+  return (
+    <li className="flex gap-2.5 text-sm leading-relaxed text-slate-700">
+      <span
+        className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#F9DDFF] text-[#80298F]"
+        aria-hidden
+      >
+        <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none">
+          <path
+            d="M2.5 6l2.5 2.5 4.5-5"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </span>
+      <span>{children}</span>
+    </li>
   );
 }
 
@@ -462,29 +467,52 @@ export default function ProjectHubPage({
 
           <section id="valor" className="scroll-mt-24 border-t border-slate-200 py-16">
             <SectionTitle>4. O que isso pode gerar</SectionTitle>
-            <p className="mb-8 max-w-3xl text-slate-600">
+            <p className="mb-3 max-w-3xl text-slate-600">
               Quando o livro passa a ser observável, diferentes áreas ganham uma base comum para
-              conversar sobre o que está funcionando e o que precisa evoluir — sem depender só de
-              impressões isoladas.
+              conversar sobre o que está funcionando e o que precisa evoluir.
             </p>
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {VALUE_ACTORS.map((item) => (
-                <div
+            <h3 className="mb-6 text-lg font-bold text-[#80298F]">Para quem essa inteligência serve</h3>
+            <div className="grid items-stretch gap-6 lg:grid-cols-2">
+              {STAKEHOLDER_CARDS.map((item, index) => (
+                <article
                   key={item.actor}
-                  className="flex gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
                 >
-                  <span className="text-2xl" aria-hidden>
-                    {item.emoji}
-                  </span>
-                  <div>
-                    <h4 className="font-bold text-slate-800">{item.actor}</h4>
-                    <p className="mt-1 text-sm text-slate-600">{item.text}</p>
+                  <div className="border-b border-slate-100 bg-gradient-to-r from-[#F9DDFF]/40 to-white px-6 py-5">
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl shadow-sm ring-1 ring-[#80298F]/10">
+                        {item.emoji}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold uppercase tracking-wider text-[#80298F]">
+                          4.{index + 1}
+                        </p>
+                        <h4 className="mt-0.5 text-lg font-bold text-slate-900">{item.actor}</h4>
+                        <p className="mt-2 text-sm leading-relaxed text-slate-600">{item.intro}</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                  <div className="flex flex-1 flex-col px-6 py-5">
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                      O que passa a ser possível
+                    </p>
+                    <ul className="flex-1 space-y-2">
+                      {item.benefits.map((benefit) => (
+                        <BenefitItem key={benefit}>{benefit}</BenefitItem>
+                      ))}
+                    </ul>
+                    <div className="mt-6 rounded-xl border-l-4 border-[#80298F] bg-[#F9DDFF]/35 px-4 py-3.5 lg:mt-auto">
+                      <p className="text-xs font-bold uppercase tracking-wider text-[#80298F]">
+                        Valor principal
+                      </p>
+                      <p className="mt-1.5 text-sm leading-relaxed text-slate-700">{item.mainValue}</p>
+                    </div>
+                  </div>
+                </article>
               ))}
             </div>
 
-            <div className="mt-8 overflow-hidden rounded-3xl bg-slate-900 text-white shadow-xl shadow-slate-900/10">
+            <div className="mt-10 overflow-hidden rounded-3xl bg-slate-900 text-white shadow-xl shadow-slate-900/10">
               <div className="bg-gradient-to-r from-[#80298F] via-[#9B4DAB] to-slate-900 px-6 py-5 md:px-8">
                 <p className="text-xs font-semibold uppercase tracking-wider text-white/70">
                   Do evento à decisão
@@ -542,8 +570,63 @@ export default function ProjectHubPage({
             </div>
           </section>
 
-          <section id="piloto" className="scroll-mt-24 border-t border-slate-200 py-16">
-            <SectionTitle>5. Acesso ao piloto</SectionTitle>
+          <section id="relatorios" className="scroll-mt-24 border-t border-slate-200 py-16">
+            <SectionTitle>5. Relatórios que podem nascer dessa camada</SectionTitle>
+            <p className="mb-8 max-w-3xl text-slate-600">
+              A partir dos eventos coletados, é possível montar diferentes leituras — da sessão
+              individual até uma visão executiva do piloto. O{' '}
+              <strong className="text-slate-800">LD Insights</strong> já cobre relatório individual e
+              consolidado de grupo; os demais representam evoluções naturais da mesma base de dados.
+            </p>
+            <div className="grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {REPORT_CARDS.map((report, index) => (
+                <article
+                  key={report.title}
+                  className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:border-[#80298F]/25 hover:shadow-md"
+                >
+                  <div
+                    className={`h-1.5 ${report.status === 'available' ? 'bg-[#80298F]' : 'bg-slate-200'}`}
+                  />
+                  <div className="flex flex-1 flex-col p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#F9DDFF] text-xs font-bold text-[#80298F]">
+                        5.{index + 1}
+                      </span>
+                      <span
+                        className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${
+                          report.status === 'available'
+                            ? 'bg-[#80298F] text-white'
+                            : 'bg-slate-100 text-slate-500'
+                        }`}
+                      >
+                        {report.status === 'available' ? 'LD Insights' : 'Em evolução'}
+                      </span>
+                    </div>
+                    <h4 className="mt-4 text-base font-bold leading-snug text-slate-900">
+                      {report.title}
+                    </h4>
+                    <ul className="mt-4 flex-1 space-y-2 border-t border-slate-100 pt-4">
+                      {report.items.map((item) => (
+                        <li key={item} className="flex gap-2 text-sm leading-relaxed text-slate-600">
+                          <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[#80298F]" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-5 border-t border-slate-100 pt-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                        Uso principal
+                      </p>
+                      <p className="mt-1.5 text-sm leading-relaxed text-slate-700">{report.usage}</p>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section id="piloto" className="scroll-mt-24 border-t border-slate-200 py-16 pb-24">
+            <SectionTitle>6. Acesso ao piloto</SectionTitle>
             <p className="mb-8 max-w-2xl text-slate-600">
               Informe seu código de participante para abrir o capítulo piloto, acompanhar eventos em
               tempo real e exportar o JSON para o dashboard LD Insights.
@@ -658,7 +741,7 @@ export default function ProjectHubPage({
         <button
           type="button"
           onClick={scrollToTop}
-          className="fixed bottom-16 right-4 z-40 p-3 transition-all hover:scale-110"
+          className="fixed bottom-24 right-4 z-40 p-3 transition-all hover:scale-110"
           title="Voltar ao topo"
         >
           <img src={publicUrl('images/setaTopo.svg')} alt="Voltar ao topo" />
