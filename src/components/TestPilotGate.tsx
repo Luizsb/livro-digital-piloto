@@ -5,6 +5,7 @@ interface TestPilotGateProps {
   selectedParticipantId: string;
   onParticipantSelect: (participantId: string) => void;
   onSubmit: (event: FormEvent) => void;
+  onClearData: () => void;
   error?: string;
 }
 
@@ -12,6 +13,7 @@ export function TestPilotGate({
   selectedParticipantId,
   onParticipantSelect,
   onSubmit,
+  onClearData,
   error,
 }: TestPilotGateProps) {
   return (
@@ -54,6 +56,17 @@ export function TestPilotGate({
           >
             Iniciar teste
           </button>
+
+          <button
+            type="button"
+            onClick={onClearData}
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+          >
+            Limpar dados
+          </button>
+          <p className="text-center text-xs text-slate-500">
+            Já participou antes? Limpe os dados para iniciar um novo teste com o mesmo nome.
+          </p>
         </form>
       </div>
     </div>

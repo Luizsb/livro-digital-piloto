@@ -13,6 +13,7 @@ import TestPilotGate from './TestPilotGate';
 import { isPilotParticipantId } from './pilotParticipants';
 import { flushPendingModalResourceOpened } from '../ld/modalResourceTracking';
 import { getSessionStatus } from '../ld/sessionStatus';
+import { reloadForNewSession } from '../ld/resetLdStorage';
 
 function resolveInitialReady(
   mode: 'default' | 'pilot',
@@ -134,6 +135,10 @@ function ParticipantGate({ children, showFinishScreen, mode = 'default' }: Parti
     setError('');
   };
 
+  const handleClearPilotData = () => {
+    reloadForNewSession();
+  };
+
   if (!participantId || !isReady) {
     if (mode === 'pilot') {
       return (
@@ -141,6 +146,7 @@ function ParticipantGate({ children, showFinishScreen, mode = 'default' }: Parti
           selectedParticipantId={selectedPilotId}
           onParticipantSelect={handlePilotSelect}
           onSubmit={handleSubmit}
+          onClearData={handleClearPilotData}
           error={error}
         />
       );
