@@ -31,6 +31,10 @@ function tryEmitResourceOpened(instanceId: string): void {
   if (!session || session.openedTracked) return;
   if (!isPageTrackingReady(session.sessionId)) return;
 
+  // Marca antes de track — persistEvents dispara ANALYTICS_EVENTS_UPDATED de forma
+  // síncrona e reentraria em flushPendingModalResourceOpened se openedTracked ainda fosse false.
+  session.openedTracked = true;
+
   trackResourceOpened({
     linkId: session.linkId,
     page: session.page,
@@ -38,7 +42,6 @@ function tryEmitResourceOpened(instanceId: string): void {
     href: session.href,
     track: session.track,
   });
-  session.openedTracked = true;
 }
 
 export interface RegisterModalResourceSessionInput extends ModalResourceSessionInput {
@@ -54,12 +57,15 @@ export function registerModalResourceSession({
   track,
   ...input
 }: RegisterModalResourceSessionInput): void {
+  const existing = openSessions.get(instanceId);
+  if (existing?.openedTracked) return;
+
   openSessions.set(instanceId, {
     ...input,
     instanceId,
     sessionId,
-    openedAtMs: Date.now(),
-    openedTracked: false,
+    openedAtMs: existing?.openedAtMs ?? Date.now(),
+    openedTracked: existing?.openedTracked ?? false,
     track,
   });
 

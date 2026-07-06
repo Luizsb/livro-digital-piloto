@@ -12,6 +12,7 @@ import ProjectHubPage from '@app/ProjectHubPage';
 import TestPilotGate from '@app/TestPilotGate';
 import { isPilotParticipantId } from '@app/pilotParticipants';
 import { flushPendingModalResourceOpened } from '@analytics/modalResourceTracking';
+import { isPageTrackingReady } from '@analytics/ldBootstrap';
 import { getSessionStatus } from '@analytics/sessionStatus';
 import { reloadForNewSession } from '@analytics/resetLdStorage';
 
@@ -86,7 +87,9 @@ function ParticipantGate({ children, showFinishScreen, mode = 'default' }: Parti
       }
 
       setBookAnalyticsReady(true);
-      flushPendingModalResourceOpened(sessionId);
+      if (isPageTrackingReady(sessionId)) {
+        flushPendingModalResourceOpened(sessionId);
+      }
     };
 
     ensureBookOpened();
