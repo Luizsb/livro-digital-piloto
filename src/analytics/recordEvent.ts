@@ -1,6 +1,7 @@
 import {
   ANALYTICS_SOURCE,
   ANALYTICS_STORAGE_KEYS,
+  ANALYTICS_EVENTS_UPDATED,
   AnalyticsEvent,
   TrackEventInput,
 } from './sessionTypes';

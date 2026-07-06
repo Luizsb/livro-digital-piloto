@@ -63,7 +63,7 @@ export const CHAPTER_MANIFEST_REGISTRY: Record<string, ChapterManifest> = {
       'page_8_rota_seda',
       'page_9_nau_cabral',
     ],
-    expected_resources: ['escola_digital_video', 'oda_page_10_comercio'],
+    expected_resources: ['escola_digital_video'],
     expected_teacher_buttons: [
       'teacher_section_page_3',
       'teacher_section_page_4',
@@ -73,7 +73,7 @@ export const CHAPTER_MANIFEST_REGISTRY: Record<string, ChapterManifest> = {
       'teacher_section_page_11',
       'teacher_section_page_12',
     ],
-    expected_activities: [],
+    expected_activities: ['oda_page_10_comercio'],
   },
 };
 
@@ -82,7 +82,7 @@ export function getChapterManifest(bookId: string, chapterId: string): ChapterMa
   if (!manifest) {
     throw new Error(
       `Manifest do capítulo não encontrado para ${bookId} / ${chapterId}. ` +
-        'Adicione uma entrada em src/analytics/chapterManifest.ts → CHAPTER_MANIFEST_REGISTRY.',
+        'Adicione uma entrada em src/book/chapter/chapterManifest.ts → CHAPTER_MANIFEST_REGISTRY.',
     );
   }
   return manifest;
@@ -108,11 +108,30 @@ function coverageRate(matched: number, expected: number): number | null {
   return Math.round((matched / expected) * 100);
 }
 
+function collectStartedActivityIds(events: AnalyticsEvent[]): Set<string> {
+  const started = new Set<string>();
+  for (const event of events) {
+    if (event.event_name === ANALYTICS_EVENT_NAMES.activityStarted) {
+      const activityId = event.metadata?.activity_id;
+      if (typeof activityId === 'string') started.add(activityId);
+      continue;
+    }
+    if (!isResourceOpenedEvent(event)) continue;
+    const meta = event.metadata ?? {};
+    if (meta.type === 'oda_opened' && typeof meta.link_id === 'string') {
+      started.add(meta.link_id);
+    }
+  }
+  return started;
+}
+
 function collectOpenedResourceIds(events: AnalyticsEvent[]): Set<string> {
   const opened = new Set<string>();
   for (const event of events) {
     if (!isResourceOpenedEvent(event)) continue;
-    const linkId = event.metadata?.link_id;
+    const meta = event.metadata ?? {};
+    if (meta.type === 'oda_opened') continue;
+    const linkId = meta.link_id;
     if (typeof linkId === 'string') opened.add(linkId);
   }
   return opened;
@@ -151,7 +170,7 @@ export function buildChapterCoverageSummary(
   const pagesViewed = new Set(input.pages_viewed);
   const pagesCompleted = new Set(input.pages_completed);
   const imagesViewed = new Set(input.images_viewed_unique);
-  const activitiesStarted = new Set(input.activities_started);
+  const activitiesStarted = collectStartedActivityIds(input.events);
   const resourcesOpened = collectOpenedResourceIds(input.events);
   const teacherSectionsUsed = collectTeacherSectionsUsed(input.events);
 

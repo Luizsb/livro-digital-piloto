@@ -24,6 +24,7 @@ import {
   buildChapterCoverageForBook,
   type ChapterCoverageSummary,
 } from '@book/chapter/chapterManifest';
+import { isResourceOpenedEvent } from './resourceEvents';
 import { buildSessionJourneyMetrics } from './sessionJourneyMetrics';
 
 export interface EventSummary
@@ -119,6 +120,9 @@ export function buildEventSummary(): EventSummary {
     }
     if (event.event_name === ANALYTICS_EVENT_NAMES.activityStarted && typeof meta.activity_id === 'string') {
       activitiesStarted.add(meta.activity_id);
+    }
+    if (isResourceOpenedEvent(event) && meta.type === 'oda_opened' && typeof meta.link_id === 'string') {
+      activitiesStarted.add(meta.link_id);
     }
     if (event.event_name === ANALYTICS_EVENT_NAMES.activityCompleted && typeof meta.activity_id === 'string') {
       activitiesCompleted.add(meta.activity_id);

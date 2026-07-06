@@ -133,10 +133,12 @@ function resolveChapterManifest(
   raw: Record<string, unknown>,
   summary: EventSummary,
 ): ChapterManifest | null {
+  const fromRegistry = tryGetChapterManifest(summary.book_id, summary.chapter_id);
+  if (fromRegistry) return fromRegistry;
   if (isValidChapterManifest(raw.chapter_manifest)) {
     return raw.chapter_manifest;
   }
-  return tryGetChapterManifest(summary.book_id, summary.chapter_id);
+  return null;
 }
 
 function enrichChapterCoverageSummary(
@@ -144,10 +146,7 @@ function enrichChapterCoverageSummary(
   events: AnalyticsEvent[],
   manifest: ChapterManifest | null,
 ): EventSummary {
-  if (typeof summary.expected_pages_count === 'number' || !manifest) {
-    return summary;
-  }
-  if (events.length === 0) {
+  if (!manifest || events.length === 0) {
     return summary;
   }
   return {

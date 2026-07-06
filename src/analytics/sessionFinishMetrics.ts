@@ -6,6 +6,7 @@ import { freezeSessionIdleTime } from './sessionIdleTime';
 import { buildChapterPageSnapshot } from '@book/chapter/chapterPageConfig';
 import { buildSessionJourneyMetrics } from './sessionJourneyMetrics';
 import { getLastActivePage } from './pageReadingState';
+import { isResourceOpenedEvent } from './resourceEvents';
 import { BOOK_PILOT } from './sessionTypes';
 import type { ReadingDepth } from './readingQuality';
 import type { SessionVisibilityMetrics } from './sessionVisibilityMetrics';
@@ -50,6 +51,9 @@ export function buildSessionFinishMetadata(sessionId: string): SessionFinishMeta
       typeof meta.activity_id === 'string'
     ) {
       activitiesStarted.add(meta.activity_id);
+    }
+    if (isResourceOpenedEvent(event) && meta.type === 'oda_opened' && typeof meta.link_id === 'string') {
+      activitiesStarted.add(meta.link_id);
     }
     if (
       event.event_name === ANALYTICS_EVENT_NAMES.activityCompleted &&
