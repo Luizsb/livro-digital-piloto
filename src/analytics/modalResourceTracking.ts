@@ -17,6 +17,7 @@ interface OpenModalResourceSession extends ModalResourceSessionInput {
   sessionId: string;
   openedAtMs: number;
   openedTracked: boolean;
+  engagementTracked: boolean;
   track: (eventName: string, metadata?: Record<string, unknown>) => void;
 }
 
@@ -66,6 +67,7 @@ export function registerModalResourceSession({
     sessionId,
     openedAtMs: existing?.openedAtMs ?? Date.now(),
     openedTracked: existing?.openedTracked ?? false,
+    engagementTracked: existing?.engagementTracked ?? false,
     track,
   });
 
@@ -87,8 +89,9 @@ export function endModalResourceSession(
   track: (eventName: string, metadata?: Record<string, unknown>) => void,
 ): boolean {
   const session = openSessions.get(instanceId);
-  if (!session) return false;
+  if (!session || session.engagementTracked) return false;
 
+  session.engagementTracked = true;
   openSessions.delete(instanceId);
 
   trackResourceEngagementRecorded({

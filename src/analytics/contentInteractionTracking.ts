@@ -40,7 +40,6 @@ export interface TrackResourceEngagementInput {
   track: (eventName: string, metadata?: Record<string, unknown>) => void;
 }
 
-/** Registra tempo de uso ao fechar ODA, Escola Digital, etc. */
 export function trackResourceEngagementRecorded({
   linkId,
   page,

@@ -38,8 +38,8 @@ export function trackTeacherButtonOpened({
   track,
 }: TrackTeacherButtonOpenedInput): void {
   if (!isPageTrackingReady(sessionId)) return;
+  if (openSessions.some((session) => session.section_id === section_id)) return;
 
-  // Chamado apenas a partir do onClick em TeacherButton — não em efeitos de render.
   track(ANALYTICS_EVENT_NAMES.teacherButtonOpened, {
     page,
     teacher_button_id,

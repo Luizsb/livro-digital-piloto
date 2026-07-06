@@ -1,11 +1,11 @@
 import {
   ANALYTICS_SOURCE,
   ANALYTICS_STORAGE_KEYS,
-  ANALYTICS_EVENTS_UPDATED,
   AnalyticsEvent,
   TrackEventInput,
 } from './sessionTypes';
 import { bootstrapLdStorage } from './resetLdStorage';
+import { scheduleAnalyticsEventsUpdated } from './eventsNotify';
 
 function createEventId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -26,7 +26,7 @@ export function loadStoredEvents(): AnalyticsEvent[] {
 }
 
 function notifyEventsUpdated(): void {
-  window.dispatchEvent(new CustomEvent(ANALYTICS_EVENTS_UPDATED));
+  scheduleAnalyticsEventsUpdated();
 }
 
 export function subscribeToEventsUpdates(callback: () => void): () => void {

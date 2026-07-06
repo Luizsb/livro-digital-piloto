@@ -117,17 +117,12 @@ function TrackedVideo({ analytics, onPlay, onEnded, onTimeUpdate, ...videoProps 
 
 
       trackVideoCompleted({
-
+        sessionId: analyticsContext.sessionId,
         instanceId,
-
         watchDurationSeconds: Math.max(1, Math.round(video.currentTime)),
-
         videoDurationSeconds: duration,
-
         track: analyticsContext.track,
-
         ...analytics,
-
       });
 
     }

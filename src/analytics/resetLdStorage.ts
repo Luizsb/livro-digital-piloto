@@ -1,4 +1,5 @@
-import { ANALYTICS_EVENTS_UPDATED, ANALYTICS_STORAGE_KEYS } from './sessionTypes';
+import { ANALYTICS_STORAGE_KEYS } from './sessionTypes';
+import { scheduleAnalyticsEventsUpdated } from './eventsNotify';
 import { resetPageReadingState } from './pageReadingState';
 import { resetSessionVisibleTime } from './sessionVisibleTime';
 import { resetSessionIdleTime } from './sessionIdleTime';
@@ -37,7 +38,7 @@ export function resetLdStorage(): void {
     resetPageReadingState();
     resetSessionVisibleTime();
     resetSessionIdleTime();
-    window.dispatchEvent(new CustomEvent(ANALYTICS_EVENTS_UPDATED));
+    scheduleAnalyticsEventsUpdated();
   } catch {
     // ignore
   }

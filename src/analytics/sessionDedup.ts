@@ -28,7 +28,8 @@ export function unmarkSessionEventTracked(sessionId: string, key: string): void 
   }
 }
 
-/** Registra no máximo uma vez por sessão; retorna true se o evento foi emitido. */
+/** Registra no máximo uma vez por sessão; retorna true se o evento foi emitido.
+ *  A marcação ocorre ANTES de emit() para resistir a reentrância síncrona. */
 export function trackOncePerSession(
   sessionId: string,
   key: string,
