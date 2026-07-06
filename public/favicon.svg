@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" role="img" aria-label="Livro Digital Inteligente">
+  <rect width="32" height="32" rx="8" fill="#80298F"/>
+  <path
+    d="M8 7.5A1.5 1.5 0 0 1 9.5 6H22v20H9.5A1.5 1.5 0 0 1 8 24.5v-17Z"
+    fill="#fff"
+    fill-opacity="0.95"
+  />
+  <path d="M11 10h10M11 14h8M11 18h6" stroke="#80298F" stroke-width="1.6" stroke-linecap="round"/>
+  <circle cx="22.5" cy="21.5" r="5.5" fill="#F9DDFF"/>
+  <path d="M20 21.5h5M22.5 19v5" stroke="#80298F" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

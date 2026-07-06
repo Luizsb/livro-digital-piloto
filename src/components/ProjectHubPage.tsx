@@ -586,8 +586,11 @@ export default function ProjectHubPage({
                   <div
                     className={`h-1.5 ${report.status === 'available' ? 'bg-[#80298F]' : 'bg-slate-200'}`}
                   />
-                  <div className="flex flex-1 flex-col p-5">
-                    <div className="flex items-start justify-end">
+                  <div className="flex flex-1 flex-col p-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <h4 className="min-w-0 flex-1 text-base font-bold leading-snug text-slate-900">
+                        {report.title}
+                      </h4>
                       <span
                         className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${
                           report.status === 'available'
@@ -598,22 +601,16 @@ export default function ProjectHubPage({
                         {report.status === 'available' ? 'LD Insights' : 'Em evolução'}
                       </span>
                     </div>
-                    <h4 className="mt-3 text-base font-bold leading-snug text-slate-900">
-                      {report.title}
-                    </h4>
-                    <ul className="mt-4 flex-1 space-y-2 border-t border-slate-100 pt-4">
+                    <ul className="mt-5 flex-1 space-y-2.5">
                       {report.items.map((item) => (
-                        <li key={item} className="flex gap-2 text-sm leading-relaxed text-slate-600">
-                          <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[#80298F]" />
-                          <span>{item}</span>
-                        </li>
+                        <BenefitItem key={item}>{item}</BenefitItem>
                       ))}
                     </ul>
-                    <div className="mt-8 border-t border-slate-100 pt-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                    <div className="mt-8 rounded-xl border-l-4 border-[#80298F]/40 bg-slate-50 px-4 py-3.5">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                         Uso principal
                       </p>
-                      <p className="mt-1.5 text-sm leading-relaxed text-slate-700">{report.usage}</p>
+                      <p className="mt-2 text-sm leading-relaxed text-slate-700">{report.usage}</p>
                     </div>
                   </div>
                 </article>
