@@ -10,6 +10,7 @@ import { buildExportPayload, downloadEventsJson, type ExportPayload } from './ex
 export type ExportSource =
   | 'manual_button'
   | 'finish_screen'
+  | 'finish_button'
   | 'floating_button';
 
 export interface ExportSessionReportOptions {

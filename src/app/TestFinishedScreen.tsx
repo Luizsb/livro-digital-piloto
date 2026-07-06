@@ -68,7 +68,8 @@ function TestFinishedScreen({ mode = 'default' }: TestFinishedScreenProps) {
           </button>
           {isPilot ? (
             <p className="text-center text-xs text-slate-500">
-              Após o download, você pode fechar esta aba.
+              O relatório JSON foi baixado automaticamente. Você pode exportar novamente acima ou
+              fechar esta aba.
             </p>
           ) : (
             <button

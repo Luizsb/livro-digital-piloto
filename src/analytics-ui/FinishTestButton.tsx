@@ -1,12 +1,18 @@
 import { useAnalytics } from '@analytics/SessionProvider';
 import { finishTestFromButton } from '@analytics/finishSession';
+import { exportSessionReport } from '@analytics/exportSessionReport';
 
 interface FinishTestButtonProps {
   onFinished?: () => void;
   variant?: 'default' | 'prominent';
+  autoExportReport?: boolean;
 }
 
-function FinishTestButton({ onFinished, variant = 'default' }: FinishTestButtonProps) {
+function FinishTestButton({
+  onFinished,
+  variant = 'default',
+  autoExportReport = false,
+}: FinishTestButtonProps) {
   const { track, sessionId, sessionStatus, refreshSessionStatus } = useAnalytics();
 
   if (sessionStatus === 'finished') {
@@ -17,6 +23,9 @@ function FinishTestButton({ onFinished, variant = 'default' }: FinishTestButtonP
     const result = finishTestFromButton(sessionId, track);
     refreshSessionStatus();
     if (result.emitted) {
+      if (autoExportReport) {
+        exportSessionReport(sessionId, track, { export_source: 'finish_button' });
+      }
       onFinished?.();
     }
   };

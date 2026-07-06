@@ -33,26 +33,31 @@ export function finishSessionOnUnload(
   sessionId: string,
   track: (eventName: string, metadata?: Record<string, unknown>) => void,
 ): boolean {
-  return trackOncePerSession(sessionId, ANALYTICS_EVENT_NAMES.sessionFinished, () => {
-    flushAllOpenVideoSessions();
-    flushAllOpenModalResourceSessions(track);
-    closeAllOpenTeacherButtons(track);
-    completeActivePageOnSessionEnd(sessionId, track);
+  if (wasSessionEventTracked(sessionId, ANALYTICS_EVENT_NAMES.sessionFinished)) {
+    return false;
+  }
 
-    trackResourceTimingSnapshotOnce(sessionId, track);
+  flushAllOpenVideoSessions();
+  flushAllOpenModalResourceSessions(track);
+  closeAllOpenTeacherButtons(track);
+  completeActivePageOnSessionEnd(sessionId, track);
 
-    const metadata = buildSessionFinishMetadata(sessionId);
-    track(ANALYTICS_EVENT_NAMES.sessionFinished, {
-      ...pickSessionFinishedEventMetadata(metadata),
-      reading_depth_label: getReadingDepthLabel(metadata.reading_depth),
-      finish_trigger: 'unload',
-      ...captureResourceTimingMetadata(),
-    });
+  trackResourceTimingSnapshotOnce(sessionId, track);
 
-    const finishedAt = new Date().toISOString();
-    setSessionStatus('finished');
-    setSessionFinishedAt(finishedAt);
+  const metadata = buildSessionFinishMetadata(sessionId);
+  track(ANALYTICS_EVENT_NAMES.sessionFinished, {
+    ...pickSessionFinishedEventMetadata(metadata),
+    reading_depth_label: getReadingDepthLabel(metadata.reading_depth),
+    finish_trigger: 'unload',
+    ...captureResourceTimingMetadata(),
   });
+
+  markSessionEventTracked(sessionId, ANALYTICS_EVENT_NAMES.sessionFinished);
+
+  const finishedAt = new Date().toISOString();
+  setSessionStatus('finished');
+  setSessionFinishedAt(finishedAt);
+  return true;
 }
 
 /**
@@ -94,8 +99,6 @@ export function finishTestFromButton(
     });
   }
 
-  markSessionEventTracked(sessionId, ANALYTICS_EVENT_NAMES.sessionFinished);
-
   trackResourceTimingSnapshotOnce(sessionId, track);
 
   const sessionMetadata = buildSessionFinishMetadata(sessionId);
@@ -105,6 +108,8 @@ export function finishTestFromButton(
     finish_trigger: 'finish_button',
     ...captureResourceTimingMetadata(),
   });
+
+  markSessionEventTracked(sessionId, ANALYTICS_EVENT_NAMES.sessionFinished);
 
   const finishedAt = new Date().toISOString();
   setSessionStatus('finished');
