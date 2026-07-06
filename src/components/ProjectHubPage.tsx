@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState, type ReactNode } from 'react';
 import { reloadForNewSession } from '../ld/resetLdStorage';
+import { publicUrl } from '../lib/publicUrl';
 
 const SECTIONS = [
   {
@@ -185,11 +186,21 @@ export default function ProjectHubPage({
   participantId,
 }: ProjectHubPageProps) {
   const [activeSection, setActiveSection] = useState<SectionId>('visao');
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      const offset = window.scrollY + 120;
+      const scrollY = window.scrollY;
+      setShowScrollTop(scrollY > 320);
+
+      if (scrollY < 80) {
+        setActiveSection('visao');
+        return;
+      }
+
+      const offset = scrollY + 120;
       for (const section of SECTIONS) {
+        if (section.id === 'visao') continue;
         const element = document.getElementById(section.id);
         if (
           element &&
@@ -206,10 +217,19 @@ export default function ProjectHubPage({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setActiveSection('visao');
+  };
+
   const scrollTo = (id: SectionId) => {
+    if (id === 'visao') {
+      scrollToTop();
+      return;
+    }
     const element = document.getElementById(id);
     if (!element) return;
-    window.scrollTo({ top: element.offsetTop - 72, behavior: 'smooth' });
+    window.scrollTo({ top: element.offsetTop - 80, behavior: 'smooth' });
   };
 
   return (
@@ -633,6 +653,17 @@ export default function ProjectHubPage({
           </section>
         </main>
       </div>
+
+      {showScrollTop ? (
+        <button
+          type="button"
+          onClick={scrollToTop}
+          className="fixed bottom-16 right-4 z-40 p-3 transition-all hover:scale-110"
+          title="Voltar ao topo"
+        >
+          <img src={publicUrl('images/setaTopo.svg')} alt="Voltar ao topo" />
+        </button>
+      ) : null}
     </div>
   );
 }
