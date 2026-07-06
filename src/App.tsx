@@ -11,20 +11,37 @@ import TestPilotRoute from './components/TestPilotRoute';
 import AnalyticsErrorBoundary from './components/AnalyticsErrorBoundary';
 import { SessionProvider, useAnalytics } from './ld/SessionProvider';
 
-function useHashView(): 'book' | 'dashboard' | 'projeto' | 'testepiloto' {
-  const resolveView = (): 'book' | 'dashboard' | 'projeto' | 'testepiloto' => {
-    if (window.location.hash.startsWith('#/dashboard')) return 'dashboard';
-    if (window.location.hash.startsWith('#/projeto')) return 'projeto';
-    if (window.location.hash.startsWith('#/testepiloto')) return 'testepiloto';
-    return 'book';
-  };
+type AppView = 'book' | 'dashboard' | 'projeto' | 'teste';
 
-  const [view, setView] = useState<'book' | 'dashboard' | 'projeto' | 'testepiloto'>(resolveView);
+function isTestePath(): boolean {
+  const path = window.location.pathname.replace(/\/$/, '');
+  return path === '/teste' || path.endsWith('/teste');
+}
+
+function resolveView(): AppView {
+  if (isTestePath()) return 'teste';
+  if (window.location.hash.startsWith('#/dashboard')) return 'dashboard';
+  if (window.location.hash.startsWith('#/projeto')) return 'projeto';
+  return 'book';
+}
+
+function useAppView(): AppView {
+  const [view, setView] = useState<AppView>(resolveView);
 
   useEffect(() => {
-    const onHashChange = () => setView(resolveView());
-    window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
+    if (window.location.hash.startsWith('#/testepiloto') && !isTestePath()) {
+      const base = window.location.pathname.replace(/\/$/, '');
+      window.location.replace(`${base}/teste${window.location.search}`);
+      return;
+    }
+
+    const sync = () => setView(resolveView());
+    window.addEventListener('hashchange', sync);
+    window.addEventListener('popstate', sync);
+    return () => {
+      window.removeEventListener('hashchange', sync);
+      window.removeEventListener('popstate', sync);
+    };
   }, []);
 
   return view;
@@ -59,7 +76,7 @@ function BookSessionControls({ onFinished }: { onFinished: () => void }) {
 }
 
 function BookAppContent() {
-  const view = useHashView();
+  const view = useAppView();
   const { sessionStatus } = useAnalytics();
   const [showFinishScreen, setShowFinishScreen] = useState(false);
 
@@ -81,7 +98,7 @@ function BookAppContent() {
     return <ParticipantHubRoute />;
   }
 
-  if (view === 'testepiloto') {
+  if (view === 'teste') {
     return <TestPilotRoute />;
   }
 

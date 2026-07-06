@@ -49,6 +49,9 @@ function pages404Fallback(): Plugin {
       const indexPath = path.join(distDir, 'index.html');
       const fallbackPath = path.join(distDir, '404.html');
       fs.copyFileSync(indexPath, fallbackPath);
+      const testeDir = path.join(distDir, 'teste');
+      fs.mkdirSync(testeDir, { recursive: true });
+      fs.copyFileSync(indexPath, path.join(testeDir, 'index.html'));
       fs.writeFileSync(path.join(distDir, '.nojekyll'), '');
     },
   };
