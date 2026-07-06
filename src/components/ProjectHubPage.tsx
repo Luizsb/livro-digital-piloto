@@ -6,7 +6,7 @@ const SECTIONS = [
     id: 'visao',
     label: 'Visão geral',
     icon: (
-      <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
         <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
         <path d="M12 8v4l3 2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
@@ -16,7 +16,7 @@ const SECTIONS = [
     id: 'problema',
     label: 'Por que observar',
     icon: (
-      <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
         <path d="M12 3v18M5 8h14M7 16h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     ),
@@ -25,7 +25,7 @@ const SECTIONS = [
     id: 'maturidade',
     label: 'Evolução do livro',
     icon: (
-      <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
         <path d="M4 18h16M7 18V13M12 18V9M17 18V5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     ),
@@ -34,7 +34,7 @@ const SECTIONS = [
     id: 'metricas',
     label: 'O que medimos',
     icon: (
-      <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
         <path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
@@ -43,7 +43,7 @@ const SECTIONS = [
     id: 'valor',
     label: 'Possibilidades',
     icon: (
-      <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
         <path d="M4 16l5-5 4 3 7-8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M14 6h6v6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
@@ -53,7 +53,7 @@ const SECTIONS = [
     id: 'piloto',
     label: 'Acesso ao piloto',
     icon: (
-      <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
         <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.8" />
         <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
@@ -256,28 +256,31 @@ export default function ProjectHubPage({
         </div>
       </header>
 
-      <div className="flex">
-        <aside className="hidden w-56 shrink-0 border-r border-slate-200 bg-white lg:sticky lg:top-[73px] lg:block lg:h-[calc(100vh-73px)] lg:overflow-y-auto">
-          <nav className="space-y-1 p-3">
+      <div className="flex w-full">
+        <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white lg:sticky lg:top-[73px] lg:block lg:h-[calc(100vh-73px)] lg:overflow-y-auto xl:w-72">
+          <nav className="space-y-2 p-4">
+            <p className="mb-3 px-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+              Navegação
+            </p>
             {SECTIONS.map((section) => (
               <button
                 key={section.id}
                 type="button"
                 onClick={() => scrollTo(section.id)}
-                className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm transition ${
+                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-left text-[15px] transition ${
                   activeSection === section.id
-                    ? 'bg-[#80298F] font-semibold text-white shadow-sm'
-                    : 'text-slate-600 hover:bg-[#F9DDFF]/50 hover:text-[#80298F]'
+                    ? 'bg-[#80298F] font-semibold text-white shadow-md shadow-[#80298F]/20'
+                    : 'font-medium text-slate-700 hover:bg-[#F9DDFF]/60 hover:text-[#80298F]'
                 }`}
               >
                 {section.icon}
-                <span>{section.label}</span>
+                <span className="leading-snug">{section.label}</span>
               </button>
             ))}
           </nav>
         </aside>
 
-        <main className="min-w-0 flex-1 px-4 py-8 md:px-8 md:py-10 lg:max-w-4xl lg:px-10">
+        <main className="min-w-0 flex-1 bg-slate-100 px-4 py-8 md:px-8 md:py-10 lg:px-10 xl:px-12">
           <div className="mb-8 flex gap-2 overflow-x-auto pb-1 lg:hidden">
             {SECTIONS.map((section) => (
               <button
@@ -305,7 +308,7 @@ export default function ProjectHubPage({
               <br />
               <span className="text-[#80298F]">do Livro Digital</span>
             </h1>
-            <blockquote className="max-w-4xl border-l-4 border-[#80298F] py-1 pl-5">
+            <blockquote className="max-w-5xl border-l-4 border-[#80298F] py-1 pl-5">
               <p className="text-lg leading-relaxed text-slate-600 md:text-xl">
                 Este projeto cria uma camada invisível sobre o livro digital que registra como ele é
                 usado na prática — sem alterar o conteúdo oficial. A ideia é simples: quando
@@ -413,7 +416,7 @@ export default function ProjectHubPage({
               Esses sinais são registrados como eventos ao longo da sessão e podem ser exportados
               para análise no LD Insights.
             </p>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               {PILLARS.map((item) => (
                 <div
                   key={item.title}
@@ -444,7 +447,7 @@ export default function ProjectHubPage({
               conversar sobre o que está funcionando e o que precisa evoluir — sem depender só de
               impressões isoladas.
             </p>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {VALUE_ACTORS.map((item) => (
                 <div
                   key={item.actor}
@@ -474,7 +477,7 @@ export default function ProjectHubPage({
                   leitura que pode orientar uma melhoria concreta.
                 </p>
               </div>
-              <div className="grid gap-3 px-6 py-6 md:grid-cols-5 md:px-8 md:py-8">
+              <div className="grid gap-3 px-6 py-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 md:px-8 md:py-8">
                 {[
                   {
                     title: '1. Evento',
