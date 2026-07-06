@@ -473,7 +473,7 @@ export default function ProjectHubPage({
             </p>
             <h3 className="mb-6 text-lg font-bold text-[#80298F]">Para quem essa inteligência serve</h3>
             <div className="grid items-stretch gap-6 lg:grid-cols-2">
-              {STAKEHOLDER_CARDS.map((item, index) => (
+              {STAKEHOLDER_CARDS.map((item) => (
                 <article
                   key={item.actor}
                   className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
@@ -484,28 +484,27 @@ export default function ProjectHubPage({
                         {item.emoji}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs font-bold uppercase tracking-wider text-[#80298F]">
-                          4.{index + 1}
-                        </p>
-                        <h4 className="mt-0.5 text-lg font-bold text-slate-900">{item.actor}</h4>
+                        <h4 className="text-lg font-bold text-slate-900">{item.actor}</h4>
                         <p className="mt-2 text-sm leading-relaxed text-slate-600">{item.intro}</p>
                       </div>
                     </div>
                   </div>
                   <div className="flex flex-1 flex-col px-6 py-5">
-                    <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                      O que passa a ser possível
-                    </p>
-                    <ul className="flex-1 space-y-2">
-                      {item.benefits.map((benefit) => (
-                        <BenefitItem key={benefit}>{benefit}</BenefitItem>
-                      ))}
-                    </ul>
-                    <div className="mt-6 rounded-xl border-l-4 border-[#80298F] bg-[#F9DDFF]/35 px-4 py-3.5 lg:mt-auto">
+                    <div className="flex-1">
+                      <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                        O que passa a ser possível
+                      </p>
+                      <ul className="space-y-2.5">
+                        {item.benefits.map((benefit) => (
+                          <BenefitItem key={benefit}>{benefit}</BenefitItem>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="mt-8 rounded-xl border-l-4 border-[#80298F] bg-[#F9DDFF]/35 px-4 py-4">
                       <p className="text-xs font-bold uppercase tracking-wider text-[#80298F]">
                         Valor principal
                       </p>
-                      <p className="mt-1.5 text-sm leading-relaxed text-slate-700">{item.mainValue}</p>
+                      <p className="mt-2 text-sm leading-relaxed text-slate-700">{item.mainValue}</p>
                     </div>
                   </div>
                 </article>
@@ -579,7 +578,7 @@ export default function ProjectHubPage({
               consolidado de grupo; os demais representam evoluções naturais da mesma base de dados.
             </p>
             <div className="grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {REPORT_CARDS.map((report, index) => (
+              {REPORT_CARDS.map((report) => (
                 <article
                   key={report.title}
                   className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:border-[#80298F]/25 hover:shadow-md"
@@ -588,10 +587,7 @@ export default function ProjectHubPage({
                     className={`h-1.5 ${report.status === 'available' ? 'bg-[#80298F]' : 'bg-slate-200'}`}
                   />
                   <div className="flex flex-1 flex-col p-5">
-                    <div className="flex items-start justify-between gap-3">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#F9DDFF] text-xs font-bold text-[#80298F]">
-                        5.{index + 1}
-                      </span>
+                    <div className="flex items-start justify-end">
                       <span
                         className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${
                           report.status === 'available'
@@ -602,7 +598,7 @@ export default function ProjectHubPage({
                         {report.status === 'available' ? 'LD Insights' : 'Em evolução'}
                       </span>
                     </div>
-                    <h4 className="mt-4 text-base font-bold leading-snug text-slate-900">
+                    <h4 className="mt-3 text-base font-bold leading-snug text-slate-900">
                       {report.title}
                     </h4>
                     <ul className="mt-4 flex-1 space-y-2 border-t border-slate-100 pt-4">
@@ -613,7 +609,7 @@ export default function ProjectHubPage({
                         </li>
                       ))}
                     </ul>
-                    <div className="mt-5 border-t border-slate-100 pt-4">
+                    <div className="mt-8 border-t border-slate-100 pt-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                         Uso principal
                       </p>
