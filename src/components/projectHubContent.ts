@@ -18,7 +18,7 @@ export const STAKEHOLDER_CARDS: StakeholderCard[] = [
     actor: 'Empresa',
     emoji: '🏢',
     intro:
-      'Para a empresa, a Inteligência de Eventos transforma o Livro Digital em um produto com dados.',
+      'Para a empresa, o Livro Digital Inteligente transforma o produto em algo com dados de uso concretos.',
     benefits: [
       'Demonstrar evolução do digital',
       'Gerar evidências de uso',

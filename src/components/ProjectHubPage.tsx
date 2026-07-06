@@ -247,10 +247,10 @@ export default function ProjectHubPage({
             </div>
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
-                Projeto estratégico
+                Projeto piloto
               </p>
               <p className="truncate text-sm font-bold md:text-base">
-                Inteligência de Eventos do Livro Digital
+                Livro Digital Inteligente
               </p>
             </div>
           </div>
@@ -326,21 +326,21 @@ export default function ProjectHubPage({
 
           <section id="visao" className="scroll-mt-24 pb-16">
             <span className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#F9DDFF] px-3 py-1 text-xs font-semibold text-[#80298F]">
-              Livro digital inteligente · Piloto cap. 07
+              Piloto cap. 07
             </span>
             <h1 className="mb-6 text-3xl font-extrabold leading-tight tracking-tight text-slate-900 md:text-5xl">
-              Inteligência de Eventos
+              Livro Digital
               <br />
-              <span className="text-[#80298F]">do Livro Digital</span>
+              <span className="text-[#80298F]">Inteligente</span>
             </h1>
             <blockquote className="max-w-5xl border-l-4 border-[#80298F] py-1 pl-5">
               <p className="text-lg leading-relaxed text-slate-600 md:text-xl">
                 Este projeto cria uma camada invisível sobre o livro digital que registra como ele é
                 usado na prática — sem alterar o conteúdo oficial. A ideia é simples: quando
                 entendemos a jornada de leitura, as interações e a experiência técnica, o livro
-                deixa de ser só uma versão digital do impresso e passa a{' '}
+                deixa de ser apenas uma versão digital do impresso e passa a ser uma{' '}
                 <strong className="font-semibold text-slate-800">
-                  evoluir com base em evidências reais
+                  experiência inteligente, mensurável e evolutiva
                 </strong>
                 .
               </p>
@@ -368,7 +368,7 @@ export default function ProjectHubPage({
                 </p>
               </div>
               <div className="rounded-2xl border border-[#80298F]/20 bg-[#F9DDFF]/40 p-6">
-                <h3 className="mb-3 text-lg font-bold text-[#80298F]">Com inteligência de eventos</h3>
+                <h3 className="mb-3 text-lg font-bold text-[#80298F]">Com o livro inteligente</h3>
                 <p className="text-sm leading-relaxed text-slate-700 md:text-base">
                   O livro passa a gerar sinais de uso — navegação, interação, percepção e saúde
                   técnica — que podem ser analisados no{' '}
@@ -411,8 +411,7 @@ export default function ProjectHubPage({
                         stage.current ? 'text-[#F9DDFF]' : 'text-slate-400'
                       }`}
                     >
-                      {stage.level}
-                      {stage.current ? ' · piloto atual' : ''}
+                      {stage.current ? 'Piloto atual' : stage.level}
                     </p>
                     <h4 className={`mt-1 font-bold ${stage.current ? 'text-white' : 'text-slate-800'}`}>
                       {stage.title}
@@ -468,10 +467,10 @@ export default function ProjectHubPage({
           <section id="valor" className="scroll-mt-24 border-t border-slate-200 py-16">
             <SectionTitle>4. O que isso pode gerar</SectionTitle>
             <p className="mb-3 max-w-3xl text-slate-600">
-              Quando o livro passa a ser observável, diferentes áreas ganham uma base comum para
+              Quando o livro digital se torna inteligente, diferentes áreas ganham uma base comum para
               conversar sobre o que está funcionando e o que precisa evoluir.
             </p>
-            <h3 className="mb-6 text-lg font-bold text-[#80298F]">Para quem essa inteligência serve</h3>
+            <h3 className="mb-6 text-lg font-bold text-[#80298F]">Para quem o livro inteligente serve</h3>
             <div className="grid items-stretch gap-6 lg:grid-cols-2">
               {STAKEHOLDER_CARDS.map((item) => (
                 <article

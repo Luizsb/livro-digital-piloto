@@ -1,4 +1,4 @@
-import type { GroupTestReport } from './types';
+import type { GroupReport } from './types';
 import { formatDuration, formatWouldUseAgain } from './reportExtractors';
 import { PAGE_COMPLETION_RATE_LABEL } from '../ld/metricDisplayLabels';
 
@@ -70,11 +70,21 @@ function HeatmapBar({ pct, tone }: { pct: number; tone: 'viewed' | 'completed' |
   );
 }
 
-export function GroupReportContent({ report }: { report: GroupTestReport }) {
+export function GroupReportContent({ report }: { report: GroupReport }) {
+  const n = report.valid_sessions_count;
+  const { summary, page_analytics, resource_analytics, feedback_analytics, technical_analytics, data_quality } =
+    report;
+
   return (
     <div className="space-y-6">
-      {(report.warnings.length > 0 || report.loadErrors.length > 0) && (
+      {(report.warnings.length > 0 || report.load_errors.length > 0) && (
         <div className="space-y-2">
+          {data_quality.mixed_book_or_chapter ? (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-900">
+              Arquivos de livros ou capítulos diferentes detectados — revise o lote antes de
+              interpretar os indicadores agregados.
+            </div>
+          ) : null}
           {report.warnings.map((warning) => (
             <div
               key={warning}
@@ -83,86 +93,88 @@ export function GroupReportContent({ report }: { report: GroupTestReport }) {
               {warning}
             </div>
           ))}
-          {report.loadErrors.map((err) => (
+          {report.load_errors.map((err) => (
             <div
-              key={`${err.fileName}:${err.message}`}
+              key={`${err.file_name}:${err.message}`}
               className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
             >
-              <span className="font-medium">{err.fileName}:</span> {err.message}
+              <span className="font-medium">{err.file_name}:</span> {err.message}
             </div>
           ))}
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-        <MetricCard label="Sessões no grupo" value={String(report.sessionCount)} />
-        <MetricCard
-          label="Participantes"
-          value={String(report.participantIds.length)}
-          hint={report.participantIds.join(', ') || undefined}
-        />
-        <MetricCard
-          label="Páginas vistas (média)"
-          value={String(report.avgPagesViewed)}
-          hint={`de ${report.sessions[0]?.totalPages ?? '—'} por sessão`}
-        />
-        <MetricCard
-          label={PAGE_COMPLETION_RATE_LABEL}
-          value={`${report.avgCompletionRate}%`}
-          hint="Média do grupo"
-        />
-        <MetricCard
-          label="Capítulo finalizado"
-          value={`${report.chapterFinishedPct}%`}
-          hint="Clicou em Finalizar teste"
-        />
-        <MetricCard
-          label="Capítulo concluído"
-          value={`${report.chapterCompletedPct}%`}
-          hint="Critério pedagógico mínimo"
-        />
-        <MetricCard
-          label="Abandonou antes do fim"
-          value={`${report.abandonmentPct}%`}
-          hint="Não visualizou todas as páginas"
-        />
-        <MetricCard
-          label="Tempo no livro (média)"
-          value={formatDuration(report.avgVisibleTimeSeconds)}
-        />
-        {report.avgIdleTimeSeconds !== null ? (
+      <Section title="Visão geral do grupo">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
           <MetricCard
-            label="Tempo inativo (média)"
-            value={formatDuration(Math.round(report.avgIdleTimeSeconds))}
+            label="Participantes"
+            value={String(report.participants_count)}
+            hint={summary.participant_ids.join(', ') || undefined}
           />
-        ) : null}
-        <MetricCard
-          label="Qualidade da coleta (média)"
-          value={report.avgDataQualityScore !== null ? String(report.avgDataQualityScore) : '—'}
-          hint={`${report.reliableSessionCount}/${report.sessionCount} sessões ≥ 85`}
-        />
-      </div>
+          <MetricCard
+            label="Sessões válidas"
+            value={String(n)}
+            hint={
+              report.invalid_sessions_count > 0
+                ? `${report.invalid_sessions_count} ignorada(s) (duplicadas ou inválidas)`
+                : `${report.source_reports_count} arquivo(s) carregado(s)`
+            }
+          />
+          <MetricCard
+            label="Páginas vistas (média)"
+            value={String(summary.avg_pages_viewed)}
+            hint={`de ${page_analytics.total_pages} por sessão`}
+          />
+          <MetricCard
+            label={PAGE_COMPLETION_RATE_LABEL}
+            value={`${summary.avg_completion_rate}%`}
+            hint="Média do grupo"
+          />
+          <MetricCard
+            label="Capítulo finalizado"
+            value={`${summary.chapter_finished_pct}%`}
+            hint="Clicou em Finalizar teste"
+          />
+          <MetricCard
+            label="Capítulo concluído"
+            value={`${summary.chapter_completed_pct}%`}
+            hint="Critério pedagógico mínimo"
+          />
+          <MetricCard
+            label="Abandonou antes do fim"
+            value={`${summary.abandonment_pct}%`}
+            hint="Não visualizou todas as páginas"
+          />
+          <MetricCard
+            label="Tempo visível (média)"
+            value={formatDuration(summary.avg_visible_time_seconds)}
+          />
+          {summary.avg_idle_time_seconds !== null ? (
+            <MetricCard
+              label="Tempo inativo (média)"
+              value={formatDuration(Math.round(summary.avg_idle_time_seconds))}
+            />
+          ) : null}
+          <MetricCard
+            label="Qualidade da coleta (média)"
+            value={data_quality.avg_data_quality_score !== null ? String(data_quality.avg_data_quality_score) : '—'}
+            hint={`${data_quality.reliable_session_count}/${n} sessões ≥ ${data_quality.reliable_quality_threshold}`}
+          />
+        </div>
+      </Section>
 
-      <section className="rounded-2xl border-2 border-[#80298F]/20 bg-gradient-to-br from-[#F9DDFF]/60 via-white to-white p-6 shadow-md">
-        <h2 className="text-xl font-bold text-slate-900">Resumo do grupo de teste</h2>
-        <p className="mt-0.5 text-sm text-slate-600">
-          Leitura executiva agregada — padrões de uso, não aprendizagem.
-        </p>
-        <p className="mt-4 text-base leading-relaxed text-slate-800">{report.insight}</p>
-      </section>
-
-      <Section title="Heatmap de páginas (grupo)">
+      <Section title="Jornada por página">
         <p className="mb-4 text-sm text-slate-600">
           Percentual de sessões em que cada página foi visualizada, concluída ou foi o ponto de
           abandono. Útil para identificar onde o capítulo perde participantes.
         </p>
         <div className="space-y-4">
-          {report.pageHeatmap.map((item) => (
+          {page_analytics.heatmap.map((item) => (
             <div key={item.page} className="rounded-lg border border-slate-100 bg-slate-50/50 p-3">
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-sm">
                 <span className="font-semibold text-slate-800">Pág. {item.page}</span>
                 <span className="text-slate-500">
-                  {item.viewedCount}/{report.sessionCount} vistas · {item.completedCount} concluídas
+                  {item.viewedCount}/{n} vistas · {item.completedCount} concluídas
                   {item.abandonmentCount > 0 ? ` · ${item.abandonmentCount} abandono` : ''}
                 </span>
               </div>
@@ -181,14 +193,10 @@ export function GroupReportContent({ report }: { report: GroupTestReport }) {
                 </div>
                 <div>
                   <p className="mb-1 text-[10px] font-medium uppercase text-slate-500">
-                    Abandono ({report.sessionCount > 0 ? Math.round((item.abandonmentCount / report.sessionCount) * 100) : 0}%)
+                    Abandono ({n > 0 ? Math.round((item.abandonmentCount / n) * 100) : 0}%)
                   </p>
                   <HeatmapBar
-                    pct={
-                      report.sessionCount > 0
-                        ? Math.round((item.abandonmentCount / report.sessionCount) * 100)
-                        : 0
-                    }
+                    pct={n > 0 ? Math.round((item.abandonmentCount / n) * 100) : 0}
                     tone="abandon"
                   />
                 </div>
@@ -200,55 +208,96 @@ export function GroupReportContent({ report }: { report: GroupTestReport }) {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Section title="Profundidade de leitura">
-          <DistributionList
-            items={report.readingDepthDistribution}
-            total={report.sessionCount}
-          />
+          <DistributionList items={summary.reading_depth_distribution} total={n} />
         </Section>
-        <Section title="Dispositivos">
-          <DistributionList items={report.deviceDistribution} total={report.sessionCount} />
+        <Section title="Recursos digitais">
+          <dl className="grid gap-4 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="text-slate-500">Recursos abertos (média)</dt>
+              <dd className="font-semibold text-[#80298F]">{resource_analytics.avg_resources_opened}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Sessões com ODA</dt>
+              <dd className="font-semibold text-[#80298F]">{resource_analytics.sessions_with_oda_pct}%</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">ODAs abertas (média)</dt>
+              <dd className="font-semibold text-[#80298F]">{resource_analytics.avg_oda_opened}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Zoom em imagens (média)</dt>
+              <dd className="font-semibold text-[#80298F]">
+                {resource_analytics.avg_image_zoom_total} total ·{' '}
+                {resource_analytics.avg_image_zoom_unique} únicas
+              </dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Vídeos iniciados</dt>
+              <dd className="font-semibold text-[#80298F]">
+                {resource_analytics.sessions_with_video_play_pct}% das sessões
+              </dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Vídeos concluídos</dt>
+              <dd className="font-semibold text-[#80298F]">
+                {resource_analytics.sessions_with_video_completed_pct}% das sessões
+              </dd>
+            </div>
+            {resource_analytics.avg_video_watch_seconds !== null ? (
+              <div>
+                <dt className="text-slate-500">Tempo de vídeo (média)</dt>
+                <dd className="font-semibold text-[#80298F]">
+                  {formatDuration(Math.round(resource_analytics.avg_video_watch_seconds))}
+                </dd>
+              </div>
+            ) : null}
+            <div>
+              <dt className="text-slate-500">Botão do professor</dt>
+              <dd className="font-semibold text-[#80298F]">{resource_analytics.teacher_button_usage_pct}%</dd>
+            </div>
+          </dl>
         </Section>
       </div>
 
-      {report.feedbackCount > 0 ? (
-        <Section title="Feedback agregado">
+      {feedback_analytics.feedback_count > 0 ? (
+        <Section title="Feedback">
           <dl className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <dt className="text-slate-500">Respostas</dt>
               <dd className="font-semibold text-[#80298F]">
-                {report.feedbackCount}/{report.sessionCount}
+                {feedback_analytics.feedback_count}/{n} ({feedback_analytics.feedback_rate_pct}%)
               </dd>
             </div>
             <div>
               <dt className="text-slate-500">Nota geral (média)</dt>
               <dd className="font-semibold text-[#80298F]">
-                {report.avgRating?.toFixed(1) ?? '—'}/5
+                {feedback_analytics.avg_rating?.toFixed(1) ?? '—'}/5
               </dd>
             </div>
             <div>
               <dt className="text-slate-500">Clareza da navegação</dt>
               <dd className="font-semibold text-[#80298F]">
-                {report.avgNavigationClarity?.toFixed(1) ?? '—'}/5
+                {feedback_analytics.avg_navigation_clarity?.toFixed(1) ?? '—'}/5
               </dd>
             </div>
             <div>
               <dt className="text-slate-500">Conforto visual</dt>
               <dd className="font-semibold text-[#80298F]">
-                {report.avgVisualComfort?.toFixed(1) ?? '—'}/5
+                {feedback_analytics.avg_visual_comfort?.toFixed(1) ?? '—'}/5
               </dd>
             </div>
             <div>
               <dt className="text-slate-500">Utilidade dos recursos</dt>
               <dd className="font-semibold text-[#80298F]">
-                {report.avgResourceUsefulness?.toFixed(1) ?? '—'}/5
+                {feedback_analytics.avg_resource_usefulness?.toFixed(1) ?? '—'}/5
               </dd>
             </div>
           </dl>
-          {Object.keys(report.wouldUseAgainDistribution).length > 0 ? (
+          {Object.keys(feedback_analytics.would_use_again_distribution).length > 0 ? (
             <div className="mt-4">
               <p className="text-sm font-medium text-slate-700">Usaria novamente</p>
               <ul className="mt-2 space-y-1 text-sm text-slate-600">
-                {Object.entries(report.wouldUseAgainDistribution).map(([key, count]) => (
+                {Object.entries(feedback_analytics.would_use_again_distribution).map(([key, count]) => (
                   <li key={key}>
                     {formatWouldUseAgain(key)}: {count}
                   </li>
@@ -258,31 +307,95 @@ export function GroupReportContent({ report }: { report: GroupTestReport }) {
           ) : null}
         </Section>
       ) : (
-        <Section title="Feedback agregado">
+        <Section title="Feedback">
           <p className="text-sm text-slate-500">Nenhum feedback enviado neste lote.</p>
         </Section>
       )}
 
-      <Section title="Engajamento e técnica">
-        <dl className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
-          <div>
-            <dt className="text-slate-500">Recursos abertos (média)</dt>
-            <dd className="font-semibold text-[#80298F]">{report.avgResourcesOpened}</dd>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Section title="Ambiente técnico">
+          <div className="space-y-6">
+            <div>
+              <p className="mb-2 text-sm font-medium text-slate-700">Dispositivos</p>
+              <DistributionList items={technical_analytics.device_distribution} total={n} />
+            </div>
+            <div>
+              <p className="mb-2 text-sm font-medium text-slate-700">Navegadores</p>
+              <DistributionList items={technical_analytics.browser_distribution} total={n} />
+            </div>
+            <dl className="grid gap-4 text-sm sm:grid-cols-2">
+              <div>
+                <dt className="text-slate-500">Sessões com alerta técnico</dt>
+                <dd className="font-semibold text-[#80298F]">
+                  {technical_analytics.sessions_with_technical_issues} ({technical_analytics.technical_issues_pct}%)
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Erros de runtime</dt>
+                <dd className="font-semibold text-[#80298F]">{technical_analytics.total_runtime_errors}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Erros de carregamento</dt>
+                <dd className="font-semibold text-[#80298F]">{technical_analytics.total_asset_load_errors}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Erros de renderização</dt>
+                <dd className="font-semibold text-[#80298F]">{technical_analytics.total_render_errors}</dd>
+              </div>
+            </dl>
           </div>
-          <div>
-            <dt className="text-slate-500">Usou botão do professor</dt>
-            <dd className="font-semibold text-[#80298F]">{report.teacherButtonUsagePct}%</dd>
-          </div>
-          <div>
-            <dt className="text-slate-500">Sessões com alerta técnico</dt>
-            <dd className="font-semibold text-[#80298F]">{report.technicalIssuesPct}%</dd>
-          </div>
-        </dl>
-      </Section>
+        </Section>
+
+        <Section title="Qualidade da coleta">
+          <dl className="grid gap-4 text-sm">
+            <div>
+              <dt className="text-slate-500">Score médio</dt>
+              <dd className="font-semibold text-[#80298F]">
+                {data_quality.avg_data_quality_score ?? '—'}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Sessões confiáveis (≥ {data_quality.reliable_quality_threshold})</dt>
+              <dd className="font-semibold text-[#80298F]">
+                {data_quality.reliable_session_count}/{n}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Sessões duplicadas ignoradas</dt>
+              <dd className="font-semibold text-[#80298F]">
+                {data_quality.duplicate_session_ids.length}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Arquivos com erro de carga</dt>
+              <dd className="font-semibold text-[#80298F]">{data_quality.load_error_count}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Avisos por sessão</dt>
+              <dd className="font-semibold text-[#80298F]">{data_quality.per_session_warnings_count}</dd>
+            </div>
+          </dl>
+        </Section>
+      </div>
+
+      <section className="rounded-2xl border-2 border-[#80298F]/20 bg-gradient-to-br from-[#F9DDFF]/60 via-white to-white p-6 shadow-md">
+        <h2 className="text-xl font-bold text-slate-900">Insights automáticos</h2>
+        <p className="mt-0.5 text-sm text-slate-600">
+          Leitura executiva agregada — padrões de uso, não aprendizagem.
+        </p>
+        <ul className="mt-4 space-y-3">
+          {report.insights.map((insight) => (
+            <li key={insight} className="flex gap-2 text-base leading-relaxed text-slate-800">
+              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#80298F]" aria-hidden />
+              <span>{insight}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <Section title="Sessões do grupo">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-left text-sm">
+          <table className="w-full min-w-[800px] text-left text-sm">
             <thead>
               <tr className="border-b border-slate-200 text-slate-500">
                 <th className="pb-2 pr-4 font-medium">Participante</th>
@@ -296,7 +409,10 @@ export function GroupReportContent({ report }: { report: GroupTestReport }) {
             </thead>
             <tbody>
               {report.sessions.map((row) => (
-                <tr key={`${row.participantId}:${row.fileName}`} className="border-b border-slate-100">
+                <tr
+                  key={`${row.sessionId}:${row.fileName}`}
+                  className="border-b border-slate-100"
+                >
                   <td className="py-2.5 pr-4 font-semibold text-[#80298F]">{row.participantId}</td>
                   <td className="py-2.5 pr-4 text-slate-700">
                     {row.pagesViewedCount}/{row.totalPages}

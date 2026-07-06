@@ -1,8 +1,9 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, type DragEvent } from 'react';
 import { getChapterTotalPages, resolveChapterPageBounds } from '../ld/chapterPageConfig';
 import { parseReportFile, parseMultipleReportFiles, ReportParseError } from './parseReport';
 import type { DashboardViewMode, ParsedDashboardReport } from './types';
-import { buildGroupTestReport } from './buildGroupReport';
+import { aggregateSessionReports } from './buildGroupReport';
+import { downloadGroupReportJson } from './exportGroupReport';
 import GroupReportContent from './GroupReportContent';
 import {
   buildChapterStatusInsight,
@@ -1186,10 +1187,10 @@ function DashboardPage() {
     [],
   );
   const [error, setError] = useState<string | null>(null);
-  const [fileLabel, setFileLabel] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const groupReport = useMemo(
-    () => buildGroupTestReport(groupSessions, groupLoadErrors),
+    () => aggregateSessionReports(groupSessions, groupLoadErrors),
     [groupSessions, groupLoadErrors],
   );
 
@@ -1201,10 +1202,8 @@ function DashboardPage() {
       setParsed(result);
       setGroupSessions([]);
       setGroupLoadErrors([]);
-      setFileLabel(file.name);
     } catch (err) {
       setParsed(null);
-      setFileLabel(null);
       setError(
         err instanceof ReportParseError
           ? err.message
@@ -1213,16 +1212,15 @@ function DashboardPage() {
     }
   };
 
-  const handleGroupFiles = async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
+  const handleGroupFiles = async (files: File[]) => {
+    if (files.length === 0) return;
     setError(null);
-    const result = await parseMultipleReportFiles([...files]);
+    const result = await parseMultipleReportFiles(files);
     setGroupSessions(result.sessions);
     setGroupLoadErrors(result.loadErrors);
     setParsed(null);
 
     if (result.sessions.length === 0) {
-      setFileLabel(null);
       setError(
         result.loadErrors.length > 0
           ? 'Nenhum JSON válido no lote. Verifique os arquivos selecionados.'
@@ -1230,21 +1228,56 @@ function DashboardPage() {
       );
       return;
     }
+  };
 
-    setFileLabel(
-      result.sessions.length === 1
-        ? result.sessions[0].sourceFileName ?? '1 sessão'
-        : `${result.sessions.length} sessões`,
+  const filterJsonFiles = (files: File[]): File[] =>
+    files.filter(
+      (file) =>
+        file.name.toLowerCase().endsWith('.json') || file.type === 'application/json',
     );
+
+  const handleFiles = (files: File[]) => {
+    const jsonFiles = filterJsonFiles(files);
+    if (jsonFiles.length === 0) {
+      setError('Selecione ao menos um arquivo .json exportado pelo piloto.');
+      return;
+    }
+    if (jsonFiles.length >= 2) {
+      setMode('group');
+      void handleGroupFiles(jsonFiles);
+      return;
+    }
+    setMode('single');
+    void handleSingleFile(jsonFiles[0] ?? null);
   };
 
   const handleFileInput = (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    if (mode === 'single') {
-      void handleSingleFile(files[0] ?? null);
-      return;
+    handleFiles([...files]);
+  };
+
+  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  const handleDragEnter = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const related = event.relatedTarget as Node | null;
+    if (!event.currentTarget.contains(related)) {
+      setIsDragOver(false);
     }
-    void handleGroupFiles(files);
+  };
+
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragOver(false);
+    handleFiles([...event.dataTransfer.files]);
   };
 
   const switchMode = (next: DashboardViewMode) => {
@@ -1253,7 +1286,6 @@ function DashboardPage() {
     setParsed(null);
     setGroupSessions([]);
     setGroupLoadErrors([]);
-    setFileLabel(null);
     if (inputRef.current) {
       inputRef.current.value = '';
     }
@@ -1274,9 +1306,9 @@ function DashboardPage() {
               <p className="mt-1 text-sm text-white/90">
                 {mode === 'group' ? (
                   <>
-                    Grupo de teste · {groupReport.bookId} · {groupReport.chapterId} ·{' '}
-                    {groupReport.sessionCount} sessão
-                    {groupReport.sessionCount === 1 ? '' : 'ões'}
+                    Relatório consolidado · {groupReport.book_id} · {groupReport.chapter_id} ·{' '}
+                    {groupReport.valid_sessions_count} sessão
+                    {groupReport.valid_sessions_count === 1 ? '' : 'ões'}
                   </>
                 ) : (
                   <>
@@ -1290,53 +1322,38 @@ function DashboardPage() {
             ) : (
               <p className="mt-1 text-sm text-white/90">
                 {mode === 'group'
-                  ? 'Carregue vários JSONs para o relatório do grupo de teste'
+                  ? 'Carregue vários JSONs para o relatório consolidado multi-sessão'
                   : 'Carregue um relatório JSON exportado pelo piloto'}
               </p>
             )}
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex rounded-lg border border-white/30 p-0.5">
-              <button
-                type="button"
-                onClick={() => switchMode('single')}
-                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
-                  mode === 'single' ? 'bg-white text-[#80298F]' : 'text-white hover:bg-white/10'
-                }`}
-              >
-                1 sessão
-              </button>
-              <button
-                type="button"
-                onClick={() => switchMode('group')}
-                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
-                  mode === 'group' ? 'bg-white text-[#80298F]' : 'text-white hover:bg-white/10'
-                }`}
-              >
-                Grupo de teste
-              </button>
-            </div>
             <input
               ref={inputRef}
               type="file"
               accept="application/json,.json"
-              multiple={mode === 'group'}
+              multiple
               className="hidden"
               onChange={(e) => handleFileInput(e.target.files)}
             />
-            <button
-              type="button"
-              onClick={() => inputRef.current?.click()}
-              className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-[#80298F] shadow transition hover:bg-[#F9DDFF]"
-            >
-              {fileLabel
-                ? mode === 'group'
-                  ? 'Trocar lote'
-                  : 'Trocar JSON'
-                : mode === 'group'
-                  ? 'Carregar JSONs do grupo'
-                  : 'Carregar relatório JSON'}
-            </button>
+            {hasContent ? (
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                className="rounded-lg border border-white/40 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                {mode === 'group' ? 'Trocar lote' : 'Trocar arquivo'}
+              </button>
+            ) : null}
+            {mode === 'group' && groupSessions.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => downloadGroupReportJson(groupReport)}
+                className="rounded-lg border border-white/40 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                Exportar JSON consolidado
+              </button>
+            ) : null}
             <a
               href="#/projeto"
               className="rounded-lg border border-white/40 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
@@ -1348,6 +1365,41 @@ function DashboardPage() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-8">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-slate-800">Tipo de relatório</p>
+            <p className="text-xs text-slate-500">
+              {mode === 'group'
+                ? 'Consolida vários JSONs exportados pelo piloto'
+                : 'Analisa um único JSON de sessão'}
+            </p>
+          </div>
+          <div className="flex w-fit rounded-lg border border-slate-200 bg-white p-0.5 shadow-sm">
+            <button
+              type="button"
+              onClick={() => switchMode('single')}
+              className={`rounded-md px-4 py-2 text-sm font-semibold transition ${
+                mode === 'single'
+                  ? 'bg-[#80298F] text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              1 sessão
+            </button>
+            <button
+              type="button"
+              onClick={() => switchMode('group')}
+              className={`rounded-md px-4 py-2 text-sm font-semibold transition ${
+                mode === 'group'
+                  ? 'bg-[#80298F] text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              Consolidado
+            </button>
+          </div>
+        </div>
+
         {error ? (
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-6 text-center text-red-800">
             {error}
@@ -1355,29 +1407,56 @@ function DashboardPage() {
         ) : null}
 
         {!hasContent && !error ? (
-          <div className="rounded-2xl border-2 border-dashed border-[#80298F]/30 bg-white px-6 py-16 text-center shadow-sm">
+          <div
+            role="button"
+            tabIndex={0}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                inputRef.current?.click();
+              }
+            }}
+            onDragOver={handleDragOver}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => inputRef.current?.click()}
+            className={`cursor-pointer rounded-2xl border-2 border-dashed px-6 py-16 text-center shadow-sm transition ${
+              isDragOver
+                ? 'border-[#80298F] bg-[#F9DDFF]/40 ring-2 ring-[#80298F]/25'
+                : 'border-[#80298F]/30 bg-white hover:border-[#80298F]/50 hover:bg-[#F9DDFF]/10'
+            }`}
+          >
             <p className="text-lg font-semibold text-slate-800">
-              {mode === 'group' ? 'Nenhum lote carregado' : 'Nenhum relatório carregado'}
+              {isDragOver
+                ? 'Solte os arquivos aqui'
+                : mode === 'group'
+                  ? 'Nenhum lote carregado'
+                  : 'Nenhum relatório carregado'}
             </p>
             <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
               {mode === 'group' ? (
                 <>
-                  Exporte um JSON por participante no piloto e selecione todos os arquivos de uma
-                  vez para gerar o relatório consolidado da turma.
+                  Exporte um JSON por participante no piloto e arraste ou selecione dois ou mais
+                  arquivos para gerar o relatório consolidado multi-sessão.
                 </>
               ) : (
                 <>
-                  Exporte os eventos no piloto (botão &quot;Exportar eventos JSON&quot;) e carregue o
-                  arquivo aqui para visualizar indicadores de uso, leitura e feedback.
+                  Exporte os eventos no piloto (botão &quot;Exportar eventos JSON&quot;) e arraste ou
+                  selecione um arquivo para o relatório individual — vários JSONs abrem o modo
+                  consolidado automaticamente.
                 </>
               )}
             </p>
             <button
               type="button"
-              onClick={() => inputRef.current?.click()}
+              onClick={(event) => {
+                event.stopPropagation();
+                inputRef.current?.click();
+              }}
               className="mt-6 rounded-full bg-[#80298F] px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-[#6b2278]"
             >
-              {mode === 'group' ? 'Selecionar JSONs (.json)' : 'Selecionar arquivo .json'}
+              {mode === 'group' ? 'Selecionar JSONs (.json)' : 'Selecionar arquivo(s) .json'}
             </button>
           </div>
         ) : null}
