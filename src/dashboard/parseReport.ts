@@ -227,11 +227,22 @@ export function parseReportJson(raw: unknown): ParsedDashboardReport {
   const chapterManifest = resolveChapterManifest(raw, summary);
 
   const report: DashboardReport = {
+    report_type: 'session_report',
+    schema_version:
+      typeof raw.schema_version === 'string' ? raw.schema_version : 'legacy',
     exported_at: exportedAt,
     exported_at_br: exportedAtBr,
     timezone: ANALYTICS_TIMEZONE_BR,
     book_id: typeof raw.book_id === 'string' ? raw.book_id : '—',
     chapter_id: typeof raw.chapter_id === 'string' ? raw.chapter_id : '—',
+    participant_id:
+      typeof raw.participant_id === 'string'
+        ? raw.participant_id
+        : summary.participant_ids[0] ?? events[0]?.participant_id ?? '',
+    session_id:
+      typeof raw.session_id === 'string'
+        ? raw.session_id
+        : summary.session_ids[0] ?? events[0]?.session_id ?? '',
     event_count: typeof raw.event_count === 'number' ? raw.event_count : events.length,
     ...(chapterManifest ? { chapter_manifest: chapterManifest } : {}),
     summary: {

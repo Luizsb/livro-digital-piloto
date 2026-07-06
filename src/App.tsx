@@ -7,17 +7,19 @@ import FinishTestButton from './components/FinishTestButton';
 import SessionLifecycle from './components/SessionLifecycle';
 import DashboardPage from './dashboard/DashboardPage';
 import ParticipantHubRoute from './components/ParticipantHubRoute';
+import TestPilotRoute from './components/TestPilotRoute';
 import AnalyticsErrorBoundary from './components/AnalyticsErrorBoundary';
 import { SessionProvider, useAnalytics } from './ld/SessionProvider';
 
-function useHashView(): 'book' | 'dashboard' | 'projeto' {
-  const resolveView = (): 'book' | 'dashboard' | 'projeto' => {
+function useHashView(): 'book' | 'dashboard' | 'projeto' | 'testepiloto' {
+  const resolveView = (): 'book' | 'dashboard' | 'projeto' | 'testepiloto' => {
     if (window.location.hash.startsWith('#/dashboard')) return 'dashboard';
     if (window.location.hash.startsWith('#/projeto')) return 'projeto';
+    if (window.location.hash.startsWith('#/testepiloto')) return 'testepiloto';
     return 'book';
   };
 
-  const [view, setView] = useState<'book' | 'dashboard' | 'projeto'>(resolveView);
+  const [view, setView] = useState<'book' | 'dashboard' | 'projeto' | 'testepiloto'>(resolveView);
 
   useEffect(() => {
     const onHashChange = () => setView(resolveView());
@@ -77,6 +79,10 @@ function BookAppContent() {
 
   if (view === 'projeto') {
     return <ParticipantHubRoute />;
+  }
+
+  if (view === 'testepiloto') {
+    return <TestPilotRoute />;
   }
 
   return (

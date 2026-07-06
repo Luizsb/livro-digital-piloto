@@ -2,10 +2,17 @@ import { useState } from 'react';
 import { useAnalytics } from '../ld/SessionProvider';
 import { exportSessionReport } from '../ld/exportSessionReport';
 import { reloadForNewSession } from '../ld/resetLdStorage';
+import { getPilotParticipantName } from './pilotParticipants';
 
-function TestFinishedScreen() {
+interface TestFinishedScreenProps {
+  mode?: 'default' | 'pilot';
+}
+
+function TestFinishedScreen({ mode = 'default' }: TestFinishedScreenProps) {
   const { track, sessionId, participantId } = useAnalytics();
   const [exportStatus, setExportStatus] = useState<string | null>(null);
+  const isPilot = mode === 'pilot';
+  const participantName = getPilotParticipantName(participantId);
 
   const handleExport = () => {
     const payload = exportSessionReport(sessionId, track, {
@@ -27,15 +34,27 @@ function TestFinishedScreen() {
         aria-labelledby="test-finished-title"
       >
         <h1 id="test-finished-title" className="mb-2 text-xl font-bold text-[#80298F]">
-          Teste finalizado
+          {isPilot ? 'Teste concluído' : 'Teste finalizado'}
         </h1>
         <p className="mb-2 text-sm text-slate-600">
-          A sessão foi finalizada com sucesso. Exporte o relatório JSON antes de iniciar um novo
-          teste.
+          {isPilot ? (
+            <>
+              Obrigado por participar. Exporte o relatório JSON abaixo e envie o arquivo para a
+              equipe do piloto.
+            </>
+          ) : (
+            <>
+              A sessão foi finalizada com sucesso. Exporte o relatório JSON antes de iniciar um novo
+              teste.
+            </>
+          )}
         </p>
         {participantId ? (
           <p className="mb-6 text-xs text-slate-500">
-            Participante: <span className="font-semibold text-slate-700">{participantId}</span>
+            Participante:{' '}
+            <span className="font-semibold text-slate-700">
+              {participantName ? `${participantName} (${participantId})` : participantId}
+            </span>
           </p>
         ) : null}
 
@@ -47,13 +66,19 @@ function TestFinishedScreen() {
           >
             Exportar relatório JSON
           </button>
-          <button
-            type="button"
-            onClick={handleNewTest}
-            className="w-full rounded-lg border border-[#80298F] bg-white px-4 py-3 font-semibold text-[#80298F] transition hover:bg-[#F9DDFF]"
-          >
-            Iniciar novo teste
-          </button>
+          {isPilot ? (
+            <p className="text-center text-xs text-slate-500">
+              Após o download, você pode fechar esta aba.
+            </p>
+          ) : (
+            <button
+              type="button"
+              onClick={handleNewTest}
+              className="w-full rounded-lg border border-[#80298F] bg-white px-4 py-3 font-semibold text-[#80298F] transition hover:bg-[#F9DDFF]"
+            >
+              Iniciar novo teste
+            </button>
+          )}
         </div>
 
         {exportStatus ? (

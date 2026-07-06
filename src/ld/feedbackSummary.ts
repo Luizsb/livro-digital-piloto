@@ -1,7 +1,5 @@
 import type { AnalyticsEvent } from './sessionTypes';
 import { ANALYTICS_EVENT_NAMES } from './sessionTypes';
-import { loadFeedbackComments } from './feedbackComments';
-
 export interface FeedbackSummary {
   submitted: boolean;
   rating?: number;
@@ -11,8 +9,6 @@ export interface FeedbackSummary {
   would_use_again?: string;
   has_comment?: boolean;
   comment_length?: number;
-  /** Texto em `feedback_comments` no export (não no evento principal). */
-  comment?: string;
 }
 
 export function buildFeedbackSummary(events: AnalyticsEvent[]): FeedbackSummary {
@@ -26,9 +22,6 @@ export function buildFeedbackSummary(events: AnalyticsEvent[]): FeedbackSummary 
 
   const latest = feedbackEvents[feedbackEvents.length - 1];
   const meta = latest.metadata ?? {};
-  const commentRecord = loadFeedbackComments().find(
-    (item) => item.session_id === latest.session_id,
-  );
 
   return {
     submitted: true,
@@ -42,6 +35,5 @@ export function buildFeedbackSummary(events: AnalyticsEvent[]): FeedbackSummary 
       typeof meta.would_use_again === 'string' ? meta.would_use_again : undefined,
     has_comment: typeof meta.has_comment === 'boolean' ? meta.has_comment : undefined,
     comment_length: typeof meta.comment_length === 'number' ? meta.comment_length : undefined,
-    comment: commentRecord?.comment,
   };
 }

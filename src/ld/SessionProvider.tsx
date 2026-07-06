@@ -22,10 +22,9 @@ import {
   trackEvent as persistTrackEvent,
 } from './recordEvent';
 import {
-  markSessionEventTracked,
-  setSessionStartedAt,
   wasSessionEventTracked,
   getSessionStartedAt,
+  setSessionStartedAt,
 } from './sessionDedup';
 import {
   isEventAllowedWhenFinished,
@@ -35,12 +34,9 @@ import {
   syncSessionStatus,
   type SessionStatus,
 } from './sessionStatus';
-import { captureSessionDeviceContext } from './deviceContext';
 import { capturePageLoadTiming } from './captureLoadTiming';
-import {
-  resumeSessionVisibleTimeTracking,
-  startSessionVisibleTimeTracking,
-} from './sessionVisibleTime';
+import { resumeSessionVisibleTimeTracking } from './sessionVisibleTime';
+import { ensureSessionStarted } from './ensureSessionStarted';
 
 interface AnalyticsContextValue {
   sessionId: string;
@@ -96,9 +92,16 @@ export function SessionProvider({
       setParticipantIdState(normalized);
       setSessionStatus('active');
       setSessionStatusState('active');
+      ensureSessionStarted({
+        sessionId,
+        participantId: normalized,
+        bookId,
+        chapterId,
+      });
+      sessionStartedRef.current = true;
       return true;
     },
-    [],
+    [bookId, chapterId, sessionId],
   );
 
   const track = useCallback(
@@ -135,15 +138,14 @@ export function SessionProvider({
       return;
     }
     sessionStartedRef.current = true;
-    markSessionEventTracked(sessionId, ANALYTICS_EVENT_NAMES.sessionStarted);
-    setSessionStartedAt(new Date().toISOString());
-    startSessionVisibleTimeTracking();
-    setSessionStatus('active');
-    setSessionStatusState('active');
-    track(ANALYTICS_EVENT_NAMES.sessionStarted, {
-      ...captureSessionDeviceContext(),
+    ensureSessionStarted({
+      sessionId,
+      participantId,
+      bookId,
+      chapterId,
     });
-  }, [participantId, refreshSessionStatus, sessionId, track]);
+    refreshSessionStatus();
+  }, [bookId, chapterId, participantId, refreshSessionStatus, sessionId]);
 
   useEffect(() => {
     if (!participantId) return;

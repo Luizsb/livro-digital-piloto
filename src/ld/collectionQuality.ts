@@ -75,6 +75,32 @@ function computeCompletionRate(pagesViewed: number, pagesCompleted: number): num
   return Math.round((pagesCompleted / pagesViewed) * 100);
 }
 
+type SessionFinishTrigger = 'finish_button' | 'unload' | 'unknown';
+
+function resolveSessionFinishTrigger(events: AnalyticsEvent[]): SessionFinishTrigger {
+  const finishedEvents = events.filter(
+    (event) => event.event_name === ANALYTICS_EVENT_NAMES.sessionFinished,
+  );
+  if (finishedEvents.length === 0) return 'unknown';
+
+  const last = finishedEvents[finishedEvents.length - 1];
+  const trigger = last.metadata?.finish_trigger;
+  if (trigger === 'finish_button' || trigger === 'unload') {
+    return trigger;
+  }
+
+  if (events.some((event) => event.event_name === ANALYTICS_EVENT_NAMES.chapterFinished)) {
+    return 'finish_button';
+  }
+
+  return 'unknown';
+}
+
+function sessionFinishedRequiresChapterFinished(events: AnalyticsEvent[]): boolean {
+  const trigger = resolveSessionFinishTrigger(events);
+  return trigger === 'finish_button';
+}
+
 function collectPageSetsFromEvents(events: AnalyticsEvent[]) {
   const pagesViewed = new Set<number>();
   const pagesCompleted = new Set<number>();
@@ -263,7 +289,8 @@ export function buildCollectionQualityChecks(
     label: 'chapter_finished ao finalizar o capítulo',
     ok:
       !has(ANALYTICS_EVENT_NAMES.sessionFinished) ||
-      summary.chapter_finished_count > 0,
+      summary.chapter_finished_count > 0 ||
+      !sessionFinishedRequiresChapterFinished(events),
     severity: 'major',
   });
 
@@ -485,7 +512,11 @@ export function buildCollectionQuality(
     }
   }
 
-  if (has(ANALYTICS_EVENT_NAMES.sessionFinished) && summary.chapter_finished_count === 0) {
+  if (
+    has(ANALYTICS_EVENT_NAMES.sessionFinished) &&
+    summary.chapter_finished_count === 0 &&
+    sessionFinishedRequiresChapterFinished(events)
+  ) {
     inconsistent_event_warnings.push(
       'session_finished sem chapter_finished correspondente.',
     );

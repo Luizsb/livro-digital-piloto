@@ -45,6 +45,7 @@ export function finishSessionOnUnload(
     track(ANALYTICS_EVENT_NAMES.sessionFinished, {
       ...pickSessionFinishedEventMetadata(metadata),
       reading_depth_label: getReadingDepthLabel(metadata.reading_depth),
+      finish_trigger: 'unload',
       ...captureResourceTimingMetadata(),
     });
 
@@ -101,6 +102,7 @@ export function finishTestFromButton(
   track(ANALYTICS_EVENT_NAMES.sessionFinished, {
     ...pickSessionFinishedEventMetadata(sessionMetadata),
     reading_depth_label: getReadingDepthLabel(sessionMetadata.reading_depth),
+    finish_trigger: 'finish_button',
     ...captureResourceTimingMetadata(),
   });
 

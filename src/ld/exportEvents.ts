@@ -19,12 +19,18 @@ export type ExportedFeedbackComment = ReturnType<typeof loadFeedbackComments>[nu
   submitted_date_br: string;
 };
 
+export const EXPORT_SCHEMA_VERSION = '1.0.0';
+
 export interface ExportPayload {
+  report_type: 'session_report';
+  schema_version: string;
   exported_at: string;
   exported_at_br: string;
   timezone: typeof ANALYTICS_TIMEZONE_BR;
   book_id: string;
   chapter_id: string;
+  participant_id: string;
+  session_id: string;
   event_count: number;
   chapter_manifest?: ChapterManifest;
   summary: ReturnType<typeof buildEventSummary> & { exported_at_br: string };
@@ -68,12 +74,19 @@ export function buildExportPayload(): ExportPayload {
     tryGetChapterManifest(BOOK_PILOT.book_id, BOOK_PILOT.chapter_id) ??
     getActiveChapterManifest();
 
+  const participantId = summary.participant_ids[0] ?? events[0]?.participant_id ?? '';
+  const sessionId = summary.session_ids[0] ?? events[0]?.session_id ?? '';
+
   return {
+    report_type: 'session_report',
+    schema_version: EXPORT_SCHEMA_VERSION,
     exported_at: exportedAt,
     exported_at_br: formatDateTimeBr(exportedAt),
     timezone: ANALYTICS_TIMEZONE_BR,
     book_id: BOOK_PILOT.book_id,
     chapter_id: BOOK_PILOT.chapter_id,
+    participant_id: participantId,
+    session_id: sessionId,
     event_count: events.length,
     chapter_manifest: chapterManifest,
     summary: {

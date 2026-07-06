@@ -14,13 +14,31 @@ export interface ModalResourceSessionInput {
 
 interface OpenModalResourceSession extends ModalResourceSessionInput {
   instanceId: string;
+  sessionId: string;
   openedAtMs: number;
+  openedTracked: boolean;
+  track: (eventName: string, metadata?: Record<string, unknown>) => void;
 }
 
 const openSessions = new Map<string, OpenModalResourceSession>();
 
 function computeDurationSeconds(openedAtMs: number): number {
   return Math.max(1, Math.round((Date.now() - openedAtMs) / 1000));
+}
+
+function tryEmitResourceOpened(instanceId: string): void {
+  const session = openSessions.get(instanceId);
+  if (!session || session.openedTracked) return;
+  if (!isPageTrackingReady(session.sessionId)) return;
+
+  trackResourceOpened({
+    linkId: session.linkId,
+    page: session.page,
+    type: session.type,
+    href: session.href,
+    track: session.track,
+  });
+  session.openedTracked = true;
 }
 
 export interface RegisterModalResourceSessionInput extends ModalResourceSessionInput {
@@ -39,18 +57,23 @@ export function registerModalResourceSession({
   openSessions.set(instanceId, {
     ...input,
     instanceId,
+    sessionId,
     openedAtMs: Date.now(),
-  });
-
-  if (!isPageTrackingReady(sessionId)) return;
-
-  trackResourceOpened({
-    linkId: input.linkId,
-    page: input.page,
-    type: input.type,
-    href: input.href,
+    openedTracked: false,
     track,
   });
+
+  tryEmitResourceOpened(instanceId);
+}
+
+/** Emite `resource_opened` pendente após session_started + book_opened. */
+export function flushPendingModalResourceOpened(sessionId: string): void {
+  for (const instanceId of openSessions.keys()) {
+    const session = openSessions.get(instanceId);
+    if (session?.sessionId === sessionId) {
+      tryEmitResourceOpened(instanceId);
+    }
+  }
 }
 
 export function endModalResourceSession(

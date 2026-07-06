@@ -5,6 +5,7 @@ import {
   type ContentInteractionsSummary,
 } from '../ld/contentInteractionsSummary';
 import { buildFeedbackSummary, type FeedbackSummary } from '../ld/feedbackSummary';
+import { loadFeedbackComments } from '../ld/feedbackComments';
 import {
   buildReadingJourneySummary,
   type ReadingJourneySummary,
@@ -418,14 +419,17 @@ function CollectionSummary({
               <dt className="text-slate-500">Recursos digitais</dt>
               <dd className="font-semibold text-[#80298F]">{feedback.resource_usefulness}/5</dd>
             </div>
-            {feedback.comment ? (
+            {(() => {
+              const comment = loadFeedbackComments()[loadFeedbackComments().length - 1]?.comment;
+              return comment ? (
               <div className="col-span-2">
                 <dt className="text-slate-500">Comentário</dt>
                 <dd className="mt-1 whitespace-pre-wrap font-medium text-slate-800">
-                  {feedback.comment}
+                  {comment}
                 </dd>
               </div>
-            ) : null}
+              ) : null;
+            })()}
           </dl>
         </div>
       ) : null}

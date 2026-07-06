@@ -9,10 +9,26 @@ import {
 import { subscribeToEventsUpdates } from '../ld/recordEvent';
 import TestFinishedScreen from './TestFinishedScreen';
 import ProjectHubPage from './ProjectHubPage';
+import TestPilotGate from './TestPilotGate';
+import { isPilotParticipantId } from './pilotParticipants';
+import { flushPendingModalResourceOpened } from '../ld/modalResourceTracking';
+import { getSessionStatus } from '../ld/sessionStatus';
+
+function resolveInitialReady(
+  mode: 'default' | 'pilot',
+  participantId: string | null,
+): boolean {
+  if (!participantId) return false;
+  if (mode === 'pilot') {
+    return getSessionStatus() === 'active';
+  }
+  return true;
+}
 
 interface ParticipantGateProps {
   children: ReactNode;
   showFinishScreen: boolean;
+  mode?: 'default' | 'pilot';
 }
 
 function extractParticipantNumber(participantId: string | null): string {
@@ -25,14 +41,17 @@ function extractParticipantNumber(participantId: string | null): string {
  * Solicita código anônimo (P01, P02…) antes de exibir o livro.
  * Garante ordem: session_started → book_opened → (conteúdo + page_viewed).
  */
-function ParticipantGate({ children, showFinishScreen }: ParticipantGateProps) {
+function ParticipantGate({ children, showFinishScreen, mode = 'default' }: ParticipantGateProps) {
   const { participantId, setParticipantId, track, sessionId, sessionStatus, refreshSessionStatus } =
     useAnalytics();
   const [participantNumber, setParticipantNumber] = useState(() =>
     extractParticipantNumber(participantId),
   );
+  const [selectedPilotId, setSelectedPilotId] = useState(() =>
+    participantId && isPilotParticipantId(participantId) ? participantId : '',
+  );
   const [error, setError] = useState('');
-  const [isReady, setIsReady] = useState(Boolean(participantId));
+  const [isReady, setIsReady] = useState(() => resolveInitialReady(mode, participantId));
   const [bookAnalyticsReady, setBookAnalyticsReady] = useState(false);
   const bookOpenedRef = useRef(false);
 
@@ -66,6 +85,7 @@ function ParticipantGate({ children, showFinishScreen }: ParticipantGateProps) {
       }
 
       setBookAnalyticsReady(true);
+      flushPendingModalResourceOpened(sessionId);
     };
 
     ensureBookOpened();
@@ -74,6 +94,22 @@ function ParticipantGate({ children, showFinishScreen }: ParticipantGateProps) {
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
+
+    if (mode === 'pilot') {
+      if (!selectedPilotId) {
+        setError('Selecione seu nome na lista.');
+        return;
+      }
+      const ok = setParticipantId(selectedPilotId);
+      if (!ok) {
+        setError('Não foi possível iniciar a sessão. Tente novamente.');
+        return;
+      }
+      setError('');
+      setIsReady(true);
+      return;
+    }
+
     if (!participantNumber) {
       setError('Informe o número do participante (ex.: 01, 02, 03…)');
       return;
@@ -88,12 +124,28 @@ function ParticipantGate({ children, showFinishScreen }: ParticipantGateProps) {
     setIsReady(true);
   };
 
+  const handlePilotSelect = (id: string) => {
+    setSelectedPilotId(id);
+    setError('');
+  };
+
   const handleNumberChange = (raw: string) => {
     setParticipantNumber(raw.replace(/\D/g, '').slice(0, 2));
     setError('');
   };
 
   if (!participantId || !isReady) {
+    if (mode === 'pilot') {
+      return (
+        <TestPilotGate
+          selectedParticipantId={selectedPilotId}
+          onParticipantSelect={handlePilotSelect}
+          onSubmit={handleSubmit}
+          error={error}
+        />
+      );
+    }
+
     return (
       <ProjectHubPage
         participantNumber={participantNumber}
@@ -106,7 +158,7 @@ function ParticipantGate({ children, showFinishScreen }: ParticipantGateProps) {
   }
 
   if (sessionStatus === 'finished' && showFinishScreen) {
-    return <TestFinishedScreen />;
+    return <TestFinishedScreen mode={mode} />;
   }
 
   if (isReady && bookAnalyticsReady) {
