@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { useStoredEvents } from '@analytics/useStoredEvents';
-import EventReportPanel from '@analytics-ui/EventReportPanel';
+import { useSessionLog } from '@analytics/useSessionLog';
+import SessionReportPanel from '@analytics-ui/SessionReportPanel';
 
-function EventsPanelButton() {
+function SessionLogButton() {
   const [open, setOpen] = useState(false);
-  const events = useStoredEvents();
+  const events = useSessionLog();
 
   return (
     <>
@@ -16,9 +16,9 @@ function EventsPanelButton() {
       >
         Ver eventos ({events.length})
       </button>
-      {open ? <EventReportPanel events={events} onClose={() => setOpen(false)} /> : null}
+      {open ? <SessionReportPanel events={events} onClose={() => setOpen(false)} /> : null}
     </>
   );
 }
 
-export default EventsPanelButton;
+export default SessionLogButton;

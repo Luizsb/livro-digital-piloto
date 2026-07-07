@@ -6,7 +6,7 @@ import { isPageTrackingReady } from './ldBootstrap';
 import { tryCompletePage } from './pageCompletion';
 import { recordPageViewedAt, setLastActivePage } from './pageReadingState';
 import { trackOncePerSession, wasSessionEventTracked } from './sessionDedup';
-import { subscribeToEventsUpdates } from './recordEvent';
+import { subscribeToEventsUpdates } from './sessionStore';
 import {
   BOOK_PAGE_END_MARKERS,
   getActiveBookPage,

@@ -9,8 +9,8 @@
     "paths": {
       "@app/*": ["src/app/*"],
       "@book/*": ["src/book/*"],
-      "@analytics/*": ["src/analytics/*"],
-      "@analytics-ui/*": ["src/analytics-ui/*"],
+      "@analytics/*": ["src/collect/*"],
+      "@analytics-ui/*": ["src/collect-ui/*"],
       "@dashboard/*": ["src/dashboard/*"],
       "@shared/*": ["src/shared/*"]
     },

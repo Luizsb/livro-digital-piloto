@@ -4,7 +4,7 @@ import { buildTeacherButtonSummary } from '@analytics/teacherButtonSummary';
 import {
   enrichEventForExport,
   enrichFeedbackCommentForExport,
-} from '@analytics/exportEvents';
+} from '@analytics/exportSessionLog';
 import type { AnalyticsEvent } from '@analytics/sessionTypes';
 import type { FeedbackCommentRecord } from '@analytics/feedbackComments';
 import { ANALYTICS_TIMEZONE_BR, formatDateTimeBr } from '@shared/lib/formatDateTimeBr';

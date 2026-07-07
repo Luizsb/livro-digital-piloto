@@ -4,7 +4,8 @@ import {
   getChapterTotalPages,
   getMinCompletionRateForChapter,
 } from '@book/chapter/chapterPageConfig';
-import { ANALYTICS_EVENT_NAMES, BOOK_PILOT } from './sessionTypes';import { loadStoredEvents } from './recordEvent';
+import { ANALYTICS_EVENT_NAMES, BOOK_PILOT } from './sessionTypes';
+import { loadStoredEvents } from './sessionStore';
 import {
   computeReadingQuality,
   getReadingDepthLabel,

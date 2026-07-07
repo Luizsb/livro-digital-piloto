@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { AnalyticsEvent } from './sessionTypes';
-import { loadStoredEvents, subscribeToEventsUpdates } from './recordEvent';
+import { loadStoredEvents, subscribeToEventsUpdates } from './sessionStore';
 
-export function useStoredEvents(): AnalyticsEvent[] {
+export function useSessionLog(): AnalyticsEvent[] {
   const [events, setEvents] = useState<AnalyticsEvent[]>(() => loadStoredEvents());
 
   const refresh = useCallback(() => {

@@ -1,6 +1,6 @@
 import { listChapterPageNumbers, getChapterPageConfig } from '@book/chapter/chapterPageConfig';
 import { BOOK_PILOT } from '@analytics/sessionTypes';
-import { isResourceOpenedEvent } from '@analytics/resourceEvents';
+import { isResourceOpenedEvent } from '@analytics/resourceSignals';
 import { ANALYTICS_EVENT_NAMES } from '@analytics/sessionTypes';
 import type { AnalyticsEvent } from '@analytics/sessionTypes';
 

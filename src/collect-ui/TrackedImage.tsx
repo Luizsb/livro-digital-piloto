@@ -9,7 +9,7 @@ import {
 } from '@analytics/contentInteractionTracking';
 import { normalizeImageSrcPath } from '@analytics/contentInteractionTypes';
 import { useOptionalAnalytics } from '@analytics/SessionProvider';
-import { subscribeToEventsUpdates } from '@analytics/recordEvent';
+import { subscribeToEventsUpdates } from '@analytics/sessionStore';
 import { ClosePillButton } from '@book/components/ClosePillButton';
 
 export interface TrackedImageProps

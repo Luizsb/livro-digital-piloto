@@ -6,7 +6,7 @@ import {
   TrackEventInput,
 } from './sessionTypes';
 import { bootstrapLdStorage } from './resetLdStorage';
-import { scheduleAnalyticsEventsUpdated } from './eventsNotify';
+import { scheduleAnalyticsEventsUpdated } from './persistNotify';
 
 function createEventId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {

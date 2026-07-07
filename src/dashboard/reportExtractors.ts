@@ -84,6 +84,8 @@ export function extractSessionFinishedMetadata(
     duration,
     visible,
     typeof meta.visibility_change_count === 'number' ? meta.visibility_change_count : 0,
+    typeof meta.tab_hidden_count === 'number' ? meta.tab_hidden_count : 0,
+    typeof meta.tab_focus_return_count === 'number' ? meta.tab_focus_return_count : 0,
   );
 }
 

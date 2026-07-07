@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { useAnalytics } from '@analytics/SessionProvider';
 import { exportSessionReport, type ExportSource } from '@analytics/exportSessionReport';
 
-interface ExportEventsButtonProps {
+interface ExportLogButtonProps {
   exportSource?: ExportSource;
 }
 
-function ExportEventsButton({ exportSource = 'manual_button' }: ExportEventsButtonProps) {
+function ExportLogButton({ exportSource = 'manual_button' }: ExportLogButtonProps) {
   const { track, sessionId } = useAnalytics();
   const [status, setStatus] = useState<string | null>(null);
 
@@ -37,4 +37,4 @@ function ExportEventsButton({ exportSource = 'manual_button' }: ExportEventsButt
   );
 }
 
-export default ExportEventsButton;
+export default ExportLogButton;

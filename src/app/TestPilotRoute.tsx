@@ -3,7 +3,7 @@ import Book from '@book/components/Book';
 import ParticipantGate from '@app/ParticipantGate';
 import FinishTestButton from '@analytics-ui/FinishTestButton';
 import SessionLifecycle from '@analytics-ui/SessionLifecycle';
-import AnalyticsErrorBoundary from '@analytics-ui/AnalyticsErrorBoundary';
+import SessionErrorBoundary from '@analytics-ui/SessionErrorBoundary';
 import { useAnalytics } from '@analytics/SessionProvider';
 import { getSessionStatus } from '@analytics/sessionStatus';
 import { wasSessionEventTracked } from '@analytics/sessionDedup';
@@ -59,9 +59,9 @@ export default function TestPilotRoute() {
   return (
     <ParticipantGate showFinishScreen={showFinishScreen} mode="pilot">
       <SessionLifecycle />
-      <AnalyticsErrorBoundary boundary="book">
+      <SessionErrorBoundary boundary="book">
         <Book />
-      </AnalyticsErrorBoundary>
+      </SessionErrorBoundary>
       <PilotSessionControls onFinished={handleFinished} />
     </ParticipantGate>
   );

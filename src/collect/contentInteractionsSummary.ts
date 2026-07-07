@@ -3,7 +3,7 @@ import { ANALYTICS_EVENT_NAMES } from './sessionTypes';
 import {
   isResourceEngagementEvent,
   isResourceOpenedEvent,
-} from './resourceEvents';
+} from './resourceSignals';
 
 export interface ContentInteractionsSummary {
   images_viewed_count: number;

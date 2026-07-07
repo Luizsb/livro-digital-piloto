@@ -1,6 +1,6 @@
 import { ANALYTICS_EVENT_NAMES } from './sessionTypes';
 import { unmarkSessionEventTracked, wasSessionEventTracked } from './sessionDedup';
-import { getStoredParticipantId, removeEventsForSessionByName } from './recordEvent';
+import { getStoredParticipantId, removeEventsForSessionByName } from './sessionStore';
 
 export type SessionStatus = 'not_started' | 'active' | 'finished';
 

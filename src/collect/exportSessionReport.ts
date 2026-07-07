@@ -4,8 +4,8 @@ import {
   captureResourceTimingMetadata,
   trackResourceTimingSnapshotOnce,
 } from './resourceTimingSnapshot';
-import { loadStoredEvents } from './recordEvent';
-import { buildExportPayload, downloadEventsJson, type ExportPayload } from './exportEvents';
+import { loadStoredEvents } from './sessionStore';
+import { buildExportPayload, downloadEventsJson, type ExportPayload } from './exportSessionLog';
 
 export type ExportSource =
   | 'manual_button'

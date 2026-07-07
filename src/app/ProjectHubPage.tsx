@@ -204,17 +204,16 @@ export default function ProjectHubPage({
       }
 
       const offset = scrollY + 120;
+      let current: SectionId = 'visao';
+
       for (const section of SECTIONS) {
-        if (section.id === 'visao') continue;
         const element = document.getElementById(section.id);
-        if (
-          element &&
-          element.offsetTop <= offset &&
-          element.offsetTop + element.offsetHeight > offset
-        ) {
-          setActiveSection(section.id);
+        if (element && element.offsetTop <= offset) {
+          current = section.id;
         }
       }
+
+      setActiveSection(current);
     };
 
     handleScroll();
@@ -228,6 +227,7 @@ export default function ProjectHubPage({
   };
 
   const scrollTo = (id: SectionId) => {
+    setActiveSection(id);
     if (id === 'visao') {
       scrollToTop();
       return;

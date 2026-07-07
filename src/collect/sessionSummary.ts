@@ -1,4 +1,4 @@
-import { loadStoredEvents } from './recordEvent';
+import { loadStoredEvents } from './sessionStore';
 import { ANALYTICS_EVENT_NAMES, BOOK_PILOT } from './sessionTypes';
 import { buildChapterPageSnapshot } from '@book/chapter/chapterPageConfig';
 import { buildContentInteractionsSummary } from './contentInteractionsSummary';
@@ -24,7 +24,7 @@ import {
   buildChapterCoverageForBook,
   type ChapterCoverageSummary,
 } from '@book/chapter/chapterManifest';
-import { isResourceOpenedEvent } from './resourceEvents';
+import { isResourceOpenedEvent } from './resourceSignals';
 import { buildSessionJourneyMetrics } from './sessionJourneyMetrics';
 
 export interface EventSummary
@@ -159,6 +159,10 @@ export function buildEventSummary(): EventSummary {
         visible,
         typeof finishMeta.visibility_change_count === 'number'
           ? finishMeta.visibility_change_count
+          : 0,
+        typeof finishMeta.tab_hidden_count === 'number' ? finishMeta.tab_hidden_count : 0,
+        typeof finishMeta.tab_focus_return_count === 'number'
+          ? finishMeta.tab_focus_return_count
           : 0,
       );
       if (typeof finishMeta.idle_time_seconds === 'number') {

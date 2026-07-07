@@ -6,7 +6,7 @@ import {
   markSessionEventTracked,
   wasSessionEventTracked,
 } from '@analytics/sessionDedup';
-import { subscribeToEventsUpdates } from '@analytics/recordEvent';
+import { subscribeToEventsUpdates } from '@analytics/sessionStore';
 import TestFinishedScreen from '@app/TestFinishedScreen';
 import ProjectHubPage from '@app/ProjectHubPage';
 import TestPilotGate from '@app/TestPilotGate';

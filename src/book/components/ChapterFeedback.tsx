@@ -2,7 +2,7 @@ import { useMemo, useState, type FormEvent } from 'react';
 import { ANALYTICS_EVENT_NAMES } from '@analytics/sessionTypes';
 import { trackFeedbackSubmitted, type WouldUseAgain } from '@analytics/feedbackTracking';
 import { useOptionalAnalytics } from '@analytics/SessionProvider';
-import { useStoredEvents } from '@analytics/useStoredEvents';
+import { useSessionLog } from '@analytics/useSessionLog';
 
 function FeedbackIcon({ className = 'h-8 w-8' }: { className?: string }) {
   return (
@@ -174,7 +174,7 @@ const WOULD_USE_OPTIONS: { value: WouldUseAgain; label: string }[] = [
 
 function ChapterFeedback() {
   const analytics = useOptionalAnalytics();
-  const events = useStoredEvents();
+  const events = useSessionLog();
   const alreadySubmitted = useMemo(
     () => events.some((event) => event.event_name === ANALYTICS_EVENT_NAMES.feedbackSubmitted),
     [events],

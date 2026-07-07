@@ -20,7 +20,7 @@ import {
   getStoredParticipantId,
   saveParticipantId,
   trackEvent as persistTrackEvent,
-} from './recordEvent';
+} from './sessionStore';
 import {
   wasSessionEventTracked,
   getSessionStartedAt,

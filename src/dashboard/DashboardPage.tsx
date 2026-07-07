@@ -54,6 +54,8 @@ import {
   VIDEO_COMPLETED_LABEL,
   VIDEO_MAX_PROGRESS_LABEL,
   VIDEO_WATCH_TIME_LABEL,
+  TAB_FOCUS_RETURN_COUNT_LABEL,
+  TAB_HIDDEN_COUNT_LABEL,
 } from '@analytics/metricDisplayLabels';
 
 function StatusMetricCard({ status }: { status: ChapterStatusLabel }) {
@@ -366,6 +368,20 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
               label="Tempo visível (%)"
               value={formatVisibleTimePercent(visibleRatio)}
             />
+            {(summary.tab_hidden_count ?? 0) > 0 ? (
+              <>
+                <MetricCard
+                  label={TAB_HIDDEN_COUNT_LABEL}
+                  value={String(summary.tab_hidden_count)}
+                  hint="Quantas vezes saiu da aba do livro"
+                />
+                <MetricCard
+                  label={TAB_FOCUS_RETURN_COUNT_LABEL}
+                  value={String(summary.tab_focus_return_count ?? 0)}
+                  hint="Quantas vezes voltou à aba do livro"
+                />
+              </>
+            ) : null}
           </>
         ) : (
           <MetricCard

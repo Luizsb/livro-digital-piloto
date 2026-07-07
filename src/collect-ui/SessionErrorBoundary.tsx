@@ -71,7 +71,7 @@ class AnalyticsErrorBoundaryClass extends Component<
   }
 }
 
-export function AnalyticsErrorBoundary({
+export function SessionErrorBoundary({
   boundary,
   children,
   fallback,
@@ -94,4 +94,4 @@ export function AnalyticsErrorBoundary({
   );
 }
 
-export default AnalyticsErrorBoundary;
+export default SessionErrorBoundary;

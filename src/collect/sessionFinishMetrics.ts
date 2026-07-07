@@ -1,12 +1,12 @@
 import { ANALYTICS_EVENT_NAMES } from './sessionTypes';
-import { loadStoredEvents } from './recordEvent';
+import { loadStoredEvents } from './sessionStore';
 import { computeReadingQuality } from './readingQuality';
 import { freezeSessionVisibilityMetrics } from './sessionVisibleTime';
 import { freezeSessionIdleTime } from './sessionIdleTime';
 import { buildChapterPageSnapshot } from '@book/chapter/chapterPageConfig';
 import { buildSessionJourneyMetrics } from './sessionJourneyMetrics';
 import { getLastActivePage } from './pageReadingState';
-import { isResourceOpenedEvent } from './resourceEvents';
+import { isResourceOpenedEvent } from './resourceSignals';
 import { BOOK_PILOT } from './sessionTypes';
 import type { ReadingDepth } from './readingQuality';
 import type { SessionVisibilityMetrics } from './sessionVisibilityMetrics';
@@ -110,6 +110,8 @@ export function pickSessionFinishedEventMetadata(
     hidden_time_seconds: metadata.hidden_time_seconds,
     visible_time_ratio: metadata.visible_time_ratio,
     visibility_change_count: metadata.visibility_change_count,
+    tab_hidden_count: metadata.tab_hidden_count,
+    tab_focus_return_count: metadata.tab_focus_return_count,
     pages_viewed_count: metadata.pages_viewed_count,
     pages_completed_count: metadata.pages_completed_count,
     avg_seconds_per_viewed_page: metadata.avg_seconds_per_viewed_page,

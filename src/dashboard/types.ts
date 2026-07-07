@@ -1,4 +1,4 @@
-import type { ExportPayload } from '@analytics/exportEvents';
+import type { ExportPayload } from '@analytics/exportSessionLog';
 import type { EventSummary } from '@analytics/sessionSummary';
 import type { FeedbackCommentRecord } from '@analytics/feedbackComments';
 import type { AnalyticsEvent } from '@analytics/sessionTypes';

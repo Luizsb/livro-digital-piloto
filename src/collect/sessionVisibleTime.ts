@@ -11,6 +11,8 @@ const ACCUMULATED_MS_KEY = 'ld_analytics_session_visible_accumulated_ms';
 const FROZEN_VISIBLE_SECONDS_KEY = 'ld_analytics_session_visible_frozen_seconds';
 const FROZEN_METRICS_KEY = 'ld_analytics_session_visibility_frozen_metrics';
 const VISIBILITY_CHANGE_COUNT_KEY = 'ld_analytics_session_visibility_change_count';
+const TAB_HIDDEN_COUNT_KEY = 'ld_analytics_session_tab_hidden_count';
+const TAB_FOCUS_RETURN_COUNT_KEY = 'ld_analytics_session_tab_focus_return_count';
 
 let visibleSinceMs: number | null = null;
 let hiddenStartedAtMs: number | null = null;
@@ -56,6 +58,42 @@ function writeVisibilityChangeCount(count: number): void {
   }
 }
 
+function readTabHiddenCount(): number {
+  try {
+    const raw = sessionStorage.getItem(TAB_HIDDEN_COUNT_KEY);
+    const parsed = raw ? parseInt(raw, 10) : 0;
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function writeTabHiddenCount(count: number): void {
+  try {
+    sessionStorage.setItem(TAB_HIDDEN_COUNT_KEY, String(Math.max(0, count)));
+  } catch {
+    // ignore
+  }
+}
+
+function readTabFocusReturnCount(): number {
+  try {
+    const raw = sessionStorage.getItem(TAB_FOCUS_RETURN_COUNT_KEY);
+    const parsed = raw ? parseInt(raw, 10) : 0;
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function writeTabFocusReturnCount(count: number): void {
+  try {
+    sessionStorage.setItem(TAB_FOCUS_RETURN_COUNT_KEY, String(Math.max(0, count)));
+  } catch {
+    // ignore
+  }
+}
+
 function readFrozenVisibleSeconds(): number | null {
   try {
     const raw = sessionStorage.getItem(FROZEN_VISIBLE_SECONDS_KEY);
@@ -85,7 +123,9 @@ function readFrozenMetrics(): SessionVisibilityMetrics | null {
       typeof parsed.visible_time_seconds === 'number' &&
       typeof parsed.hidden_time_seconds === 'number' &&
       typeof parsed.visible_time_ratio === 'number' &&
-      typeof parsed.visibility_change_count === 'number'
+      typeof parsed.visibility_change_count === 'number' &&
+      typeof parsed.tab_hidden_count === 'number' &&
+      typeof parsed.tab_focus_return_count === 'number'
     ) {
       return parsed;
     }
@@ -125,12 +165,14 @@ function handleVisibilityChange(): void {
   writeVisibilityChangeCount(readVisibilityChangeCount() + 1);
 
   if (document.hidden) {
+    writeTabHiddenCount(readTabHiddenCount() + 1);
     hiddenStartedAtMs = nowMs;
     pauseVisibleClock(nowMs);
     return;
   }
 
   if (hiddenStartedAtMs !== null) {
+    writeTabFocusReturnCount(readTabFocusReturnCount() + 1);
     shiftPageReadingStartTimes(nowMs - hiddenStartedAtMs);
     hiddenStartedAtMs = null;
   }
@@ -170,6 +212,8 @@ function clearVisibilityStorage(): void {
     sessionStorage.removeItem(FROZEN_VISIBLE_SECONDS_KEY);
     sessionStorage.removeItem(FROZEN_METRICS_KEY);
     sessionStorage.removeItem(VISIBILITY_CHANGE_COUNT_KEY);
+    sessionStorage.removeItem(TAB_HIDDEN_COUNT_KEY);
+    sessionStorage.removeItem(TAB_FOCUS_RETURN_COUNT_KEY);
   } catch {
     // ignore
   }
@@ -220,6 +264,8 @@ export function freezeSessionVisibilityMetrics(nowMs = Date.now()): SessionVisib
     durationSeconds,
     visibleSeconds,
     readVisibilityChangeCount(),
+    readTabHiddenCount(),
+    readTabFocusReturnCount(),
   );
   writeFrozenMetrics(metrics);
   return metrics;
@@ -258,4 +304,48 @@ export function getSessionVisibleSeconds(nowMs = Date.now()): number | null {
 
 export function isSessionVisibleTimePaused(): boolean {
   return getSessionStatus() !== 'finished' && !isDocumentVisible();
+}
+
+export interface LiveVisibilityStats {
+  duration_seconds: number;
+  visible_time_seconds: number;
+  hidden_time_seconds: number;
+  tab_hidden_count: number;
+  tab_focus_return_count: number;
+  is_paused: boolean;
+}
+
+/** Métricas de foco da aba em tempo real (antes de finalizar a sessão). */
+export function getLiveVisibilityStats(nowMs = Date.now()): LiveVisibilityStats | null {
+  const startedAt = getSessionStartedAt();
+  if (!startedAt) return null;
+
+  if (getSessionStatus() === 'finished') {
+    const frozen = readFrozenMetrics();
+    if (frozen) {
+      return {
+        duration_seconds: frozen.duration_seconds,
+        visible_time_seconds: frozen.visible_time_seconds,
+        hidden_time_seconds: frozen.hidden_time_seconds,
+        tab_hidden_count: frozen.tab_hidden_count,
+        tab_focus_return_count: frozen.tab_focus_return_count,
+        is_paused: false,
+      };
+    }
+    return null;
+  }
+
+  ensureActiveVisibleClock(nowMs);
+  const durationSeconds = computeWallClockSessionSeconds(nowMs);
+  const visibleSeconds = getLiveVisibleSeconds(nowMs);
+  const hiddenSeconds = Math.max(0, durationSeconds - visibleSeconds);
+
+  return {
+    duration_seconds: durationSeconds,
+    visible_time_seconds: visibleSeconds,
+    hidden_time_seconds: hiddenSeconds,
+    tab_hidden_count: readTabHiddenCount(),
+    tab_focus_return_count: readTabFocusReturnCount(),
+    is_paused: !isDocumentVisible(),
+  };
 }

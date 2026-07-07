@@ -1,6 +1,6 @@
 import { ANALYTICS_EVENT_NAMES } from './sessionTypes';
 import { captureSessionDeviceContext } from './deviceContext';
-import { trackEvent as persistTrackEvent } from './recordEvent';
+import { trackEvent as persistTrackEvent } from './sessionStore';
 import {
   markSessionEventTracked,
   setSessionStartedAt,

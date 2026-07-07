@@ -3,7 +3,7 @@ import {
   getSessionVisibleSeconds,
   isSessionVisibleTimePaused,
 } from './sessionVisibleTime';
-import { subscribeToEventsUpdates } from './recordEvent';
+import { subscribeToEventsUpdates } from './sessionStore';
 
 export function computeSessionElapsedSeconds(nowMs = Date.now()): number | null {
   return getSessionVisibleSeconds(nowMs);

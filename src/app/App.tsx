@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import Book from '@book/components/Book';
 import ParticipantGate from '@app/ParticipantGate';
-import ExportEventsButton from '@analytics-ui/ExportEventsButton';
-import EventsPanelButton from '@analytics-ui/EventsPanelButton';
+import ExportLogButton from '@analytics-ui/ExportLogButton';
+import SessionLogButton from '@analytics-ui/SessionLogButton';
 import FinishTestButton from '@analytics-ui/FinishTestButton';
 import SessionLifecycle from '@analytics-ui/SessionLifecycle';
 import DashboardPage from '@dashboard/DashboardPage';
 import ParticipantHubRoute from '@app/ParticipantHubRoute';
 import TestPilotRoute from '@app/TestPilotRoute';
-import AnalyticsErrorBoundary from '@analytics-ui/AnalyticsErrorBoundary';
+import SessionErrorBoundary from '@analytics-ui/SessionErrorBoundary';
 import { SessionProvider, useAnalytics } from '@analytics/SessionProvider';
 
 type AppView = 'book' | 'dashboard' | 'projeto' | 'teste';
@@ -56,9 +56,9 @@ function BookSessionControls({ onFinished }: { onFinished: () => void }) {
 
   return (
     <div className="fixed bottom-16 left-4 z-50 flex flex-col items-start gap-2">
-      <EventsPanelButton />
+      <SessionLogButton />
       <FinishTestButton onFinished={onFinished} />
-      <ExportEventsButton />
+      <ExportLogButton />
       <a
         href="#/projeto"
         className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-lg transition hover:bg-slate-50"
@@ -105,9 +105,9 @@ function BookAppContent() {
   return (
     <ParticipantGate showFinishScreen={showFinishScreen}>
       <SessionLifecycle />
-      <AnalyticsErrorBoundary boundary="book">
+      <SessionErrorBoundary boundary="book">
         <Book />
-      </AnalyticsErrorBoundary>
+      </SessionErrorBoundary>
       <BookSessionControls onFinished={handleFinished} />
     </ParticipantGate>
   );
@@ -119,9 +119,9 @@ function BookAppContent() {
 function App() {
   return (
     <SessionProvider>
-      <AnalyticsErrorBoundary boundary="app">
+      <SessionErrorBoundary boundary="app">
         <BookAppContent />
-      </AnalyticsErrorBoundary>
+      </SessionErrorBoundary>
     </SessionProvider>
   );
 }

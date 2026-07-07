@@ -11,6 +11,10 @@ export interface SessionVisibilityMetrics {
   visible_time_ratio: number;
   /** Quantidade de mudanças de visibilidade (Page Visibility API). */
   visibility_change_count: number;
+  /** Quantas vezes o participante saiu da aba do livro. */
+  tab_hidden_count: number;
+  /** Quantas vezes o participante voltou à aba do livro. */
+  tab_focus_return_count: number;
 }
 
 export function computeWallClockSessionSeconds(nowMs = Date.now()): number {
@@ -25,6 +29,8 @@ export function buildVisibilityMetricsFromParts(
   durationSeconds: number,
   visibleSeconds: number,
   visibilityChangeCount: number,
+  tabHiddenCount = 0,
+  tabFocusReturnCount = 0,
 ): SessionVisibilityMetrics {
   const visible_time_seconds = Math.max(0, Math.min(visibleSeconds, durationSeconds));
   const hidden_time_seconds = Math.max(0, durationSeconds - visible_time_seconds);
@@ -41,5 +47,7 @@ export function buildVisibilityMetricsFromParts(
     hidden_time_seconds,
     visible_time_ratio,
     visibility_change_count: Math.max(0, visibilityChangeCount),
+    tab_hidden_count: Math.max(0, tabHiddenCount),
+    tab_focus_return_count: Math.max(0, tabFocusReturnCount),
   };
 }

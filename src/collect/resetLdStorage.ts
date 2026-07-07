@@ -1,5 +1,5 @@
 import { ANALYTICS_STORAGE_KEYS } from './sessionTypes';
-import { scheduleAnalyticsEventsUpdated } from './eventsNotify';
+import { scheduleAnalyticsEventsUpdated } from './persistNotify';
 import { resetPageReadingState } from './pageReadingState';
 import { resetSessionVisibleTime } from './sessionVisibleTime';
 import { resetSessionIdleTime } from './sessionIdleTime';

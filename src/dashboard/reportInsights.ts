@@ -13,6 +13,7 @@ import {
 } from '@analytics/collectionQuality';
 import {
   extractSessionDurationSeconds,
+  extractSessionHiddenSeconds,
   extractSessionVisibleSeconds,
   formatDuration,
   getChapterStatusLabel,
@@ -66,6 +67,9 @@ export function buildSessionInsight(parsed: ParsedDashboardReport): string {
     totalPages > 0 ? Math.round((summary.pages_viewed_count / totalPages) * 100) : 0;
   const duration = formatDuration(extractSessionDurationSeconds(events));
   const visibleDuration = formatDuration(extractSessionVisibleSeconds(events, summary));
+  const hiddenDuration = formatDuration(
+    extractSessionHiddenSeconds(events, summary) ?? summary.hidden_time_seconds ?? 0,
+  );
   const depth = summary.reading_depth_label ?? 'não classificada';
   const status = getChapterStatusLabel(summary).toLowerCase();
   const deviceLine =
@@ -81,7 +85,11 @@ export function buildSessionInsight(parsed: ParsedDashboardReport): string {
 
   let text = `O participante ${participant} visualizou ${viewedPct}% das páginas do capítulo, com taxa de conclusão de páginas de ${summary.completion_rate}%, foi exposto a ${summary.images_viewed_unique_count} imagem(ns) e interagiu com ${summary.image_zoom_unique_count} delas por meio de zoom, abriu ${summary.resources_opened_total} recurso(s) digital(is) e finalizou o capítulo com status ${status}.`;
   if (duration !== visibleDuration) {
-    text += ` O tempo visível no livro foi ${visibleDuration} e o participante passou ${duration} no total da sessão (incluindo tempo fora da aba).`;
+    const tabHidden = summary.tab_hidden_count ?? 0;
+    const tabReturns = summary.tab_focus_return_count ?? 0;
+    const focusMoves =
+      tabHidden > 0 ? ` Saiu da aba ${tabHidden}× e voltou ${tabReturns}×.` : '';
+    text += ` O tempo visível no livro foi ${visibleDuration} e o participante passou ${duration} no total da sessão (incluindo ${hiddenDuration} fora da aba).${focusMoves}`;
   } else {
     text += ` O tempo no livro foi ${visibleDuration}.`;
   }
@@ -298,10 +306,15 @@ export function buildAlerts(summary: EventSummary): DashboardAlert[] {
 
   const hiddenSeconds = summary.hidden_time_seconds;
   if (typeof hiddenSeconds === 'number' && hiddenSeconds > 0) {
+    const tabHidden = summary.tab_hidden_count ?? 0;
+    const tabReturns = summary.tab_focus_return_count ?? 0;
+    const focusDetail =
+      tabHidden > 0
+        ? ` Saiu da aba ${tabHidden}× e voltou ${tabReturns}×.`
+        : '';
     alerts.push({
       id: 'tab_hidden',
-      message:
-        'O participante saiu da aba durante a sessão. O tempo visível foi usado para análise de leitura.',
+      message: `O participante ficou ${formatDuration(hiddenSeconds)} fora da aba durante a sessão.${focusDetail} O tempo visível foi usado para análise de leitura.`,
       severity: 'info',
     });
   }

@@ -1,4 +1,4 @@
-import { loadStoredEvents } from './recordEvent';
+import { loadStoredEvents } from './sessionStore';
 import { buildEventSummary } from './sessionSummary';
 import { getActiveChapterManifest, tryGetChapterManifest, type ChapterManifest } from '@book/chapter/chapterManifest';
 import { loadFeedbackComments } from './feedbackComments';

@@ -21,3 +21,9 @@ export const VIDEO_MAX_PROGRESS_LABEL = 'Progresso máximo';
 export const VIDEO_COMPLETED_LABEL = 'Vídeo concluído';
 
 export const RESOURCE_ENGAGEMENT_MODAL_LABEL = 'Tempo no modal';
+
+export const TAB_HIDDEN_TIME_LABEL = 'Tempo fora da aba';
+
+export const TAB_HIDDEN_COUNT_LABEL = 'Saídas da aba';
+
+export const TAB_FOCUS_RETURN_COUNT_LABEL = 'Retornos à aba';

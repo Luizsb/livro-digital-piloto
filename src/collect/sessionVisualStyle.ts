@@ -3,7 +3,7 @@ import type { AnalyticsEvent } from './sessionTypes';
 import {
   isResourceEngagementEvent,
   isResourceOpenedEvent,
-} from './resourceEvents';
+} from './resourceSignals';
 
 export type EventVisualCategory =
   | 'session'

@@ -5,7 +5,7 @@ import {
 } from '@book/chapter/chapterPageConfig';
 import { computeChapterCompletionStatus } from './chapterMetrics';
 import { computeReadingQuality } from './readingQuality';
-import { isResourceEngagementEvent, isResourceOpenedEvent } from './resourceEvents';
+import { isResourceEngagementEvent, isResourceOpenedEvent } from './resourceSignals';
 import { EVENT_CATALOG } from './sessionLabels';
 import type { EventSummary } from './sessionSummary';
 import { ANALYTICS_EVENT_NAMES, isValidParticipantId } from './sessionTypes';

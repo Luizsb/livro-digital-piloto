@@ -16,7 +16,7 @@ import type { AnalyticsEvent } from './sessionTypes';
 import {
   isResourceEngagementEvent,
   isResourceOpenedEvent,
-} from './resourceEvents';
+} from './resourceSignals';
 
 export interface EventCatalogEntry {
   label: string;
@@ -255,6 +255,8 @@ const METADATA_LABELS: Record<string, string> = {
   hidden_time_seconds: 'Tempo fora da aba (s)',
   visible_time_ratio: 'Proporção visível',
   visibility_change_count: 'Mudanças de aba',
+  tab_hidden_count: 'Saídas da aba',
+  tab_focus_return_count: 'Retornos à aba',
   completion_reason: 'Motivo da conclusão',
   pages_viewed_count: 'Páginas visualizadas',
   pages_completed_count: 'Páginas concluídas',

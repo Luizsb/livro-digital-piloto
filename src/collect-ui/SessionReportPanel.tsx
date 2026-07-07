@@ -10,7 +10,7 @@ import {
   buildReadingJourneySummary,
   type ReadingJourneySummary,
 } from '@analytics/readingJourneySummary';
-import { sortAnalyticsEventsNewestFirst } from '@analytics/sortAnalyticsEvents';
+import { sortAnalyticsEventsNewestFirst } from '@analytics/sortSessionLog';
 import {
   EVENT_CATALOG,
   buildEventBadges,
@@ -21,19 +21,23 @@ import {
 } from '@analytics/sessionLabels';
 import { getEventVisualStyle, getEventVisualStyleByBadgeKey } from '@analytics/sessionVisualStyle';
 import { useLiveSessionDuration, useIsSessionTimerPaused } from '@analytics/useLiveSessionDuration';
+import { useLiveVisibilityStats } from '@analytics/useLiveVisibilityStats';
 import { getSessionStatus } from '@analytics/sessionStatus';
 import { formatDurationClock } from '@shared/lib/formatDuration';
 import { formatDateTimeBr } from '@shared/lib/formatDateTimeBr';
 import {
   MODAL_TIME_LABEL,
   PAGE_COMPLETION_RATE_LABEL,
+  TAB_FOCUS_RETURN_COUNT_LABEL,
+  TAB_HIDDEN_COUNT_LABEL,
+  TAB_HIDDEN_TIME_LABEL,
   VIDEO_COMPLETED_LABEL,
   VIDEO_MAX_PROGRESS_LABEL,
   VIDEO_WATCH_TIME_LABEL,
 } from '@analytics/metricDisplayLabels';
 import { ClosePillButton } from '@book/components/ClosePillButton';
 
-interface EventReportPanelProps {
+interface SessionReportPanelProps {
   events: AnalyticsEvent[];
   onClose: () => void;
 }
@@ -231,45 +235,74 @@ function SummaryCollapsedHint({
 function SessionDurationBanner({ seconds }: { seconds: number }) {
   const isFinished = getSessionStatus() === 'finished';
   const isPaused = useIsSessionTimerPaused();
+  const visibilityStats = useLiveVisibilityStats();
+  const hiddenSeconds = visibilityStats?.hidden_time_seconds ?? 0;
+  const tabHiddenCount = visibilityStats?.tab_hidden_count ?? 0;
+  const tabReturnCount = visibilityStats?.tab_focus_return_count ?? 0;
+  const showFocusStats = tabHiddenCount > 0 || hiddenSeconds > 0;
 
   return (
-    <div className="flex items-center gap-3 border-b border-[#80298F]/15 bg-gradient-to-r from-[#80298F]/8 via-[#F9DDFF]/40 to-white px-4 py-3">
-      <div
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#80298F] text-lg text-white shadow-sm"
-        aria-hidden
-      >
-        ⏱
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-          Tempo na tela
-        </p>
-        <p
-          className="font-mono text-2xl font-bold tabular-nums leading-tight text-[#80298F]"
-          aria-live="polite"
-          aria-atomic="true"
+    <div className="border-b border-[#80298F]/15 bg-gradient-to-r from-[#80298F]/8 via-[#F9DDFF]/40 to-white px-4 py-3">
+      <div className="flex items-center gap-3">
+        <div
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#80298F] text-lg text-white shadow-sm"
+          aria-hidden
         >
-          {formatDurationClock(seconds)}
-        </p>
-        <p className="mt-0.5 text-[10px] text-slate-500">
-          {isFinished
-            ? 'Sessão finalizada'
-            : isPaused
-              ? 'Pausado — volte a esta aba para continuar'
-              : 'Contando enquanto a aba do livro está visível'}
-        </p>
+          ⏱
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+            Tempo na tela
+          </p>
+          <p
+            className="font-mono text-2xl font-bold tabular-nums leading-tight text-[#80298F]"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {formatDurationClock(seconds)}
+          </p>
+          <p className="mt-0.5 text-[10px] text-slate-500">
+            {isFinished
+              ? 'Sessão finalizada'
+              : isPaused
+                ? 'Pausado — volte a esta aba para continuar'
+                : 'Contando enquanto a aba do livro está visível'}
+          </p>
+        </div>
+        {!isFinished ? (
+          <span className="relative flex h-2.5 w-2.5 shrink-0" aria-hidden>
+            {isPaused ? (
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-amber-400" />
+            ) : (
+              <>
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+              </>
+            )}
+          </span>
+        ) : null}
       </div>
-      {!isFinished ? (
-        <span className="relative flex h-2.5 w-2.5 shrink-0" aria-hidden>
-          {isPaused ? (
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-amber-400" />
-          ) : (
-            <>
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
-            </>
-          )}
-        </span>
+      {showFocusStats ? (
+        <dl className="mt-3 grid grid-cols-3 gap-2 border-t border-[#80298F]/10 pt-3 text-[10px]">
+          <div>
+            <dt className="text-slate-500">{TAB_HIDDEN_TIME_LABEL}</dt>
+            <dd className="font-mono font-semibold tabular-nums text-[#80298F]">
+              {formatDurationClock(hiddenSeconds)}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">{TAB_HIDDEN_COUNT_LABEL}</dt>
+            <dd className="font-mono font-semibold tabular-nums text-[#80298F]">
+              {tabHiddenCount}×
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">{TAB_FOCUS_RETURN_COUNT_LABEL}</dt>
+            <dd className="font-mono font-semibold tabular-nums text-[#80298F]">
+              {tabReturnCount}×
+            </dd>
+          </div>
+        </dl>
       ) : null}
     </div>
   );
@@ -455,7 +488,7 @@ function CollectionSummary({
   );
 }
 
-function EventReportPanel({ events, onClose }: EventReportPanelProps) {
+function SessionReportPanel({ events, onClose }: SessionReportPanelProps) {
   const [openSection, setOpenSection] = useState<PanelSection | null>('events');
   const sessionSeconds = useLiveSessionDuration();
   const journey = useMemo(() => buildReadingJourneySummary(events), [events]);
@@ -634,4 +667,4 @@ function EventReportPanel({ events, onClose }: EventReportPanelProps) {
   );
 }
 
-export default EventReportPanel;
+export default SessionReportPanel;
