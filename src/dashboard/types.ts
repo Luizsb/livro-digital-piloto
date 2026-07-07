@@ -4,6 +4,7 @@ import type { FeedbackCommentRecord } from '@analytics/feedbackComments';
 import type { AnalyticsEvent } from '@analytics/sessionTypes';
 import type { ChapterManifest } from '@book/chapter/chapterManifest';
 import type { GroupAdvancedAnalytics } from './buildGroupAdvancedAnalytics';
+import type { GroupResourcesDetail, GroupTechnicalDetail } from './buildGroupReportExtras';
 
 export type DashboardReport = ExportPayload;
 
@@ -202,6 +203,8 @@ export interface GroupReport {
   technical_analytics: GroupTechnicalAnalytics;
   data_quality: GroupDataQuality;
   advanced_analytics: GroupAdvancedAnalytics;
+  resources_detail: GroupResourcesDetail;
+  technical_detail: GroupTechnicalDetail;
   sessions: GroupSessionRow[];
   insights: string[];
 }

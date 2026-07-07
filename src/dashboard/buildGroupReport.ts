@@ -1,4 +1,8 @@
 import { buildGroupAdvancedAnalytics } from './buildGroupAdvancedAnalytics';
+import {
+  buildGroupResourcesDetail,
+  buildGroupTechnicalDetail,
+} from './buildGroupReportExtras';
 import type {
   ParsedDashboardReport,
   GroupReport,
@@ -376,6 +380,19 @@ function emptyGroupReport(
       resource_ranking: [],
       load_time_by_device: [],
     },
+    resources_detail: {
+      coverage_resources: [],
+      coverage_images: [],
+      participants: [],
+    },
+    technical_detail: {
+      avg_page_load_ms: null,
+      avg_ttfb_ms: null,
+      avg_session_bytes: null,
+      sessions: [],
+      qa_ready: false,
+      qa_notes: [],
+    },
     sessions: [],
     insights: ['Carregue ao menos um JSON exportado pelo piloto para gerar o relatório consolidado.'],
   };
@@ -555,6 +572,9 @@ export function aggregateSessionReports(
   }
 
   const sessionsWithTechnicalIssues = rows.filter((r) => r.hasTechnicalIssues).length;
+  const reliableSessionCount = rows.filter(
+    (r) => r.dataQualityScore !== null && r.dataQualityScore >= RELIABLE_QUALITY_THRESHOLD,
+  ).length;
   const fullCompletionCount = rows.filter(
     (r) => classifyChapterProgress(r.pagesViewedCount, r.pagesCompletedCount, r.totalPages) === 'full_completion',
   ).length;
@@ -686,9 +706,7 @@ export function aggregateSessionReports(
     },
     data_quality: {
       avg_data_quality_score: average(qualityScores),
-      reliable_session_count: rows.filter(
-        (r) => r.dataQualityScore !== null && r.dataQualityScore >= RELIABLE_QUALITY_THRESHOLD,
-      ).length,
+      reliable_session_count: reliableSessionCount,
       reliable_quality_threshold: RELIABLE_QUALITY_THRESHOLD,
       duplicate_session_ids: [...new Set(duplicateSessionIds)],
       mixed_book_or_chapter: mixedBookOrChapter,
@@ -697,6 +715,13 @@ export function aggregateSessionReports(
       session_quality_issues: sessionQualityIssues,
     },
     advanced_analytics: buildGroupAdvancedAnalytics(sessions),
+    resources_detail: buildGroupResourcesDetail(sessions),
+    technical_detail: buildGroupTechnicalDetail(
+      sessions,
+      sessionsWithTechnicalIssues,
+      reliableSessionCount,
+      n,
+    ),
     sessions: rows,
   };
 

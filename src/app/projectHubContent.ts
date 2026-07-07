@@ -119,14 +119,12 @@ export const REPORT_CARDS: ReportCard[] = [
   {
     title: 'Relatório individual da sessão',
     items: [
-      'Gráfico de jornada por página (visualizada vs concluída)',
-      'Progresso no capítulo com páginas sem tempo suficiente',
-      'Engajamento com vídeo, ODA, professor e zoom',
-      'Ambiente de acesso (dispositivo, SO, navegador)',
-      'Feedback com notas, dimensões e comentário escrito',
-      'Saúde técnica e qualidade da coleta',
+      'Consolidado: jornada, resumo interpretativo e feedback',
+      'Recursos digitais: ODA, vídeo, professor, imagens e cobertura',
+      'Técnico & QA: performance, erros e qualidade da coleta',
+      'Mesma estrutura de abas do relatório de grupo',
     ],
-    usage: 'Validar uma sessão e entender a experiência de um participante.',
+    usage: 'Validar uma sessão no LD Insights — abas Consolidado, Recursos e Técnico.',
     status: 'available',
   },
   {
@@ -157,14 +155,13 @@ export const REPORT_CARDS: ReportCard[] = [
   {
     title: 'Relatório de recursos digitais',
     items: [
-      'Imagens expostas e ampliadas',
-      'Recursos abertos e tempo em ODA / Escola Digital',
-      'Play, progresso e conclusão de vídeo',
-      'Recursos pouco acessados',
+      'Funil de adoção: vídeo, ODA, professor e zoom',
+      'Cobertura dos recursos e imagens do manifesto editorial',
+      'Ranking de aberturas e tempo médio nos modais',
+      'Detalhe por participante — o que foi ignorado',
     ],
-    usage:
-      'Entender quais recursos digitais agregam valor e quais precisam ser reposicionados ou revisados.',
-    status: 'roadmap',
+    usage: 'Aba Recursos digitais no LD Insights ao carregar vários JSONs.',
+    status: 'available',
   },
   {
     title: 'Relatório editorial e de melhoria do produto',
@@ -181,23 +178,24 @@ export const REPORT_CARDS: ReportCard[] = [
   {
     title: 'Relatório técnico e QA',
     items: [
-      'Tempo de carregamento, TTFB e peso carregado',
-      'Erros de imagem, recurso e execução',
-      'Dispositivo, navegador, viewport e idioma',
-      'Qualidade da coleta',
+      'Carga, TTFB e peso médio da sessão',
+      'Erros de runtime, carregamento e renderização',
+      'Dispositivo, SO, navegador e viewport por participante',
+      'Checklist QA e qualidade da coleta',
     ],
-    usage: 'Validar estabilidade, performance e compatibilidade do Livro Digital.',
-    status: 'roadmap',
+    usage: 'Aba Técnico & QA no LD Insights ao carregar vários JSONs.',
+    status: 'available',
   },
   {
     title: 'Relatório executivo do piloto',
     items: [
-      'O que foi implementado e quais eventos estão ativos',
-      'Dimensões já medidas e principais aprendizados',
-      'Valor para professor, escola e empresa',
-      'Limitações atuais, próximos passos e evidências do dashboard',
+      'Coleta ativa: eventos por dimensão (jornada, recursos, professor, feedback, técnico)',
+      'KPIs do grupo, aprendizados e valor para empresa, escola e professor',
+      'Limitações da fase e próximos passos sugeridos com base nos dados',
+      'Evidências detalhadas na aba Consolidado do LD Insights',
     ],
-    usage: 'Comunicar o valor estratégico do piloto de forma objetiva.',
-    status: 'roadmap',
+    usage:
+      'Comunicar o valor estratégico do piloto — aba Executivo no LD Insights (vários JSONs).',
+    status: 'available',
   },
 ];

@@ -8,7 +8,7 @@ import {
 } from '@book/chapter/chapterPageConfig';
 import { getReadingDepthLabel, type ReadingDepth } from '@analytics/readingQuality';
 import { formatDateTimeBr } from '@shared/lib/formatDateTimeBr';
-import { formatLoadTimeMs } from '@shared/lib/formatDuration';
+import { formatDuration, formatLoadTimeMs } from '@shared/lib/formatDuration';
 import { formatBytes } from '@shared/lib/formatBytes';
 import { getLoadTimeRating } from '@shared/lib/loadTimeRating';
 import type { SessionVisibilityMetrics } from '@analytics/sessionVisibilityMetrics';
@@ -349,13 +349,7 @@ export const PAGE_JOURNEY_LABELS = {
   },
 } as const;
 
-export function formatDuration(seconds: number | null): string {
-  if (seconds === null) return '—';
-  if (seconds < 60) return `${seconds}s`;
-  const minutes = Math.floor(seconds / 60);
-  const rest = seconds % 60;
-  return rest > 0 ? `${minutes}min ${rest}s` : `${minutes}min`;
-}
+export { formatDuration };
 
 export function formatExportedAt(iso: string): string {
   return formatDateTimeBr(iso);

@@ -1,9 +1,10 @@
 /** Duração legível (dashboard, resumos). */
 export function formatDuration(seconds: number | null): string {
   if (seconds === null) return '—';
-  if (seconds < 60) return `${seconds}s`;
-  const minutes = Math.floor(seconds / 60);
-  const rest = seconds % 60;
+  const total = Math.round(seconds);
+  if (total < 60) return `${total}s`;
+  const minutes = Math.floor(total / 60);
+  const rest = total % 60;
   return rest > 0 ? `${minutes}min ${rest}s` : `${minutes}min`;
 }
 
@@ -16,9 +17,10 @@ export function formatLoadTimeMs(ms: number | null | undefined): string {
 
 /** Relógio MM:SS ou H:MM:SS para contador ao vivo. */
 export function formatDurationClock(seconds: number): string {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
+  const total = Math.round(seconds);
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const secs = total % 60;
   if (hours > 0) {
     return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
