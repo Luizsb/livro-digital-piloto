@@ -19,7 +19,7 @@ function PilotSessionControls({ onFinished }: { onFinished: () => void }) {
 
   return (
     <div className="fixed bottom-16 left-4 z-50">
-      <FinishTestButton onFinished={onFinished} variant="prominent" autoExportReport />
+      <FinishTestButton onFinished={onFinished} variant="prominent" />
     </div>
   );
 }

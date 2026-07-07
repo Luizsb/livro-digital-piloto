@@ -194,13 +194,17 @@ export default function ProjectHubPage({
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      setShowScrollTop(scrollY > 320);
+    const resolveActiveSection = (scrollY: number): SectionId => {
+      if (scrollY < 80) return 'visao';
 
-      if (scrollY < 80) {
-        setActiveSection('visao');
-        return;
+      const lastSection = SECTIONS[SECTIONS.length - 1];
+      const lastElement = document.getElementById(lastSection.id);
+      const scrollBottom = scrollY + window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
+
+      // Em telas altas o scroll pode não passar o topo da última seção — ativa ao chegar no fim.
+      if (lastElement && docHeight - scrollBottom < 120) {
+        return lastSection.id;
       }
 
       const offset = scrollY + 120;
@@ -213,12 +217,22 @@ export default function ProjectHubPage({
         }
       }
 
-      setActiveSection(current);
+      return current;
+    };
+
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setShowScrollTop(scrollY > 320);
+      setActiveSection(resolveActiveSection(scrollY));
     };
 
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
   }, []);
 
   const scrollToTop = () => {
@@ -326,7 +340,7 @@ export default function ProjectHubPage({
 
           <section id="visao" className="scroll-mt-24 pb-16">
             <span className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#F9DDFF] px-3 py-1 text-xs font-semibold text-[#80298F]">
-              Piloto cap. 07
+              Piloto cap. 07 - História 4º ano
             </span>
             <h1 className="mb-6 text-3xl font-extrabold leading-tight tracking-tight text-slate-900 md:text-5xl">
               Livro Digital
@@ -628,7 +642,7 @@ export default function ProjectHubPage({
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md md:p-8">
                 <h3 className="text-lg font-bold text-[#80298F]">Entrar na sessão de teste</h3>
                 <p className="mt-1 text-sm text-slate-600">
-                  Código anônimo (P01, P02…) — sem nome nem e-mail.
+                  Código anônimo (P01, P02…)
                 </p>
 
                 {participantId ? (
@@ -728,6 +742,11 @@ export default function ProjectHubPage({
           </section>
         </main>
       </div>
+
+      <footer className="border-t border-[#80298F]/10 bg-slate-50 px-6 py-6 text-center">
+        <p className="text-sm font-semibold text-slate-700">Time Interações Digitais</p>
+        <p className="mt-1 text-xs text-slate-400">v.1.0</p>
+      </footer>
 
       {showScrollTop ? (
         <button

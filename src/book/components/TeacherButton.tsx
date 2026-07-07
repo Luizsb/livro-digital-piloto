@@ -6,6 +6,7 @@ import {
   closeTeacherButtonBySection,
   trackTeacherButtonOpened,
 } from '@analytics/teacherButtonTracking';
+import { lockBodyScroll, unlockBodyScroll } from '@shared/lib/bodyScrollLock';
 
 interface TeacherButtonProps {
     title?: string;
@@ -54,11 +55,10 @@ function TeacherButton({
             if (event.key === 'Escape') closeModal();
         };
         window.addEventListener('keydown', onKeyDown);
-        const prevOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
+        lockBodyScroll();
         return () => {
             window.removeEventListener('keydown', onKeyDown);
-            document.body.style.overflow = prevOverflow;
+            unlockBodyScroll();
         };
     }, [isOpen]);
 

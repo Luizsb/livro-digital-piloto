@@ -68,8 +68,7 @@ function TestFinishedScreen({ mode = 'default' }: TestFinishedScreenProps) {
           </button>
           {isPilot ? (
             <p className="text-center text-xs text-slate-500">
-              O relatório JSON foi baixado automaticamente. Você pode exportar novamente acima ou
-              fechar esta aba.
+              Clique no botão acima para baixar o arquivo e envie para a equipe do piloto.
             </p>
           ) : (
             <button

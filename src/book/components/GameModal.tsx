@@ -7,6 +7,7 @@ import {
 } from '@analytics/modalResourceTracking';
 import { useOptionalAnalytics } from '@analytics/SessionProvider';
 import { ClosePillButton } from '@book/components/ClosePillButton';
+import { lockBodyScroll, unlockBodyScroll } from '@shared/lib/bodyScrollLock';
 
 interface GameModalAnalytics {
   linkId: string;
@@ -60,12 +61,11 @@ function GameModal({
       if (e.key === 'Escape') closeModal();
     };
     window.addEventListener('keydown', onKeyDown);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    lockBodyScroll();
 
     return () => {
       window.removeEventListener('keydown', onKeyDown);
-      document.body.style.overflow = prevOverflow;
+      unlockBodyScroll();
 
       if (analytics && analyticsResource) {
         endModalResourceSession(instanceId, analytics.track);

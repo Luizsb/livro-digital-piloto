@@ -11,6 +11,7 @@ import { normalizeImageSrcPath } from '@analytics/contentInteractionTypes';
 import { useOptionalAnalytics } from '@analytics/SessionProvider';
 import { subscribeToEventsUpdates } from '@analytics/sessionStore';
 import { ClosePillButton } from '@book/components/ClosePillButton';
+import { lockBodyScroll, unlockBodyScroll } from '@shared/lib/bodyScrollLock';
 
 export interface TrackedImageProps
   extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src' | 'title'> {
@@ -112,12 +113,11 @@ function TrackedImage({
     };
 
     window.addEventListener('keydown', onKeyDown);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    lockBodyScroll();
 
     return () => {
       window.removeEventListener('keydown', onKeyDown);
-      document.body.style.overflow = prevOverflow;
+      unlockBodyScroll();
     };
   }, [isZoomOpen]);
 
