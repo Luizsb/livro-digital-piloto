@@ -1,0 +1,1392 @@
+{
+  "report_type": "session_report",
+  "schema_version": "1.0.0",
+  "exported_at": "2026-07-07T10:50:06.541Z",
+  "exported_at_br": "07/07/2026, 07:50:06",
+  "timezone": "America/Sao_Paulo",
+  "book_id": "cap07_historia_ai43",
+  "chapter_id": "cap07",
+  "participant_id": "P13",
+  "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+  "event_count": 56,
+  "chapter_manifest": {
+    "book_id": "cap07_historia_ai43",
+    "chapter_id": "cap07",
+    "pages": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "expected_images": [
+      "page_3_abertura_rialto",
+      "page_5_feira_rolo",
+      "page_6_moedas_lidia",
+      "page_8_rota_seda",
+      "page_9_nau_cabral"
+    ],
+    "expected_resources": [
+      "escola_digital_video",
+      "oda_page_10_comercio"
+    ],
+    "expected_teacher_buttons": [
+      "teacher_section_page_3",
+      "teacher_section_page_4",
+      "teacher_section_page_7",
+      "teacher_section_page_8",
+      "teacher_section_page_10",
+      "teacher_section_page_11",
+      "teacher_section_page_12"
+    ],
+    "expected_activities": []
+  },
+  "summary": {
+    "exported_at": "2026-07-07T10:50:06.541Z",
+    "book_id": "cap07_historia_ai43",
+    "chapter_id": "cap07",
+    "total_events": 56,
+    "participant_ids": [
+      "P13"
+    ],
+    "session_ids": [
+      "1be32062-6e43-47d0-b69c-d298ae544c69"
+    ],
+    "by_event_name": {
+      "session_started": 1,
+      "book_opened": 1,
+      "page_viewed": 10,
+      "image_viewed": 5,
+      "image_zoomed": 7,
+      "resource_opened": 2,
+      "video_started": 1,
+      "video_progress_recorded": 1,
+      "resource_engagement_recorded": 2,
+      "teacher_button_opened": 5,
+      "teacher_button_closed": 5,
+      "page_completed": 10,
+      "feedback_submitted": 1,
+      "chapter_finished": 1,
+      "chapter_completed": 1,
+      "resource_timing_snapshot": 1,
+      "session_finished": 1,
+      "events_exported": 1
+    },
+    "pages_viewed": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "pages_completed": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "pages_viewed_count": 10,
+    "pages_completed_count": 10,
+    "completion_rate": 100,
+    "activities_started": [
+      "oda_page_10_comercio"
+    ],
+    "activities_completed": [],
+    "teacher_button_opened_count": 5,
+    "teacher_button_closed_count": 5,
+    "teacher_button_total_seconds": 24,
+    "teacher_sections_opened": [
+      "teacher_section_page_3",
+      "teacher_section_page_4",
+      "teacher_section_page_7",
+      "teacher_section_page_8",
+      "teacher_section_page_11"
+    ],
+    "teacher_button_usage_by_section": [
+      {
+        "section_id": "teacher_section_page_3",
+        "teacher_button_id": "teacher_button_page_3",
+        "page": 3,
+        "open_count": 1,
+        "close_count": 1,
+        "total_seconds": 6,
+        "avg_seconds": 6,
+        "opened_more_than_once": false
+      },
+      {
+        "section_id": "teacher_section_page_4",
+        "teacher_button_id": "teacher_button_page_4",
+        "page": 4,
+        "open_count": 1,
+        "close_count": 1,
+        "total_seconds": 5,
+        "avg_seconds": 5,
+        "opened_more_than_once": false
+      },
+      {
+        "section_id": "teacher_section_page_7",
+        "teacher_button_id": "teacher_button_page_7",
+        "page": 7,
+        "open_count": 1,
+        "close_count": 1,
+        "total_seconds": 8,
+        "avg_seconds": 8,
+        "opened_more_than_once": false
+      },
+      {
+        "section_id": "teacher_section_page_8",
+        "teacher_button_id": "teacher_button_page_8",
+        "page": 8,
+        "open_count": 1,
+        "close_count": 1,
+        "total_seconds": 2,
+        "avg_seconds": 2,
+        "opened_more_than_once": false
+      },
+      {
+        "section_id": "teacher_section_page_11",
+        "teacher_button_id": "teacher_button_page_11",
+        "page": 11,
+        "open_count": 1,
+        "close_count": 1,
+        "total_seconds": 3,
+        "avg_seconds": 3,
+        "opened_more_than_once": false
+      }
+    ],
+    "teacher_button_unique_count": 5,
+    "teacher_button_repeated_count": 0,
+    "teacher_button_repeated_sections": [],
+    "most_opened_teacher_section": {
+      "section_id": "teacher_section_page_7",
+      "page": 7,
+      "open_count": 1,
+      "total_seconds": 8
+    },
+    "images_with_errors": [],
+    "images_viewed_unique": [
+      "page_3_abertura_rialto",
+      "page_5_feira_rolo",
+      "page_6_moedas_lidia",
+      "page_8_rota_seda",
+      "page_9_nau_cabral"
+    ],
+    "images_viewed_unique_count": 5,
+    "image_zoom_total": 7,
+    "image_zoom_unique_count": 5,
+    "resources_opened_total": 2,
+    "resources_opened_unique_count": 2,
+    "resources_engagement_total": 2,
+    "oda_opened_count": 1,
+    "oda_engagement_total_seconds": 170,
+    "escola_digital_opened_count": 1,
+    "escola_digital_engagement_total_seconds": 68,
+    "escola_digital_video_play_count": 1,
+    "escola_digital_video_completed_count": 0,
+    "escola_digital_video_watched_to_end": false,
+    "escola_digital_video_max_progress_percent": 97,
+    "escola_digital_video_watch_total_seconds": 197,
+    "feedback_count": 1,
+    "feedback": {
+      "submitted": true,
+      "rating": 5,
+      "navigation_clarity": 5,
+      "visual_comfort": 3,
+      "resource_usefulness": 5,
+      "would_use_again": "sim",
+      "has_comment": true,
+      "comment_length": 222
+    },
+    "reading_depth": "deep_reading",
+    "reading_depth_label": "Leitura aprofundada",
+    "chapter_finished_count": 1,
+    "chapter_completed_count": 1,
+    "device_type": "desktop",
+    "device_type_label": "Computador",
+    "os_name": "Windows",
+    "browser_name": "Chrome",
+    "browser_version": "150",
+    "screen_width": 1920,
+    "screen_height": 1080,
+    "viewport_width": 1920,
+    "viewport_height": 911,
+    "is_touch_device": false,
+    "app_language": "pt-BR",
+    "browser_language": "pt-BR",
+    "duration_seconds": 1321,
+    "visible_time_seconds": 1310,
+    "hidden_time_seconds": 11,
+    "visible_time_ratio": 0.992,
+    "visibility_change_count": 4,
+    "chapter_first_page": 3,
+    "chapter_last_page": 12,
+    "chapter_total_pages": 10,
+    "chapter_default_page": 3,
+    "page_load_time_ms": 1401,
+    "dom_content_loaded_ms": 1343,
+    "ttfb_ms": 540,
+    "session_bytes_transferred": 18023001,
+    "session_image_bytes_transferred": 17301348,
+    "resources_loaded_count": 50,
+    "largest_images_loaded": [
+      {
+        "src": "/livro-digital-piloto/images/page_1_img_39_225.png",
+        "bytes": 8576024
+      },
+      {
+        "src": "/livro-digital-piloto/images/page_4_img_290_484.png",
+        "bytes": 2301122
+      },
+      {
+        "src": "/livro-digital-piloto/images/page_7_img_300_309.png",
+        "bytes": 1983209
+      },
+      {
+        "src": "/livro-digital-piloto/images/thumbODA.svg",
+        "bytes": 1558694
+      },
+      {
+        "src": "/livro-digital-piloto/images/page_3_img_295_487.png",
+        "bytes": 1142418
+      }
+    ],
+    "bytes_from_cache_only": false,
+    "runtime_errors_count": 0,
+    "render_errors_count": 0,
+    "asset_load_errors_count": 0,
+    "links_open_failed_count": 0,
+    "runtime_error_messages": [],
+    "render_error_boundaries": [],
+    "render_error_pages": [],
+    "asset_load_failures": [],
+    "links_open_failed": [],
+    "has_technical_issues": false,
+    "expected_pages_count": 10,
+    "expected_images_count": 5,
+    "expected_resources_count": 2,
+    "expected_teacher_buttons_count": 7,
+    "expected_activities_count": 0,
+    "pages_viewed_coverage_rate": 100,
+    "pages_completed_coverage_rate": 100,
+    "image_exposure_coverage_rate": 100,
+    "resource_open_coverage_rate": 100,
+    "teacher_button_usage_coverage_rate": 71,
+    "activity_start_coverage_rate": null,
+    "pages_not_viewed": [],
+    "images_not_exposed": [],
+    "resources_not_opened": [],
+    "teacher_buttons_not_used": [
+      "teacher_section_page_10",
+      "teacher_section_page_12"
+    ],
+    "activities_not_started": [],
+    "data_quality_score": 100,
+    "event_integrity_status": "ok",
+    "missing_expected_events": [],
+    "duplicate_event_warnings": [],
+    "inconsistent_event_warnings": [],
+    "unexpected_event_warnings": [],
+    "last_page_viewed": 12,
+    "abandoned_before_end": false,
+    "abandonment_page": null,
+    "idle_time_seconds": 0,
+    "exported_at_br": "07/07/2026, 07:50:06"
+  },
+  "events": [
+    {
+      "event_id": "53e107f2-21e9-4a94-8596-1e5ce7840310",
+      "event_name": "session_started",
+      "timestamp": "2026-07-07T10:28:02.238Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "device_type": "desktop",
+        "device_type_label": "Computador",
+        "os_name": "Windows",
+        "browser_name": "Chrome",
+        "browser_version": "150",
+        "screen_width": 1920,
+        "screen_height": 1080,
+        "viewport_width": 1920,
+        "viewport_height": 911,
+        "is_touch_device": false,
+        "app_language": "pt-BR",
+        "browser_language": "pt-BR"
+      },
+      "timestamp_br": "07/07/2026, 07:28:02",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "54f574db-9439-4bc1-9ce2-71f59d453bfa",
+      "event_name": "book_opened",
+      "timestamp": "2026-07-07T10:28:02.239Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page_load_time_ms": 1401,
+        "dom_content_loaded_ms": 1343,
+        "ttfb_ms": 540,
+        "load_trigger": "book_opened"
+      },
+      "timestamp_br": "07/07/2026, 07:28:02",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "c5b2d731-58fc-4b3b-9333-06db2879f729",
+      "event_name": "page_viewed",
+      "timestamp": "2026-07-07T10:28:02.554Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 3
+      },
+      "timestamp_br": "07/07/2026, 07:28:02",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "b9f10e99-a1c6-44c4-a720-b5158e1a5cb3",
+      "event_name": "image_viewed",
+      "timestamp": "2026-07-07T10:28:03.062Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "image_id": "page_3_abertura_rialto",
+        "page": 3,
+        "src": "images/page_1_img_39_225.png"
+      },
+      "timestamp_br": "07/07/2026, 07:28:03",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "dc8a6cf4-f0d4-4d94-9602-a5e0d4fc0a1c",
+      "event_name": "image_zoomed",
+      "timestamp": "2026-07-07T10:28:39.357Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "image_id": "page_3_abertura_rialto",
+        "page": 3,
+        "src": "images/page_1_img_39_225.png"
+      },
+      "timestamp_br": "07/07/2026, 07:28:39",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "1e5b4b36-e875-42d3-927c-67a21d619055",
+      "event_name": "resource_opened",
+      "timestamp": "2026-07-07T10:28:48.277Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "link_id": "escola_digital_video",
+        "page": 3,
+        "type": "escola_digital_opened"
+      },
+      "timestamp_br": "07/07/2026, 07:28:48",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "0ac3c6a0-b396-4443-910a-9fdb19c17378",
+      "event_name": "video_started",
+      "timestamp": "2026-07-07T10:28:54.704Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "link_id": "escola_digital_video",
+        "page": 3,
+        "video_id": "escola_digital_video",
+        "type": "escola_digital_video"
+      },
+      "timestamp_br": "07/07/2026, 07:28:54",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "9025682e-6731-4054-a9e8-2608bcdefbe2",
+      "event_name": "video_progress_recorded",
+      "timestamp": "2026-07-07T10:29:56.758Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "link_id": "escola_digital_video",
+        "page": 3,
+        "video_id": "escola_digital_video",
+        "type": "escola_digital_video",
+        "watched_to_end": false,
+        "watch_duration_seconds": 197,
+        "max_progress_percent": 97,
+        "video_duration_seconds": 202
+      },
+      "timestamp_br": "07/07/2026, 07:29:56",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "924be9ee-ad9f-49c6-8ac7-11127928b0bc",
+      "event_name": "resource_engagement_recorded",
+      "timestamp": "2026-07-07T10:29:56.758Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "link_id": "escola_digital_video",
+        "page": 3,
+        "type": "escola_digital_engagement",
+        "duration_seconds": 68
+      },
+      "timestamp_br": "07/07/2026, 07:29:56",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "34529bdc-09cc-4548-8238-4bb5d2467fdd",
+      "event_name": "teacher_button_opened",
+      "timestamp": "2026-07-07T10:29:59.933Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 3,
+        "teacher_button_id": "teacher_button_page_3",
+        "section_id": "teacher_section_page_3"
+      },
+      "timestamp_br": "07/07/2026, 07:29:59",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "a8a44fa8-e935-4df5-b64b-eee0c7b6f233",
+      "event_name": "teacher_button_closed",
+      "timestamp": "2026-07-07T10:30:06.021Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 3,
+        "teacher_button_id": "teacher_button_page_3",
+        "section_id": "teacher_section_page_3",
+        "duration_seconds": 6
+      },
+      "timestamp_br": "07/07/2026, 07:30:06",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "89637a1c-1ba6-405f-a837-2a5e5aa87c44",
+      "event_name": "teacher_button_opened",
+      "timestamp": "2026-07-07T10:30:17.301Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 4,
+        "teacher_button_id": "teacher_button_page_4",
+        "section_id": "teacher_section_page_4"
+      },
+      "timestamp_br": "07/07/2026, 07:30:17",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "72676abf-9637-4fba-89bc-b22223f90355",
+      "event_name": "teacher_button_closed",
+      "timestamp": "2026-07-07T10:30:22.213Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 4,
+        "teacher_button_id": "teacher_button_page_4",
+        "section_id": "teacher_section_page_4",
+        "duration_seconds": 5
+      },
+      "timestamp_br": "07/07/2026, 07:30:22",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "6bf2cc00-cb57-4989-b900-695a10614393",
+      "event_name": "page_viewed",
+      "timestamp": "2026-07-07T10:30:29.255Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 4
+      },
+      "timestamp_br": "07/07/2026, 07:30:29",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "7f133d6a-5f0d-4325-a9c7-e190c9499988",
+      "event_name": "page_completed",
+      "timestamp": "2026-07-07T10:30:29.256Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 3,
+        "duration_seconds": 140,
+        "completion_reason": "page_changed"
+      },
+      "timestamp_br": "07/07/2026, 07:30:29",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "a8270c98-e0c8-4157-9f9b-d29ec7d01d50",
+      "event_name": "page_viewed",
+      "timestamp": "2026-07-07T10:31:31.192Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 5
+      },
+      "timestamp_br": "07/07/2026, 07:31:31",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "d40f68dd-4850-47c4-8a81-72fc303cba06",
+      "event_name": "page_completed",
+      "timestamp": "2026-07-07T10:31:31.193Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 4,
+        "duration_seconds": 62,
+        "completion_reason": "page_changed"
+      },
+      "timestamp_br": "07/07/2026, 07:31:31",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "aafb7b25-c97d-44e2-bb82-6f41d159a4c8",
+      "event_name": "image_viewed",
+      "timestamp": "2026-07-07T10:31:31.508Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "image_id": "page_5_feira_rolo",
+        "page": 5,
+        "src": "images/page_3_img_295_487.png"
+      },
+      "timestamp_br": "07/07/2026, 07:31:31",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "5cd5a62c-2583-4cbd-bc13-5ba0144515e6",
+      "event_name": "image_zoomed",
+      "timestamp": "2026-07-07T10:31:35.972Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "image_id": "page_5_feira_rolo",
+        "page": 5,
+        "src": "images/page_3_img_295_487.png"
+      },
+      "timestamp_br": "07/07/2026, 07:31:35",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "aa76f487-5bd0-4483-b5ca-bd1a37980a50",
+      "event_name": "image_zoomed",
+      "timestamp": "2026-07-07T10:32:17.110Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "image_id": "page_5_feira_rolo",
+        "page": 5,
+        "src": "images/page_3_img_295_487.png"
+      },
+      "timestamp_br": "07/07/2026, 07:32:17",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "3952dff7-fe99-4b58-997b-7c3351199ad7",
+      "event_name": "page_viewed",
+      "timestamp": "2026-07-07T10:32:26.286Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 6
+      },
+      "timestamp_br": "07/07/2026, 07:32:26",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "f6b5d784-2a9c-440c-9613-a974289739ad",
+      "event_name": "page_completed",
+      "timestamp": "2026-07-07T10:32:26.286Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 5,
+        "duration_seconds": 55,
+        "completion_reason": "page_changed"
+      },
+      "timestamp_br": "07/07/2026, 07:32:26",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "d326888b-e70a-4f85-8593-b9d8e2913224",
+      "event_name": "image_viewed",
+      "timestamp": "2026-07-07T10:32:26.660Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "image_id": "page_6_moedas_lidia",
+        "page": 6,
+        "src": "images/page_4_img_290_484.png"
+      },
+      "timestamp_br": "07/07/2026, 07:32:26",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "d5e2ed0e-3608-4cdd-9566-f566af6a2683",
+      "event_name": "image_zoomed",
+      "timestamp": "2026-07-07T10:32:30.197Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "image_id": "page_6_moedas_lidia",
+        "page": 6,
+        "src": "images/page_4_img_290_484.png"
+      },
+      "timestamp_br": "07/07/2026, 07:32:30",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "22cefea6-4e16-49c7-a099-0f87ca2e6606",
+      "event_name": "teacher_button_opened",
+      "timestamp": "2026-07-07T10:32:39.334Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 7,
+        "teacher_button_id": "teacher_button_page_7",
+        "section_id": "teacher_section_page_7"
+      },
+      "timestamp_br": "07/07/2026, 07:32:39",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "18fe0058-32a2-45c1-b92e-c52fe85335b5",
+      "event_name": "teacher_button_closed",
+      "timestamp": "2026-07-07T10:32:47.069Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 7,
+        "teacher_button_id": "teacher_button_page_7",
+        "section_id": "teacher_section_page_7",
+        "duration_seconds": 8
+      },
+      "timestamp_br": "07/07/2026, 07:32:47",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "df96df39-a8f3-4ca5-9d6d-1cc4e0e60949",
+      "event_name": "page_viewed",
+      "timestamp": "2026-07-07T10:32:48.260Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 7
+      },
+      "timestamp_br": "07/07/2026, 07:32:48",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "3c6c2a1d-446a-4163-bc92-8bd8f050ba4d",
+      "event_name": "page_completed",
+      "timestamp": "2026-07-07T10:32:48.260Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 6,
+        "duration_seconds": 22,
+        "completion_reason": "page_changed"
+      },
+      "timestamp_br": "07/07/2026, 07:32:48",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "bb9e9590-ae1a-4c67-8335-b82a577331e0",
+      "event_name": "image_viewed",
+      "timestamp": "2026-07-07T10:35:21.060Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "image_id": "page_8_rota_seda",
+        "page": 8,
+        "src": "images/page_6_img_70_284.png"
+      },
+      "timestamp_br": "07/07/2026, 07:35:21",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "874b6feb-a567-4d19-9f3a-9adc47865168",
+      "event_name": "teacher_button_opened",
+      "timestamp": "2026-07-07T10:36:48.805Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 8,
+        "teacher_button_id": "teacher_button_page_8",
+        "section_id": "teacher_section_page_8"
+      },
+      "timestamp_br": "07/07/2026, 07:36:48",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "321e8207-180b-4edf-b764-64526c1f094c",
+      "event_name": "teacher_button_closed",
+      "timestamp": "2026-07-07T10:36:50.957Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 8,
+        "teacher_button_id": "teacher_button_page_8",
+        "section_id": "teacher_section_page_8",
+        "duration_seconds": 2
+      },
+      "timestamp_br": "07/07/2026, 07:36:50",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "93e99710-b812-4cc3-84d6-4dc456e535ad",
+      "event_name": "page_viewed",
+      "timestamp": "2026-07-07T10:36:51.709Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 8
+      },
+      "timestamp_br": "07/07/2026, 07:36:51",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "dc400207-f484-4a51-9c08-01ff10e7c704",
+      "event_name": "page_completed",
+      "timestamp": "2026-07-07T10:36:51.709Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 7,
+        "duration_seconds": 243,
+        "completion_reason": "page_changed"
+      },
+      "timestamp_br": "07/07/2026, 07:36:51",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "d421a43d-3d7a-469b-bf39-e8bf3c6bf287",
+      "event_name": "image_zoomed",
+      "timestamp": "2026-07-07T10:36:52.661Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "image_id": "page_8_rota_seda",
+        "page": 8,
+        "src": "images/page_6_img_70_284.png"
+      },
+      "timestamp_br": "07/07/2026, 07:36:52",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "be1c3240-aeb9-4a61-acd8-1f16a754d8d6",
+      "event_name": "image_viewed",
+      "timestamp": "2026-07-07T10:36:58.049Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "image_id": "page_9_nau_cabral",
+        "page": 9,
+        "src": "images/page_7_img_300_309.png"
+      },
+      "timestamp_br": "07/07/2026, 07:36:58",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "01f03b61-7992-4e82-8149-3062510d83e4",
+      "event_name": "page_viewed",
+      "timestamp": "2026-07-07T10:36:58.369Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 9
+      },
+      "timestamp_br": "07/07/2026, 07:36:58",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "2be7ccd2-609d-4d27-a2cb-8cccbac8e079",
+      "event_name": "image_zoomed",
+      "timestamp": "2026-07-07T10:36:59.365Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "image_id": "page_9_nau_cabral",
+        "page": 9,
+        "src": "images/page_7_img_300_309.png"
+      },
+      "timestamp_br": "07/07/2026, 07:36:59",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "4bb56c89-ad82-4347-80c3-00613e222b74",
+      "event_name": "resource_opened",
+      "timestamp": "2026-07-07T10:37:04.493Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "link_id": "oda_page_10_comercio",
+        "page": 10,
+        "type": "oda_opened"
+      },
+      "timestamp_br": "07/07/2026, 07:37:04",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "992e4bda-eb69-46fc-a4cc-c46a690aa985",
+      "event_name": "resource_engagement_recorded",
+      "timestamp": "2026-07-07T10:39:54.216Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "link_id": "oda_page_10_comercio",
+        "page": 10,
+        "type": "oda_engagement",
+        "duration_seconds": 170
+      },
+      "timestamp_br": "07/07/2026, 07:39:54",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "9b31ade7-48df-4d6c-80a0-7edcfb09f6d8",
+      "event_name": "page_completed",
+      "timestamp": "2026-07-07T10:40:54.022Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 8,
+        "duration_seconds": 242,
+        "completion_reason": "page_changed"
+      },
+      "timestamp_br": "07/07/2026, 07:40:54",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "1c24142d-a838-4265-aed4-6eb3b385e53d",
+      "event_name": "image_zoomed",
+      "timestamp": "2026-07-07T10:41:37.693Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "image_id": "page_9_nau_cabral",
+        "page": 9,
+        "src": "images/page_7_img_300_309.png"
+      },
+      "timestamp_br": "07/07/2026, 07:41:37",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "96e66091-a621-43e9-9e54-eb78f40aacc6",
+      "event_name": "page_viewed",
+      "timestamp": "2026-07-07T10:42:58.380Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 10
+      },
+      "timestamp_br": "07/07/2026, 07:42:58",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "7481d46a-a6ac-485a-9c05-0c6db9f01d7d",
+      "event_name": "page_completed",
+      "timestamp": "2026-07-07T10:42:58.381Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 9,
+        "duration_seconds": 360,
+        "completion_reason": "page_changed"
+      },
+      "timestamp_br": "07/07/2026, 07:42:58",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "5a09808b-3e08-4d98-b7c0-5556558b2055",
+      "event_name": "teacher_button_opened",
+      "timestamp": "2026-07-07T10:44:09.862Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 11,
+        "teacher_button_id": "teacher_button_page_11",
+        "section_id": "teacher_section_page_11"
+      },
+      "timestamp_br": "07/07/2026, 07:44:09",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "5e8c3298-cb06-440a-9dfb-33c40d205e13",
+      "event_name": "teacher_button_closed",
+      "timestamp": "2026-07-07T10:44:12.589Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 11,
+        "teacher_button_id": "teacher_button_page_11",
+        "section_id": "teacher_section_page_11",
+        "duration_seconds": 3
+      },
+      "timestamp_br": "07/07/2026, 07:44:12",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "e3e22b50-ba6a-42d1-8f3f-8b9943f6e7b7",
+      "event_name": "page_viewed",
+      "timestamp": "2026-07-07T10:44:13.441Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 11
+      },
+      "timestamp_br": "07/07/2026, 07:44:13",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "e18b71b8-a76c-41f6-89cf-be3b195d4d83",
+      "event_name": "page_completed",
+      "timestamp": "2026-07-07T10:44:13.441Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 10,
+        "duration_seconds": 75,
+        "completion_reason": "page_changed"
+      },
+      "timestamp_br": "07/07/2026, 07:44:13",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "66e8b87e-8363-4a18-8fee-cf690c8bb657",
+      "event_name": "page_viewed",
+      "timestamp": "2026-07-07T10:46:23.164Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 12
+      },
+      "timestamp_br": "07/07/2026, 07:46:23",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "bb6c2d2a-62d5-4152-8afb-81917671ec61",
+      "event_name": "page_completed",
+      "timestamp": "2026-07-07T10:46:23.164Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 11,
+        "duration_seconds": 130,
+        "completion_reason": "page_changed"
+      },
+      "timestamp_br": "07/07/2026, 07:46:23",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "af69356a-576d-434b-8977-f39dd82916a9",
+      "event_name": "page_completed",
+      "timestamp": "2026-07-07T10:47:00.042Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "page": 12,
+        "duration_seconds": 37,
+        "completion_reason": "time_threshold"
+      },
+      "timestamp_br": "07/07/2026, 07:47:00",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "fb62b86f-5dae-4b14-9636-c93bd8e03fc3",
+      "event_name": "feedback_submitted",
+      "timestamp": "2026-07-07T10:49:51.822Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "rating": 5,
+        "navigation_clarity": 5,
+        "visual_comfort": 3,
+        "resource_usefulness": 5,
+        "would_use_again": "sim",
+        "has_comment": true,
+        "comment_length": 222
+      },
+      "timestamp_br": "07/07/2026, 07:49:51",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "b2d240dd-fdd2-4b0b-859e-b0f8f8dd891b",
+      "event_name": "chapter_finished",
+      "timestamp": "2026-07-07T10:50:04.198Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "pages_viewed_count": 10,
+        "pages_completed_count": 10,
+        "total_pages": 10,
+        "completion_rate": 100,
+        "last_page_viewed": 12,
+        "abandoned_before_end": false,
+        "abandonment_page": null,
+        "reading_depth": "deep_reading",
+        "reading_depth_label": "Leitura aprofundada",
+        "completion_status": "completed",
+        "finish_source": "finish_button"
+      },
+      "timestamp_br": "07/07/2026, 07:50:04",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "a683cbe2-6f0f-454d-b1f0-cfa41509c947",
+      "event_name": "chapter_completed",
+      "timestamp": "2026-07-07T10:50:04.198Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "pages_viewed_count": 10,
+        "pages_completed_count": 10,
+        "total_pages": 10,
+        "completion_rate": 100,
+        "last_page_viewed": 12,
+        "abandoned_before_end": false,
+        "abandonment_page": null,
+        "reading_depth": "deep_reading",
+        "reading_depth_label": "Leitura aprofundada",
+        "completion_status": "completed",
+        "finish_source": "finish_button"
+      },
+      "timestamp_br": "07/07/2026, 07:50:04",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "9406988a-b9e2-404d-a421-646057aefb02",
+      "event_name": "resource_timing_snapshot",
+      "timestamp": "2026-07-07T10:50:04.199Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "session_bytes_transferred": 18023001,
+        "session_image_bytes_transferred": 17301348,
+        "resources_loaded_count": 50,
+        "largest_images": [
+          {
+            "src": "/livro-digital-piloto/images/page_1_img_39_225.png",
+            "bytes": 8576024
+          },
+          {
+            "src": "/livro-digital-piloto/images/page_4_img_290_484.png",
+            "bytes": 2301122
+          },
+          {
+            "src": "/livro-digital-piloto/images/page_7_img_300_309.png",
+            "bytes": 1983209
+          },
+          {
+            "src": "/livro-digital-piloto/images/thumbODA.svg",
+            "bytes": 1558694
+          },
+          {
+            "src": "/livro-digital-piloto/images/page_3_img_295_487.png",
+            "bytes": 1142418
+          }
+        ],
+        "bytes_from_cache_only": false
+      },
+      "timestamp_br": "07/07/2026, 07:50:04",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "2ce05fd1-44c3-49d4-8400-3384b256c4f1",
+      "event_name": "session_finished",
+      "timestamp": "2026-07-07T10:50:04.199Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "duration_seconds": 1321,
+        "visible_time_seconds": 1310,
+        "hidden_time_seconds": 11,
+        "visible_time_ratio": 0.992,
+        "visibility_change_count": 4,
+        "pages_viewed_count": 10,
+        "pages_completed_count": 10,
+        "avg_seconds_per_viewed_page": 131,
+        "avg_seconds_per_completed_page": 136.6,
+        "reading_depth": "deep_reading",
+        "activities_started_count": 1,
+        "activities_completed_count": 0,
+        "images_viewed_count": 5,
+        "feedback_submitted": true,
+        "idle_time_seconds": 0,
+        "last_page_viewed": 12,
+        "abandoned_before_end": false,
+        "abandonment_page": null,
+        "reading_depth_label": "Leitura aprofundada",
+        "finish_trigger": "finish_button",
+        "session_bytes_transferred": 18023001,
+        "session_image_bytes_transferred": 17301348,
+        "resources_loaded_count": 50,
+        "largest_images": [
+          {
+            "src": "/livro-digital-piloto/images/page_1_img_39_225.png",
+            "bytes": 8576024
+          },
+          {
+            "src": "/livro-digital-piloto/images/page_4_img_290_484.png",
+            "bytes": 2301122
+          },
+          {
+            "src": "/livro-digital-piloto/images/page_7_img_300_309.png",
+            "bytes": 1983209
+          },
+          {
+            "src": "/livro-digital-piloto/images/thumbODA.svg",
+            "bytes": 1558694
+          },
+          {
+            "src": "/livro-digital-piloto/images/page_3_img_295_487.png",
+            "bytes": 1142418
+          }
+        ],
+        "bytes_from_cache_only": false
+      },
+      "timestamp_br": "07/07/2026, 07:50:04",
+      "timestamp_date_br": "07/07/2026"
+    },
+    {
+      "event_id": "02d75f18-a34f-4577-b360-30ee0a7deb33",
+      "event_name": "events_exported",
+      "timestamp": "2026-07-07T10:50:04.200Z",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "participant_id": "P13",
+      "book_id": "cap07_historia_ai43",
+      "chapter_id": "cap07",
+      "source": "react_mvp",
+      "metadata": {
+        "event_count_before_export": 55,
+        "event_count_at_export": 56,
+        "export_format": "json",
+        "export_source": "finish_button",
+        "export_count": 1,
+        "session_bytes_transferred": 18023001,
+        "session_image_bytes_transferred": 17301348,
+        "resources_loaded_count": 50,
+        "largest_images": [
+          {
+            "src": "/livro-digital-piloto/images/page_1_img_39_225.png",
+            "bytes": 8576024
+          },
+          {
+            "src": "/livro-digital-piloto/images/page_4_img_290_484.png",
+            "bytes": 2301122
+          },
+          {
+            "src": "/livro-digital-piloto/images/page_7_img_300_309.png",
+            "bytes": 1983209
+          },
+          {
+            "src": "/livro-digital-piloto/images/thumbODA.svg",
+            "bytes": 1558694
+          },
+          {
+            "src": "/livro-digital-piloto/images/page_3_img_295_487.png",
+            "bytes": 1142418
+          }
+        ],
+        "bytes_from_cache_only": false
+      },
+      "timestamp_br": "07/07/2026, 07:50:04",
+      "timestamp_date_br": "07/07/2026"
+    }
+  ],
+  "feedback_comments": [
+    {
+      "participant_id": "P13",
+      "session_id": "1be32062-6e43-47d0-b69c-d298ae544c69",
+      "comment": "As interatividades de zoom, responder questões e ODAs são os pontos positivos. Também gostei da organização do conteúdo, alinhamentos e espaçamentos dos textos, mas achei o tamanho da fonte pequena para a série respectiva.",
+      "submitted_at": "2026-07-07T10:49:51.823Z",
+      "submitted_at_br": "07/07/2026, 07:49:51",
+      "submitted_date_br": "07/07/2026"
+    }
+  ]
+}

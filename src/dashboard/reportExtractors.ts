@@ -283,6 +283,52 @@ export function buildPageJourney(summary: EventSummary): PageJourneyItem[] {
   });
 }
 
+export type ChapterProgressKind = 'full_completion' | 'viewed_all_incomplete' | 'partial_view';
+
+export function classifyChapterProgress(
+  pagesViewed: number,
+  pagesCompleted: number,
+  totalPages: number,
+): ChapterProgressKind {
+  if (pagesCompleted >= totalPages) return 'full_completion';
+  if (pagesViewed >= totalPages) return 'viewed_all_incomplete';
+  return 'partial_view';
+}
+
+export function getChapterProgressLabel(kind: ChapterProgressKind): string {
+  switch (kind) {
+    case 'full_completion':
+      return 'Concluiu 100% das páginas';
+    case 'viewed_all_incomplete':
+      return 'Viu tudo, tempo insuficiente';
+    case 'partial_view':
+      return 'Não percorreu o capítulo inteiro';
+  }
+}
+
+export function buildSessionPageHeatmap(
+  summary: EventSummary,
+): Array<{
+  page: number;
+  viewedCount: number;
+  viewedPct: number;
+  completedCount: number;
+  completedPct: number;
+  abandonmentCount: number;
+}> {
+  const viewed = new Set(summary.pages_viewed);
+  const completed = new Set(summary.pages_completed);
+
+  return getChapterPageNumbers(summary).map((page) => ({
+    page,
+    viewedCount: viewed.has(page) ? 1 : 0,
+    viewedPct: viewed.has(page) ? 100 : 0,
+    completedCount: completed.has(page) ? 1 : 0,
+    completedPct: completed.has(page) ? 100 : 0,
+    abandonmentCount: summary.abandonment_page === page ? 1 : 0,
+  }));
+}
+
 export function formatCoverageRate(rate: number | null | undefined): string {
   if (rate === null || rate === undefined) return 'N/A';
   return `${rate}%`;
@@ -353,4 +399,14 @@ export function formatWouldUseAgain(value: string | undefined): string {
     talvez: 'Talvez',
   };
   return map[value] ?? value;
+}
+
+const WOULD_USE_AGAIN_COLORS: Record<string, string> = {
+  sim: '#10b981',
+  talvez: '#f59e0b',
+  nao: '#94a3b8',
+};
+
+export function getWouldUseAgainColor(value: string): string {
+  return WOULD_USE_AGAIN_COLORS[value] ?? '#80298F';
 }

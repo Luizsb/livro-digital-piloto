@@ -587,8 +587,10 @@ export default function ProjectHubPage({
             <p className="mb-8 max-w-3xl text-slate-600">
               A partir dos eventos coletados, é possível montar diferentes leituras — da sessão
               individual até uma visão executiva do piloto. O{' '}
-              <strong className="text-slate-800">LD Insights</strong> já cobre relatório individual e
-              consolidado de grupo; os demais representam evoluções naturais da mesma base de dados.
+              <strong className="text-slate-800">LD Insights</strong> já oferece relatório individual
+              e consolidado com gráficos visuais (jornada por página, dispositivos, engajamento,
+              feedback e status do capítulo). Os demais representam evoluções naturais da mesma base
+              de dados.
             </p>
             <div className="grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-3">
               {REPORT_CARDS.map((report) => (

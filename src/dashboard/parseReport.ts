@@ -92,13 +92,18 @@ function enrichEscolaDigitalVideoSummary(
   };
 }
 
+function countByEventName(events: AnalyticsEvent[]): Record<string, number> {
+  const by: Record<string, number> = {};
+  for (const event of events) {
+    by[event.event_name] = (by[event.event_name] ?? 0) + 1;
+  }
+  return by;
+}
+
 function enrichCollectionQualitySummary(
   summary: EventSummary,
   events: AnalyticsEvent[],
 ): EventSummary {
-  if (typeof summary.data_quality_score === 'number') {
-    return summary;
-  }
   if (events.length === 0) {
     return {
       ...summary,
@@ -110,9 +115,14 @@ function enrichCollectionQualitySummary(
       unexpected_event_warnings: [],
     };
   }
+  const summaryForQuality: EventSummary = {
+    ...summary,
+    by_event_name: countByEventName(events),
+    total_events: events.length,
+  };
   return {
     ...summary,
-    ...buildCollectionQuality(events, summary),
+    ...buildCollectionQuality(events, summaryForQuality),
   };
 }
 

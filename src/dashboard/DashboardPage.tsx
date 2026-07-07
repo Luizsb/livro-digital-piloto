@@ -10,7 +10,15 @@ import { aggregateSessionReports } from './buildGroupReport';
 import { downloadGroupReportJson } from './exportGroupReport';
 import GroupReportContent from './GroupReportContent';
 import {
-  buildChapterStatusInsight,
+  SessionChapterProgressSection,
+  SessionDeviceSection,
+  SessionEngagementSection,
+  SessionFeedbackVisualSection,
+  SessionPageJourneySection,
+} from './SessionVisualBlocks';
+import { ScrollToTopButton } from '@shared/components/ScrollToTopButton';
+import { pluralSessao } from '@shared/lib/pluralizePt';
+import {
   buildHealthChecks,
   buildInterpretationAlerts,
   buildQualityChecksByCategory,
@@ -21,7 +29,6 @@ import {
   QUALITY_CATEGORY_LABELS,
 } from './reportInsights';
 import {
-  buildPageJourney,
   extractSessionDurationSeconds,
   extractSessionHiddenSeconds,
   extractSessionVisibleSeconds,
@@ -34,17 +41,8 @@ import {
   formatBytes,
   formatLoadTimeMs,
   getLoadTimeRating,
-  formatWouldUseAgain,
-  getChapterStatusBadgeClass,
-  getChapterStatusLabel,
   getParticipantLabel,
-  PAGE_JOURNEY_LABELS,
-  type ChapterStatusLabel,
 } from './reportExtractors';
-import {
-  formatBrowserLabel,
-  formatScreenResolution,
-} from '@analytics/deviceContext';
 import { MetricTerm, TECHNICAL_HEALTH_HINTS } from './InfoHint';
 import {
   MODAL_TIME_LABEL,
@@ -57,24 +55,6 @@ import {
   TAB_FOCUS_RETURN_COUNT_LABEL,
   TAB_HIDDEN_COUNT_LABEL,
 } from '@analytics/metricDisplayLabels';
-
-function StatusMetricCard({ status }: { status: ChapterStatusLabel }) {
-  return (
-    <div className="flex min-h-[6.75rem] min-w-0 flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <p className="text-[11px] font-medium uppercase leading-snug tracking-wide text-slate-500">
-        Status do capítulo
-      </p>
-      <div className="mt-3">
-        <span
-          className={`inline-block rounded-full border px-3 py-1.5 text-sm font-semibold leading-snug ${getChapterStatusBadgeClass(status)}`}
-        >
-          {status}
-        </span>
-      </div>
-      <span className="mt-auto" aria-hidden />
-    </div>
-  );
-}
 
 function InsightIcon({ className = 'h-6 w-6' }: { className?: string }) {
   return (
@@ -307,32 +287,19 @@ function Section({
 
 function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
   const { report, summary, events, feedbackComments, warnings, chapterManifest } = parsed;
-  const [showComment, setShowComment] = useState(false);
   const totalPages =
     summary.chapter_total_pages ?? getChapterTotalPages(resolveChapterPageBounds(summary));
   const duration = extractSessionDurationSeconds(events);
   const visibleDuration = extractSessionVisibleSeconds(events, summary);
   const hiddenDuration = extractSessionHiddenSeconds(events, summary);
   const visibleRatio = extractVisibleTimeRatio(events, summary);
-  const pageJourney = buildPageJourney(summary);
   const zoomedImages = extractZoomedImageIds(events);
   const healthChecks = buildHealthChecks(summary);
   const qualityByCategory = buildQualityChecksByCategory(events, summary);
   const interpretationAlerts = buildInterpretationAlerts(summary);
   const technicalAlerts = buildTechnicalAlerts(summary);
-  const chapterStatus = getChapterStatusLabel(summary);
   const sessionInsight = buildSessionInsight(parsed);
-  const commentText = feedbackComments[0]?.comment;
   const loadTimeRating = getLoadTimeRating(summary.page_load_time_ms);
-
-  const deviceEmoji =
-    summary.device_type === 'mobile'
-      ? '📱'
-      : summary.device_type === 'tablet'
-        ? '📲'
-        : summary.device_type === 'desktop'
-          ? '🖥️'
-          : null;
 
   return (
     <div className="space-y-6">
@@ -402,7 +369,6 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
           label={PAGE_COMPLETION_RATE_LABEL}
           value={`${summary.completion_rate}%`}
         />
-        <StatusMetricCard status={chapterStatus} />
         <MetricCard
           label={READING_DEPTH_LABEL}
           value={summary.reading_depth_label ?? '—'}
@@ -423,61 +389,14 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
         exportedAt={report.exported_at}
       />
 
-      {summary.device_type_label ? (
-        <Section title="Ambiente de acesso">
-          <p className="mb-4 text-sm text-slate-600">
-            Registrado no início da sessão — útil para entender em qual dispositivo o participante
-            usou o livro digital.
-          </p>
-          <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3 lg:grid-cols-4">
-            <div>
-              <dt className="text-slate-500">Dispositivo</dt>
-              <dd className="mt-1 font-semibold text-[#80298F]">
-                {deviceEmoji ? `${deviceEmoji} ` : ''}
-                {summary.device_type_label}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">Sistema operacional</dt>
-              <dd className="mt-1 font-semibold text-[#80298F]">{summary.os_name ?? '—'}</dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">Navegador</dt>
-              <dd className="mt-1 font-semibold text-[#80298F]">
-                {formatBrowserLabel(summary.browser_name, summary.browser_version)}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">Resolução da tela</dt>
-              <dd className="mt-1 font-semibold text-[#80298F]">
-                {formatScreenResolution(summary.screen_width, summary.screen_height)}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">Janela do navegador</dt>
-              <dd className="mt-1 font-semibold text-[#80298F]">
-                {formatScreenResolution(summary.viewport_width, summary.viewport_height)}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">Tela touch</dt>
-              <dd className="mt-1 font-semibold text-[#80298F]">
-                {summary.is_touch_device ? 'Sim' : 'Não'}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">Idioma do app</dt>
-              <dd className="mt-1 font-semibold text-[#80298F]">{summary.app_language ?? '—'}</dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">Idioma do navegador</dt>
-              <dd className="mt-1 font-semibold text-[#80298F]">
-                {summary.browser_language ?? '—'}
-              </dd>
-            </div>
-          </dl>
-        </Section>
-      ) : null}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <SessionChapterProgressSection summary={summary} totalPages={totalPages} />
+        <SessionEngagementSection summary={summary} />
+      </div>
+
+      <SessionPageJourneySection summary={summary} />
+
+      <SessionDeviceSection summary={summary} />
 
       <Section title="Saúde técnica na navegação">
         <p className="mb-4 text-sm text-slate-600">
@@ -676,113 +595,6 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
             </ul>
           </div>
         ) : null}
-      </Section>
-
-      <Section title="Jornada de leitura">
-        <p className="mb-4 text-sm text-slate-600">
-          Páginas do livro percorridas nesta sessão
-          {pageJourney.length > 0 ? (
-            <>
-              {' '}
-              (pág. {pageJourney[0].page} a pág. {pageJourney[pageJourney.length - 1].page})
-            </>
-          ) : null}
-          . O emoji em cada cartão indica o status (legenda).
-        </p>
-        <div className="mb-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-600">
-          {(Object.keys(PAGE_JOURNEY_LABELS) as Array<keyof typeof PAGE_JOURNEY_LABELS>).map(
-            (status) => (
-              <span key={status} className="flex items-center gap-2">
-                <span className="text-base leading-none" aria-hidden>
-                  {PAGE_JOURNEY_LABELS[status].emoji}
-                </span>
-                <span>{PAGE_JOURNEY_LABELS[status].legend}</span>
-              </span>
-            ),
-          )}
-        </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5 lg:grid-cols-10">
-          {pageJourney.map((item) => {
-            const statusLabel = PAGE_JOURNEY_LABELS[item.status];
-            return (
-              <div
-                key={item.page}
-                title={`Página ${item.page} — ${statusLabel.legend}`}
-                aria-label={`Página ${item.page} do livro: ${statusLabel.legend}`}
-                className={`rounded-lg border px-2 py-2.5 text-center text-sm font-semibold ${
-                  item.status === 'completed'
-                    ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
-                    : item.status === 'viewed'
-                      ? 'border-[#80298F]/30 bg-[#F9DDFF]/40 text-[#80298F]'
-                      : 'border-slate-200 bg-slate-50 text-slate-400'
-                }`}
-              >
-                <div className="text-lg leading-none" aria-hidden>
-                  {statusLabel.emoji}
-                </div>
-                <div className="mt-1.5 text-[10px] font-medium uppercase tracking-wide opacity-80">
-                  Pág.
-                </div>
-                <div className="text-lg font-bold leading-tight">{item.page}</div>
-              </div>
-            );
-          })}
-        </div>
-      </Section>
-
-      <Section title="Status do capítulo">
-        <div className="mb-4">
-          <span
-            className={`inline-block rounded-full border px-3 py-1.5 text-sm font-semibold ${getChapterStatusBadgeClass(chapterStatus)}`}
-          >
-            {chapterStatus}
-          </span>
-        </div>
-        <p className="text-sm leading-relaxed text-slate-700">
-          {buildChapterStatusInsight(summary)}
-        </p>
-        <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <dt className="text-slate-500">{PAGE_COMPLETION_RATE_LABEL}</dt>
-            <dd className="font-semibold text-[#80298F]">{summary.completion_rate}%</dd>
-          </div>
-          <div>
-            <dt className="text-slate-500">Capítulo finalizado</dt>
-            <dd className="font-semibold text-[#80298F]">
-              {summary.chapter_finished_count > 0 ? 'Sim' : 'Não'}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-slate-500">Capítulo concluído (critério)</dt>
-            <dd className="font-semibold text-[#80298F]">
-              {summary.chapter_completed_count > 0 ? 'Sim' : 'Não'}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-slate-500">{READING_DEPTH_LABEL}</dt>
-            <dd className="font-semibold text-[#80298F]">
-              {summary.reading_depth_label ?? '—'}
-            </dd>
-            <dd className="mt-1 text-xs text-slate-500">{READING_DEPTH_EXPLANATION}</dd>
-          </div>
-          {summary.last_page_viewed != null ? (
-            <div>
-              <dt className="text-slate-500">Última página vista</dt>
-              <dd className="font-semibold text-[#80298F]">Pág. {summary.last_page_viewed}</dd>
-            </div>
-          ) : null}
-          {summary.abandoned_before_end ? (
-            <div>
-              <dt className="text-slate-500">Abandonou antes do fim</dt>
-              <dd className="font-semibold text-amber-700">
-                Sim
-                {summary.abandonment_page != null
-                  ? ` (pág. ${summary.abandonment_page})`
-                  : ''}
-              </dd>
-            </div>
-          ) : null}
-        </dl>
       </Section>
 
       <ChapterCoverageSection summary={summary} chapterManifest={chapterManifest} />
@@ -999,87 +811,7 @@ function DashboardContent({ parsed }: { parsed: ParsedDashboardReport }) {
         )}
       </Section>
 
-      <Section title="Feedback">
-        {summary.feedback.submitted ? (
-          <dl className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
-            <div>
-              <dt className="text-slate-500">Nota geral</dt>
-              <dd className="font-semibold text-[#80298F]">{summary.feedback.rating}/5</dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">Clareza da navegação</dt>
-              <dd className="font-semibold text-[#80298F]">
-                {summary.feedback.navigation_clarity}/5
-              </dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">Conforto visual</dt>
-              <dd className="font-semibold text-[#80298F]">
-                {summary.feedback.visual_comfort}/5
-              </dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">Utilidade dos recursos</dt>
-              <dd className="font-semibold text-[#80298F]">
-                {summary.feedback.resource_usefulness}/5
-              </dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">Usaria novamente</dt>
-              <dd className="font-semibold text-[#80298F]">
-                {formatWouldUseAgain(summary.feedback.would_use_again)}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">Comentário enviado</dt>
-              <dd className="font-semibold text-[#80298F]">
-                {summary.feedback.has_comment ? 'Sim' : 'Não'}
-              </dd>
-            </div>
-            {summary.feedback.comment_length ? (
-              <div>
-                <dt className="text-slate-500">Tamanho do comentário</dt>
-                <dd className="font-semibold text-[#80298F]">
-                  {summary.feedback.comment_length} caracteres
-                </dd>
-              </div>
-            ) : null}
-          </dl>
-        ) : (
-          <p className="text-sm text-slate-600">Nenhum feedback enviado nesta sessão.</p>
-        )}
-
-        {commentText ? (
-          <div className="mt-4 border-t border-slate-100 pt-4">
-            {!showComment ? (
-              <button
-                type="button"
-                onClick={() => setShowComment(true)}
-                className="rounded-lg border border-[#80298F] px-4 py-2 text-sm font-semibold text-[#80298F] transition hover:bg-[#F9DDFF]"
-              >
-                Ver comentário
-              </button>
-            ) : (
-              <div className="space-y-3">
-                <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                  Comentário aberto pode conter informações pessoais. Exibir apenas em contexto
-                  de validação interna.
-                </p>
-                <p className="whitespace-pre-wrap rounded-lg bg-slate-50 p-4 text-sm text-slate-800">
-                  {commentText}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setShowComment(false)}
-                  className="text-sm text-slate-600 underline"
-                >
-                  Ocultar comentário
-                </button>
-              </div>
-            )}
-          </div>
-        ) : null}
-      </Section>
+      <SessionFeedbackVisualSection summary={summary} feedbackComments={feedbackComments} />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Section title="Qualidade da coleta">
@@ -1341,8 +1073,7 @@ function DashboardPage() {
                 {mode === 'group' ? (
                   <>
                     Relatório consolidado · {groupReport.book_id} · {groupReport.chapter_id} ·{' '}
-                    {groupReport.valid_sessions_count} sessão
-                    {groupReport.valid_sessions_count === 1 ? '' : 'ões'}
+                    {groupReport.valid_sessions_count} {pluralSessao(groupReport.valid_sessions_count)}
                   </>
                 ) : (
                   <>
@@ -1500,6 +1231,7 @@ function DashboardPage() {
           <GroupReportContent report={groupReport} />
         ) : null}
       </main>
+      {hasContent ? <ScrollToTopButton /> : null}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import type { EventSummary } from '@analytics/sessionSummary';
 import type { FeedbackCommentRecord } from '@analytics/feedbackComments';
 import type { AnalyticsEvent } from '@analytics/sessionTypes';
 import type { ChapterManifest } from '@book/chapter/chapterManifest';
+import type { GroupAdvancedAnalytics } from './buildGroupAdvancedAnalytics';
 
 export type DashboardReport = ExportPayload;
 
@@ -56,6 +57,10 @@ export interface GroupSessionRow {
   chapterFinished: boolean;
   chapterCompleted: boolean;
   hasTechnicalIssues: boolean;
+  tabHiddenCount: number;
+  hiddenTimeSeconds: number | null;
+  odaOpened: boolean;
+  videoPlayed: boolean;
 }
 
 export interface PageHeatmapItem {
@@ -70,9 +75,12 @@ export interface PageHeatmapItem {
 export interface GroupReportSummary {
   avg_pages_viewed: number;
   avg_completion_rate: number;
-  chapter_finished_pct: number;
-  chapter_completed_pct: number;
-  abandonment_pct: number;
+  /** Páginas concluídas em 100% (tempo mínimo em todas). */
+  full_completion_pct: number;
+  /** Viu todas as páginas, mas não concluiu 100% (tempo insuficiente). */
+  viewed_all_incomplete_pct: number;
+  /** Não visualizou todas as páginas do capítulo. */
+  partial_view_pct: number;
   avg_visible_time_seconds: number | null;
   avg_idle_time_seconds: number | null;
   reading_depth_distribution: Record<string, number>;
@@ -88,12 +96,29 @@ export interface GroupResourceAnalytics {
   avg_resources_opened: number;
   sessions_with_oda_pct: number;
   avg_oda_opened: number;
+  avg_oda_engagement_seconds: number | null;
+  avg_escola_digital_engagement_seconds: number | null;
+  avg_video_max_progress_pct: number | null;
   avg_image_zoom_total: number;
   avg_image_zoom_unique: number;
   sessions_with_video_play_pct: number;
   sessions_with_video_completed_pct: number;
   avg_video_watch_seconds: number | null;
   teacher_button_usage_pct: number;
+}
+
+export interface GroupFocusAnalytics {
+  sessions_with_focus_loss_pct: number;
+  avg_tab_hidden_count: number | null;
+  avg_hidden_time_seconds: number | null;
+  avg_idle_time_seconds: number | null;
+}
+
+export interface GroupWrittenFeedbackComment {
+  participant_id: string;
+  comment: string;
+  submitted_at_br?: string;
+  file_name: string;
 }
 
 export interface GroupFeedbackAnalytics {
@@ -104,16 +129,44 @@ export interface GroupFeedbackAnalytics {
   avg_visual_comfort: number | null;
   avg_resource_usefulness: number | null;
   would_use_again_distribution: Record<string, number>;
+  /** Distribuição de notas gerais (1–5). */
+  rating_distribution: Record<string, number>;
+  written_comments: GroupWrittenFeedbackComment[];
 }
 
 export interface GroupTechnicalAnalytics {
   device_distribution: Record<string, number>;
+  /** desktop | mobile | tablet */
+  device_type_distribution: Record<string, number>;
+  os_distribution: Record<string, number>;
   browser_distribution: Record<string, number>;
   technical_issues_pct: number;
   total_runtime_errors: number;
   total_asset_load_errors: number;
   total_render_errors: number;
   sessions_with_technical_issues: number;
+}
+
+export interface GroupEngagementAnalytics {
+  /** Todas as páginas concluídas (tempo mínimo em cada uma). */
+  full_completion_count: number;
+  /** Viu todas as páginas, mas não concluiu 100% (tempo insuficiente). */
+  viewed_all_incomplete_count: number;
+  /** Não visualizou todas as páginas do capítulo. */
+  partial_view_count: number;
+  sessions_with_video_pct: number;
+  sessions_with_video_completed_pct: number;
+  sessions_with_oda_pct: number;
+  sessions_with_teacher_pct: number;
+  sessions_with_image_zoom_pct: number;
+  avg_teacher_button_opens: number;
+}
+
+export interface GroupSessionQualityIssue {
+  participant_id: string;
+  file_name: string;
+  score: number;
+  warnings: string[];
 }
 
 export interface GroupDataQuality {
@@ -124,6 +177,7 @@ export interface GroupDataQuality {
   mixed_book_or_chapter: boolean;
   load_error_count: number;
   per_session_warnings_count: number;
+  session_quality_issues: GroupSessionQualityIssue[];
 }
 
 /** Relatório consolidado multi-sessão exportável pelo LD Insights. */
@@ -142,9 +196,12 @@ export interface GroupReport {
   summary: GroupReportSummary;
   page_analytics: GroupPageAnalytics;
   resource_analytics: GroupResourceAnalytics;
+  focus_analytics: GroupFocusAnalytics;
+  engagement_analytics: GroupEngagementAnalytics;
   feedback_analytics: GroupFeedbackAnalytics;
   technical_analytics: GroupTechnicalAnalytics;
   data_quality: GroupDataQuality;
+  advanced_analytics: GroupAdvancedAnalytics;
   sessions: GroupSessionRow[];
   insights: string[];
 }

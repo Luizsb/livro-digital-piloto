@@ -1,3 +1,4 @@
+import { buildGroupAdvancedAnalytics } from './buildGroupAdvancedAnalytics';
 import type {
   ParsedDashboardReport,
   GroupReport,
@@ -9,9 +10,11 @@ import {
   getChapterPageNumbers,
   getChapterStatusLabel,
   getParticipantLabel,
+  classifyChapterProgress,
 } from './reportExtractors';
 import { formatBrowserLabel } from '@analytics/deviceContext';
 import { formatDateTimeBr } from '@shared/lib/formatDateTimeBr';
+import { pluralSessao, pluralValida } from '@shared/lib/pluralizePt';
 
 const RELIABLE_QUALITY_THRESHOLD = 85;
 
@@ -119,6 +122,10 @@ function buildSessionRow(session: ParsedDashboardReport): GroupSessionRow {
     chapterFinished: summary.chapter_finished_count > 0,
     chapterCompleted: summary.chapter_completed_count > 0,
     hasTechnicalIssues: summary.has_technical_issues === true,
+    tabHiddenCount: summary.tab_hidden_count ?? 0,
+    hiddenTimeSeconds: summary.hidden_time_seconds ?? null,
+    odaOpened: summary.oda_opened_count > 0,
+    videoPlayed: summary.escola_digital_video_play_count > 0,
   };
 }
 
@@ -133,7 +140,7 @@ function buildGroupInsights(report: Omit<GroupReport, 'insights'>): string[] {
   const totalPages = page_analytics.total_pages;
 
   insights.push(
-    `O relatório consolidado reúne ${n} sessão${n === 1 ? '' : 'ões'} válida${n === 1 ? '' : 's'} do capítulo ${report.chapter_id} (${report.book_id}), com ${report.participants_count} participante${report.participants_count === 1 ? '' : 's'} distinto${report.participants_count === 1 ? '' : 's'}.`,
+    `O relatório consolidado reúne ${n} ${pluralSessao(n)} ${pluralValida(n)} do capítulo ${report.chapter_id} (${report.book_id}), com ${report.participants_count} participante${report.participants_count === 1 ? '' : 's'} distinto${report.participants_count === 1 ? '' : 's'}.`,
   );
 
   insights.push(
@@ -141,19 +148,16 @@ function buildGroupInsights(report: Omit<GroupReport, 'insights'>): string[] {
   );
 
   insights.push(
-    `${summary.chapter_finished_pct}% finalizaram o capítulo e ${summary.chapter_completed_pct}% atingiram o critério de conclusão pedagógica.`,
+    `${summary.full_completion_pct}% concluíram 100% das páginas (tempo mínimo em todas). ${summary.viewed_all_incomplete_pct}% viu todas as páginas mas não atingiu o tempo em algumas. ${summary.partial_view_pct}% não percorreu o capítulo inteiro.`,
   );
 
-  if (summary.abandonment_pct > 0) {
-    insights.push(
-      `${summary.abandonment_pct}% não percorreram todas as páginas antes de encerrar.`,
-    );
+  if (summary.partial_view_pct > 0) {
     const topAbandon = [...page_analytics.heatmap]
       .filter((p) => p.abandonmentCount > 0)
       .sort((a, b) => b.abandonmentCount - a.abandonmentCount)[0];
     if (topAbandon) {
       insights.push(
-        `A página mais frequente como último ponto de parada foi a pág. ${topAbandon.page} (${topAbandon.abandonmentCount} sessão${topAbandon.abandonmentCount === 1 ? '' : 'ões'}).`,
+        `A página mais frequente como último ponto de parada foi a pág. ${topAbandon.page} (${topAbandon.abandonmentCount} ${pluralSessao(topAbandon.abandonmentCount)}).`,
       );
     }
   }
@@ -177,15 +181,70 @@ function buildGroupInsights(report: Omit<GroupReport, 'insights'>): string[] {
     );
   }
 
+  const { technical_analytics, engagement_analytics } = report;
+  const deviceEntries = Object.entries(technical_analytics.device_type_distribution).sort(
+    (a, b) => b[1] - a[1],
+  );
+  if (deviceEntries.length > 0) {
+    const [topDevice, topCount] = deviceEntries[0];
+    const deviceLabels: Record<string, string> = {
+      desktop: 'desktop',
+      mobile: 'celular',
+      tablet: 'tablet',
+    };
+    insights.push(
+      `${Math.round((topCount / n) * 100)}% das sessões foram em ${deviceLabels[topDevice] ?? topDevice} (${topCount} de ${n}).`,
+    );
+  }
+
+  const osEntries = Object.entries(technical_analytics.os_distribution).sort((a, b) => b[1] - a[1]);
+  if (osEntries.length > 0) {
+    const [topOs, topOsCount] = osEntries[0];
+    insights.push(
+      `Sistema operacional predominante: ${topOs} (${topOsCount} ${pluralSessao(topOsCount)}).`,
+    );
+  }
+
+  if (engagement_analytics.sessions_with_teacher_pct > 0) {
+    insights.push(
+      `${engagement_analytics.sessions_with_teacher_pct}% usaram o botão do professor (média de ${engagement_analytics.avg_teacher_button_opens.toFixed(1)} aberturas por sessão).`,
+    );
+  }
+
+  const { focus_analytics, resource_analytics: resources } = report;
+  if (focus_analytics.sessions_with_focus_loss_pct > 0) {
+    insights.push(
+      `${focus_analytics.sessions_with_focus_loss_pct}% das sessões saiu da aba do livro ao menos uma vez${focus_analytics.avg_hidden_time_seconds !== null ? ` (média de ${Math.round(focus_analytics.avg_hidden_time_seconds)}s fora da aba)` : ''}.`,
+    );
+  }
+
+  if (resources.avg_oda_engagement_seconds !== null && resources.avg_oda_engagement_seconds > 0) {
+    insights.push(
+      `Tempo médio de engajamento em ODA: cerca de ${Math.round(resources.avg_oda_engagement_seconds)}s por sessão que abriu o recurso.`,
+    );
+  }
+
+  if (resources.avg_video_max_progress_pct !== null && resources.avg_video_max_progress_pct > 0) {
+    insights.push(
+      `Progresso médio máximo no vídeo da Escola Digital: ${Math.round(resources.avg_video_max_progress_pct)}% entre quem iniciou a reprodução.`,
+    );
+  }
+
   if (feedback_analytics.feedback_count > 0 && feedback_analytics.avg_rating !== null) {
     insights.push(
       `${feedback_analytics.feedback_count} participante${feedback_analytics.feedback_count === 1 ? '' : 's'} enviou feedback, com nota média geral de ${feedback_analytics.avg_rating.toFixed(1)}/5.`,
     );
   }
 
+  if (feedback_analytics.written_comments.length > 0) {
+    insights.push(
+      `${feedback_analytics.written_comments.length} participante${feedback_analytics.written_comments.length === 1 ? '' : 's'} deixou comentário escrito no formulário.`,
+    );
+  }
+
   if (report.technical_analytics.sessions_with_technical_issues > 0) {
     insights.push(
-      `${report.technical_analytics.sessions_with_technical_issues} sessão${report.technical_analytics.sessions_with_technical_issues === 1 ? '' : 'ões'} apresentou alertas técnicos (${report.technical_analytics.total_runtime_errors + report.technical_analytics.total_asset_load_errors + report.technical_analytics.total_render_errors} erros registrados no total).`,
+      `${report.technical_analytics.sessions_with_technical_issues} ${pluralSessao(report.technical_analytics.sessions_with_technical_issues)} apresentou alertas técnicos (${report.technical_analytics.total_runtime_errors + report.technical_analytics.total_asset_load_errors + report.technical_analytics.total_render_errors} erros registrados no total).`,
     );
   }
 
@@ -197,7 +256,7 @@ function buildGroupInsights(report: Omit<GroupReport, 'insights'>): string[] {
 
   if (data_quality.duplicate_session_ids.length > 0) {
     insights.push(
-      `${data_quality.duplicate_session_ids.length} sessão${data_quality.duplicate_session_ids.length === 1 ? '' : 'ões'} duplicada${data_quality.duplicate_session_ids.length === 1 ? '' : 's'} por session_id foram ignoradas para não distorcer as métricas.`,
+      `${data_quality.duplicate_session_ids.length} ${pluralSessao(data_quality.duplicate_session_ids.length)} duplicada${data_quality.duplicate_session_ids.length === 1 ? '' : 's'} por session_id foram ignoradas para não distorcer as métricas.`,
     );
   }
 
@@ -237,9 +296,9 @@ function emptyGroupReport(
     summary: {
       avg_pages_viewed: 0,
       avg_completion_rate: 0,
-      chapter_finished_pct: 0,
-      chapter_completed_pct: 0,
-      abandonment_pct: 0,
+      full_completion_pct: 0,
+      viewed_all_incomplete_pct: 0,
+      partial_view_pct: 0,
       avg_visible_time_seconds: null,
       avg_idle_time_seconds: null,
       reading_depth_distribution: {},
@@ -250,12 +309,32 @@ function emptyGroupReport(
       avg_resources_opened: 0,
       sessions_with_oda_pct: 0,
       avg_oda_opened: 0,
+      avg_oda_engagement_seconds: null,
+      avg_escola_digital_engagement_seconds: null,
+      avg_video_max_progress_pct: null,
       avg_image_zoom_total: 0,
       avg_image_zoom_unique: 0,
       sessions_with_video_play_pct: 0,
       sessions_with_video_completed_pct: 0,
       avg_video_watch_seconds: null,
       teacher_button_usage_pct: 0,
+    },
+    focus_analytics: {
+      sessions_with_focus_loss_pct: 0,
+      avg_tab_hidden_count: null,
+      avg_hidden_time_seconds: null,
+      avg_idle_time_seconds: null,
+    },
+    engagement_analytics: {
+      full_completion_count: 0,
+      viewed_all_incomplete_count: 0,
+      partial_view_count: 0,
+      sessions_with_video_pct: 0,
+      sessions_with_video_completed_pct: 0,
+      sessions_with_oda_pct: 0,
+      sessions_with_teacher_pct: 0,
+      sessions_with_image_zoom_pct: 0,
+      avg_teacher_button_opens: 0,
     },
     feedback_analytics: {
       feedback_count: 0,
@@ -265,9 +344,13 @@ function emptyGroupReport(
       avg_visual_comfort: null,
       avg_resource_usefulness: null,
       would_use_again_distribution: {},
+      rating_distribution: {},
+      written_comments: [],
     },
     technical_analytics: {
       device_distribution: {},
+      device_type_distribution: {},
+      os_distribution: {},
       browser_distribution: {},
       technical_issues_pct: 0,
       total_runtime_errors: 0,
@@ -283,6 +366,15 @@ function emptyGroupReport(
       mixed_book_or_chapter: false,
       load_error_count: loadErrors.length,
       per_session_warnings_count: 0,
+      session_quality_issues: [],
+    },
+    advanced_analytics: {
+      top_events: [],
+      page_dwell: [],
+      teacher_sections: [],
+      image_interaction: [],
+      resource_ranking: [],
+      load_time_by_device: [],
     },
     sessions: [],
     insights: ['Carregue ao menos um JSON exportado pelo piloto para gerar o relatório consolidado.'],
@@ -348,8 +440,12 @@ export function aggregateSessionReports(
 
   const readingDepthDistribution: Record<string, number> = {};
   const deviceDistribution: Record<string, number> = {};
+  const deviceTypeDistribution: Record<string, number> = {};
+  const osDistribution: Record<string, number> = {};
   const browserDistribution: Record<string, number> = {};
   const wouldUseAgainDistribution: Record<string, number> = {};
+  const ratingDistribution: Record<string, number> = {};
+  const writtenComments: GroupReport['feedback_analytics']['written_comments'] = [];
 
   let feedbackCount = 0;
   const ratings: number[] = [];
@@ -369,6 +465,12 @@ export function aggregateSessionReports(
     if (summary.device_type_label) {
       increment(deviceDistribution, summary.device_type_label);
     }
+    if (summary.device_type) {
+      increment(deviceTypeDistribution, summary.device_type);
+    }
+    if (summary.os_name) {
+      increment(osDistribution, summary.os_name);
+    }
     if (summary.browser_name) {
       increment(
         browserDistribution,
@@ -378,12 +480,27 @@ export function aggregateSessionReports(
     if (summary.feedback.submitted) {
       feedbackCount += 1;
       ratings.push(summary.feedback.rating);
+      increment(ratingDistribution, String(summary.feedback.rating));
       navigationScores.push(summary.feedback.navigation_clarity);
       visualScores.push(summary.feedback.visual_comfort);
       resourceScores.push(summary.feedback.resource_usefulness);
       if (summary.feedback.would_use_again) {
         increment(wouldUseAgainDistribution, summary.feedback.would_use_again);
       }
+    }
+
+    for (const comment of session.feedbackComments) {
+      const text = comment.comment?.trim();
+      if (!text) continue;
+      writtenComments.push({
+        participant_id: comment.participant_id || getParticipantLabel(summary),
+        comment: text,
+        submitted_at_br:
+          'submitted_at_br' in comment && typeof comment.submitted_at_br === 'string'
+            ? comment.submitted_at_br
+            : undefined,
+        file_name: session.sourceFileName ?? '—',
+      });
     }
 
     totalRuntimeErrors += summary.runtime_errors_count ?? 0;
@@ -397,8 +514,59 @@ export function aggregateSessionReports(
   const videoWatchSeconds = sessions
     .map((s) => s.summary.escola_digital_video_watch_total_seconds)
     .filter((v) => v > 0);
+  const odaEngagementSeconds = sessions
+    .map((s) => s.summary.oda_engagement_total_seconds)
+    .filter((v) => v > 0);
+  const escolaEngagementSeconds = sessions
+    .map((s) => s.summary.escola_digital_engagement_total_seconds)
+    .filter((v) => v > 0);
+  const videoProgressValues = sessions
+    .map((s) => s.summary.escola_digital_video_max_progress_percent)
+    .filter((v) => v > 0);
+  const tabHiddenCounts = sessions
+    .map((s) => s.summary.tab_hidden_count ?? 0)
+    .filter((v) => v > 0);
+  const hiddenTimeSeconds = sessions
+    .map((s) => s.summary.hidden_time_seconds ?? 0)
+    .filter((v) => v > 0);
+  const idleTimesFromSummary = sessions
+    .map((s) => s.summary.idle_time_seconds ?? 0)
+    .filter((v) => v > 0);
+  const sessionsWithFocusLoss = sessions.filter((s) => (s.summary.tab_hidden_count ?? 0) > 0).length;
+  const sessionQualityIssues: GroupReport['data_quality']['session_quality_issues'] = [];
+
+  for (const session of sessions) {
+    const warnings = [
+      ...(session.summary.duplicate_event_warnings ?? []),
+      ...(session.summary.inconsistent_event_warnings ?? []),
+    ];
+    const score =
+      typeof session.summary.data_quality_score === 'number'
+        ? session.summary.data_quality_score
+        : null;
+    if (warnings.length > 0 || (score !== null && score < 100)) {
+      sessionQualityIssues.push({
+        participant_id: getParticipantLabel(session.summary),
+        file_name: session.sourceFileName ?? '—',
+        score: score ?? 0,
+        warnings,
+      });
+    }
+  }
 
   const sessionsWithTechnicalIssues = rows.filter((r) => r.hasTechnicalIssues).length;
+  const fullCompletionCount = rows.filter(
+    (r) => classifyChapterProgress(r.pagesViewedCount, r.pagesCompletedCount, r.totalPages) === 'full_completion',
+  ).length;
+  const viewedAllIncompleteCount = rows.filter(
+    (r) =>
+      classifyChapterProgress(r.pagesViewedCount, r.pagesCompletedCount, r.totalPages) ===
+      'viewed_all_incomplete',
+  ).length;
+  const partialViewCount = rows.filter(
+    (r) => classifyChapterProgress(r.pagesViewedCount, r.pagesCompletedCount, r.totalPages) === 'partial_view',
+  ).length;
+  const sessionsWithImageZoom = sessions.filter((s) => s.summary.image_zoom_total > 0).length;
   const generatedAt = new Date().toISOString();
 
   const partial: Omit<GroupReport, 'insights'> = {
@@ -416,9 +584,9 @@ export function aggregateSessionReports(
     summary: {
       avg_pages_viewed: average(rows.map((r) => r.pagesViewedCount)) ?? 0,
       avg_completion_rate: average(rows.map((r) => r.completionRate)) ?? 0,
-      chapter_finished_pct: pct(rows.filter((r) => r.chapterFinished).length, n),
-      chapter_completed_pct: pct(rows.filter((r) => r.chapterCompleted).length, n),
-      abandonment_pct: pct(rows.filter((r) => r.abandonedBeforeEnd).length, n),
+      full_completion_pct: pct(fullCompletionCount, n),
+      viewed_all_incomplete_pct: pct(viewedAllIncompleteCount, n),
+      partial_view_pct: pct(partialViewCount, n),
       avg_visible_time_seconds: average(visibleTimes),
       avg_idle_time_seconds: idleTimes.length > 0 ? average(idleTimes) : null,
       reading_depth_distribution: readingDepthDistribution,
@@ -436,6 +604,12 @@ export function aggregateSessionReports(
         n,
       ),
       avg_oda_opened: average(sessions.map((s) => s.summary.oda_opened_count)) ?? 0,
+      avg_oda_engagement_seconds:
+        odaEngagementSeconds.length > 0 ? average(odaEngagementSeconds) : null,
+      avg_escola_digital_engagement_seconds:
+        escolaEngagementSeconds.length > 0 ? average(escolaEngagementSeconds) : null,
+      avg_video_max_progress_pct:
+        videoProgressValues.length > 0 ? average(videoProgressValues) : null,
       avg_image_zoom_total:
         average(sessions.map((s) => s.summary.image_zoom_total)) ?? 0,
       avg_image_zoom_unique:
@@ -455,6 +629,39 @@ export function aggregateSessionReports(
         n,
       ),
     },
+    focus_analytics: {
+      sessions_with_focus_loss_pct: pct(sessionsWithFocusLoss, n),
+      avg_tab_hidden_count:
+        tabHiddenCounts.length > 0 ? average(tabHiddenCounts) : null,
+      avg_hidden_time_seconds:
+        hiddenTimeSeconds.length > 0 ? average(hiddenTimeSeconds) : null,
+      avg_idle_time_seconds:
+        idleTimesFromSummary.length > 0 ? average(idleTimesFromSummary) : null,
+    },
+    engagement_analytics: {
+      full_completion_count: fullCompletionCount,
+      viewed_all_incomplete_count: viewedAllIncompleteCount,
+      partial_view_count: partialViewCount,
+      sessions_with_video_pct: pct(
+        sessions.filter((s) => s.summary.escola_digital_video_play_count > 0).length,
+        n,
+      ),
+      sessions_with_video_completed_pct: pct(
+        sessions.filter((s) => s.summary.escola_digital_video_completed_count > 0).length,
+        n,
+      ),
+      sessions_with_oda_pct: pct(
+        sessions.filter((s) => s.summary.oda_opened_count > 0).length,
+        n,
+      ),
+      sessions_with_teacher_pct: pct(
+        sessions.filter((s) => s.summary.teacher_button_opened_count > 0).length,
+        n,
+      ),
+      sessions_with_image_zoom_pct: pct(sessionsWithImageZoom, n),
+      avg_teacher_button_opens:
+        average(sessions.map((s) => s.summary.teacher_button_opened_count)) ?? 0,
+    },
     feedback_analytics: {
       feedback_count: feedbackCount,
       feedback_rate_pct: pct(feedbackCount, n),
@@ -463,9 +670,13 @@ export function aggregateSessionReports(
       avg_visual_comfort: average(visualScores),
       avg_resource_usefulness: average(resourceScores),
       would_use_again_distribution: wouldUseAgainDistribution,
+      rating_distribution: ratingDistribution,
+      written_comments: writtenComments,
     },
     technical_analytics: {
       device_distribution: deviceDistribution,
+      device_type_distribution: deviceTypeDistribution,
+      os_distribution: osDistribution,
       browser_distribution: browserDistribution,
       technical_issues_pct: pct(sessionsWithTechnicalIssues, n),
       total_runtime_errors: totalRuntimeErrors,
@@ -483,7 +694,9 @@ export function aggregateSessionReports(
       mixed_book_or_chapter: mixedBookOrChapter,
       load_error_count: loadErrors.length,
       per_session_warnings_count: perSessionWarningsCount,
+      session_quality_issues: sessionQualityIssues,
     },
+    advanced_analytics: buildGroupAdvancedAnalytics(sessions),
     sessions: rows,
   };
 
