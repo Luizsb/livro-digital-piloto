@@ -384,6 +384,7 @@ function emptyGroupReport(
       coverage_resources: [],
       coverage_images: [],
       participants: [],
+      video_skip_suspected_count: 0,
     },
     technical_detail: {
       avg_page_load_ms: null,

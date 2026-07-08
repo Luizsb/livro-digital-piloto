@@ -14,9 +14,14 @@ export const IMAGE_EXPOSURE_NOTE =
 
 export const MODAL_TIME_LABEL = 'Tempo no modal';
 
-export const VIDEO_WATCH_TIME_LABEL = 'Tempo assistido';
+/** Maior `currentTime` atingido no elemento de vídeo — não é tempo real de tela. */
+export const VIDEO_WATCH_TIME_LABEL = 'Posição máxima no vídeo';
 
-export const VIDEO_MAX_PROGRESS_LABEL = 'Progresso máximo';
+/** Percentual do arquivo alcançado no timeline — distinto de atenção ou tempo real. */
+export const VIDEO_MAX_PROGRESS_LABEL = 'Alcance no vídeo';
+
+export const VIDEO_METRICS_EXPLANATION =
+  'Mede o ponto mais avançado no arquivo de vídeo, não o tempo real com o modal aberto. Compare com «Tempo no modal».';
 
 export const VIDEO_COMPLETED_LABEL = 'Vídeo concluído';
 

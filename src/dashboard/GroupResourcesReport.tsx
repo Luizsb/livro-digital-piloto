@@ -1,6 +1,7 @@
 import type { GroupReport } from './types';
 import { formatDuration, formatBytes, formatLoadTimeMs } from './reportExtractors';
 import { pluralSessao } from '@shared/lib/pluralizePt';
+import { VIDEO_METRICS_EXPLANATION } from '@analytics/metricDisplayLabels';
 import {
   EngagementRateChart,
   ValueBarChart,
@@ -73,7 +74,23 @@ export function GroupResourcesReport({ report }: { report: GroupReport }) {
           Entenda quais recursos do capítulo foram abertos, por quanto tempo e quais permaneceram
           ignorados neste lote de {n} {pluralSessao(n)}.
         </p>
+        <p className="mt-3 max-w-3xl text-xs leading-relaxed text-slate-500">
+          {VIDEO_METRICS_EXPLANATION}
+        </p>
       </section>
+
+      {resources_detail.video_skip_suspected_count > 0 ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <p className="font-semibold">
+            Possível pulo no vídeo em {resources_detail.video_skip_suspected_count} de {n}{' '}
+            {pluralSessao(n)}
+          </p>
+          <p className="mt-1 text-xs leading-relaxed">
+            A posição no timeline do vídeo ficou muito acima do tempo real no modal — scrubber ou
+            velocidade acelerada. O alcance (%) não representa visualização contínua.
+          </p>
+        </div>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
@@ -90,7 +107,7 @@ export function GroupResourcesReport({ report }: { report: GroupReport }) {
             value: `${engagement_analytics.sessions_with_video_pct}%`,
             hint:
               resource_analytics.avg_video_watch_seconds !== null
-                ? `média ${formatDuration(Math.round(resource_analytics.avg_video_watch_seconds))} assistido`
+                ? `média ${formatDuration(Math.round(resource_analytics.avg_video_watch_seconds))} no timeline`
                 : undefined,
           },
           {
@@ -98,7 +115,7 @@ export function GroupResourcesReport({ report }: { report: GroupReport }) {
             value: `${engagement_analytics.sessions_with_video_completed_pct}%`,
             hint:
               resource_analytics.avg_video_max_progress_pct !== null
-                ? `progresso máx. médio ${Math.round(resource_analytics.avg_video_max_progress_pct)}%`
+                ? `alcance médio ${Math.round(resource_analytics.avg_video_max_progress_pct)}% no arquivo`
                 : undefined,
           },
           {
@@ -264,8 +281,17 @@ export function GroupResourcesReport({ report }: { report: GroupReport }) {
                   <td className="py-2.5 pr-4 text-slate-700">
                     {row.video_played ? (
                       <>
-                        {row.video_progress_pct}% · {formatDuration(row.video_watch_seconds)}
+                        {row.video_progress_pct}% no arquivo ·{' '}
+                        {formatDuration(row.video_watch_seconds)} no timeline
+                        {row.escola_seconds > 0
+                          ? ` · ${formatDuration(row.escola_seconds)} no modal`
+                          : ''}
                         {row.video_completed ? ' · concluiu' : ''}
+                        {row.video_skip_suspected ? (
+                          <span className="mt-1 block text-xs font-medium text-amber-700">
+                            possível pulo
+                          </span>
+                        ) : null}
                       </>
                     ) : (
                       'Não iniciou'

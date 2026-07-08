@@ -1,5 +1,6 @@
 import type { ParsedDashboardReport } from './types';
 import { extractZoomedImageIds } from './reportExtractors';
+import { VIDEO_METRICS_EXPLANATION } from '@analytics/metricDisplayLabels';
 import {
   SessionEngagementSection,
 } from './SessionVisualBlocks';
@@ -18,6 +19,9 @@ export function SessionResourcesReport({ parsed }: { parsed: ParsedDashboardRepo
         <h2 className="mt-1 text-xl font-bold text-slate-900">Uso de ODA, vídeo, professor e imagens</h2>
         <p className="mt-2 max-w-3xl text-sm text-slate-600">
           Aberturas, tempo nos modais e cobertura do inventário editorial nesta sessão.
+        </p>
+        <p className="mt-3 max-w-3xl text-xs leading-relaxed text-slate-500">
+          {VIDEO_METRICS_EXPLANATION}
         </p>
       </section>
 

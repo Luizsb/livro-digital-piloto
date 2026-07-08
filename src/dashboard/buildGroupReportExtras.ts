@@ -2,6 +2,7 @@ import type { ChapterManifest } from '@book/chapter/chapterManifest';
 import type { ParsedDashboardReport } from './types';
 import { getParticipantLabel } from './reportExtractors';
 import { getLoadTimeRating } from './reportExtractors';
+import { assessEscolaDigitalVideoCredibility } from './videoCredibility';
 
 function average(values: number[]): number | null {
   if (values.length === 0) return null;
@@ -50,6 +51,7 @@ export interface GroupParticipantResourceRow {
   video_progress_pct: number;
   video_watch_seconds: number;
   video_completed: boolean;
+  video_skip_suspected: boolean;
   image_zoom_total: number;
   resources_missed: string[];
   images_not_seen: string[];
@@ -59,6 +61,7 @@ export interface GroupResourcesDetail {
   coverage_resources: GroupResourceCoverageItem[];
   coverage_images: GroupImageCoverageItem[];
   participants: GroupParticipantResourceRow[];
+  video_skip_suspected_count: number;
 }
 
 export interface GroupTechnicalSessionDetail {
@@ -140,6 +143,7 @@ export function buildGroupResourcesDetail(
 
   const participants: GroupParticipantResourceRow[] = sessions.map((session) => {
     const { summary } = session;
+    const videoCredibility = assessEscolaDigitalVideoCredibility(summary);
     return {
       participant_id: getParticipantLabel(summary),
       file_name: session.sourceFileName ?? '—',
@@ -150,13 +154,16 @@ export function buildGroupResourcesDetail(
       video_progress_pct: summary.escola_digital_video_max_progress_percent,
       video_watch_seconds: summary.escola_digital_video_watch_total_seconds,
       video_completed: summary.escola_digital_video_watched_to_end,
+      video_skip_suspected: videoCredibility.suspectedSkip,
       image_zoom_total: summary.image_zoom_total,
       resources_missed: summary.resources_not_opened ?? [],
       images_not_seen: summary.images_not_exposed ?? [],
     };
   });
 
-  return { coverage_resources, coverage_images, participants };
+  const video_skip_suspected_count = participants.filter((row) => row.video_skip_suspected).length;
+
+  return { coverage_resources, coverage_images, participants, video_skip_suspected_count };
 }
 
 export function buildGroupTechnicalDetail(

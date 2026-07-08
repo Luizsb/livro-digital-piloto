@@ -13,18 +13,22 @@ import {
   MODAL_TIME_LABEL,
   VIDEO_COMPLETED_LABEL,
   VIDEO_MAX_PROGRESS_LABEL,
+  VIDEO_METRICS_EXPLANATION,
   VIDEO_WATCH_TIME_LABEL,
 } from '@analytics/metricDisplayLabels';
+import { assessEscolaDigitalVideoCredibility } from './videoCredibility';
 import { DimensionScoreBars } from './groupCharts';
 
 function ResourceCard({
   title,
   active,
   metrics,
+  notice,
 }: {
   title: string;
   active: boolean;
   metrics: Array<{ label: string; value: string }>;
+  notice?: string;
 }) {
   return (
     <div
@@ -36,14 +40,21 @@ function ResourceCard({
     >
       <h3 className={`font-semibold ${active ? 'text-[#80298F]' : 'text-slate-500'}`}>{title}</h3>
       {active ? (
-        <dl className="mt-3 space-y-2 text-sm">
-          {metrics.map((metric) => (
-            <div key={metric.label} className="flex justify-between gap-3">
-              <dt className="text-slate-600">{metric.label}</dt>
-              <dd className="shrink-0 font-semibold text-slate-800">{metric.value}</dd>
-            </div>
-          ))}
-        </dl>
+        <>
+          <dl className="mt-3 space-y-2 text-sm">
+            {metrics.map((metric) => (
+              <div key={metric.label} className="flex justify-between gap-3">
+                <dt className="text-slate-600">{metric.label}</dt>
+                <dd className="shrink-0 font-semibold text-slate-800">{metric.value}</dd>
+              </div>
+            ))}
+          </dl>
+          {notice ? (
+            <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-900">
+              {notice}
+            </p>
+          ) : null}
+        </>
       ) : (
         <p className="mt-2 text-sm text-slate-500">Não utilizado nesta sessão</p>
       )}
@@ -257,6 +268,7 @@ export function SessionEngagementSection({ summary }: { summary: EventSummary })
   const hasTeacher =
     summary.teacher_button_opened_count > 0 || summary.teacher_button_total_seconds > 0;
   const hasZoom = summary.image_zoom_total > 0;
+  const videoCredibility = assessEscolaDigitalVideoCredibility(summary);
 
   const escolaMetrics: Array<{ label: string; value: string }> = [];
   if (summary.escola_digital_opened_count > 0) {
@@ -331,8 +343,20 @@ export function SessionEngagementSection({ summary }: { summary: EventSummary })
       title="Engajamento com recursos"
       subtitle="Aberturas e tempo de permanência em cada recurso digital — métricas combinadas da sessão."
     >
+      {summary.escola_digital_video_play_count > 0 ? (
+        <p className="mb-4 text-xs leading-relaxed text-slate-500">{VIDEO_METRICS_EXPLANATION}</p>
+      ) : null}
       <div className="grid gap-4 sm:grid-cols-2">
-        <ResourceCard title="Escola Digital" active={hasEscola} metrics={escolaMetrics} />
+        <ResourceCard
+          title="Escola Digital"
+          active={hasEscola}
+          metrics={escolaMetrics}
+          notice={
+            videoCredibility.suspectedSkip && videoCredibility.message
+              ? videoCredibility.message
+              : undefined
+          }
+        />
         <ResourceCard title="ODA" active={hasOda} metrics={odaMetrics} />
         <ResourceCard title="Botão do professor" active={hasTeacher} metrics={teacherMetrics} />
         <ResourceCard

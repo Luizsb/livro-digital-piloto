@@ -20,6 +20,7 @@ import {
   getParticipantLabel,
 } from './reportExtractors';
 import { formatBrowserLabel } from '@analytics/deviceContext';
+import { assessEscolaDigitalVideoCredibility } from './videoCredibility';
 
 export function buildChapterStatusInsight(summary: EventSummary): string {
   const bounds = resolveChapterPageBounds(summary);
@@ -132,10 +133,13 @@ export function buildSessionInsight(parsed: ParsedDashboardReport): string {
 
   if (summary.escola_digital_opened_count > 0) {
     if (summary.escola_digital_video_play_count > 0) {
+      const videoCredibility = assessEscolaDigitalVideoCredibility(summary);
       if (summary.escola_digital_video_watched_to_end) {
         text += ' Assistiu o vídeo da Escola Digital até o final.';
+      } else if (videoCredibility.suspectedSkip) {
+        text += ` Abriu o vídeo da Escola Digital, mas o alcance no timeline (${summary.escola_digital_video_max_progress_percent}%) parece inflado em relação ao tempo no modal — possível pulo no vídeo.`;
       } else {
-        text += ` Reproduziu o vídeo da Escola Digital com progresso máximo de ${summary.escola_digital_video_max_progress_percent}%, sem conclusão até o fim.`;
+        text += ` Reproduziu o vídeo da Escola Digital com alcance máximo de ${summary.escola_digital_video_max_progress_percent}% no arquivo, sem conclusão até o fim.`;
       }
     } else {
       text += ' Abriu o modal da Escola Digital, mas não iniciou a reprodução do vídeo.';
@@ -383,6 +387,15 @@ export function buildAlerts(summary: EventSummary): DashboardAlert[] {
     });
   }
 
+  const videoCredibility = assessEscolaDigitalVideoCredibility(summary);
+  if (videoCredibility.suspectedSkip && videoCredibility.message) {
+    alerts.push({
+      id: 'video_skip_suspected',
+      message: videoCredibility.message,
+      severity: 'warning',
+    });
+  }
+
   return alerts;
 }
 
@@ -392,6 +405,7 @@ const INTERPRETATION_ALERT_IDS = new Set([
   'tab_hidden',
   'open_comment',
   'teacher_not_used',
+  'video_skip_suspected',
 ]);
 
 const TECHNICAL_ALERT_IDS = new Set([
