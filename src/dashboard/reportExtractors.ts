@@ -6,7 +6,7 @@ import {
   listChapterPageNumbers,
   resolveChapterPageBounds,
 } from '@book/chapter/chapterPageConfig';
-import { getReadingDepthLabel, type ReadingDepth } from '@analytics/readingQuality';
+import { computeReadingQuality, getReadingDepthLabel, type ReadingDepth } from '@analytics/readingQuality';
 import { formatDateTimeBr } from '@shared/lib/formatDateTimeBr';
 import { formatDuration, formatLoadTimeMs } from '@shared/lib/formatDuration';
 import { formatBytes } from '@shared/lib/formatBytes';
@@ -210,12 +210,48 @@ export function enrichSummaryReadingMetrics(
   summary: EventSummary,
   events: AnalyticsEvent[],
 ): EventSummary {
+  let result: EventSummary = summary;
   const { depth, label } = extractReadingDepth(summary, events);
-  if (!label) return summary;
+  if (label) {
+    result = {
+      ...result,
+      reading_depth: depth ?? summary.reading_depth,
+      reading_depth_label: label,
+    };
+  }
+
+  if (
+    typeof result.avg_seconds_per_completed_page === 'number' &&
+    result.avg_seconds_per_completed_page > 0
+  ) {
+    return result;
+  }
+
+  for (const eventName of FINISH_EVENTS_FOR_DEPTH) {
+    const event = findLastEvent(events, eventName);
+    const meta = event?.metadata ?? {};
+    if (typeof meta.avg_seconds_per_completed_page === 'number') {
+      return {
+        ...result,
+        avg_seconds_per_viewed_page:
+          typeof meta.avg_seconds_per_viewed_page === 'number'
+            ? meta.avg_seconds_per_viewed_page
+            : result.avg_seconds_per_viewed_page,
+        avg_seconds_per_completed_page: meta.avg_seconds_per_completed_page,
+      };
+    }
+  }
+
+  if (events.length === 0 || result.pages_viewed_count <= 0) {
+    return result;
+  }
+
+  const visibleSeconds = extractSessionVisibleSeconds(events, result);
+  const pace = computeReadingQuality(events, visibleSeconds, result.pages_viewed_count);
   return {
-    ...summary,
-    reading_depth: depth ?? summary.reading_depth,
-    reading_depth_label: label,
+    ...result,
+    avg_seconds_per_viewed_page: pace.avg_seconds_per_viewed_page,
+    avg_seconds_per_completed_page: pace.avg_seconds_per_completed_page,
   };
 }
 
@@ -251,7 +287,7 @@ export function enrichSummaryJourneyMetrics(
   summary: EventSummary,
   events: AnalyticsEvent[],
 ): EventSummary {
-  if (typeof summary.abandoned_before_end === 'boolean') {
+  if (events.length === 0) {
     return summary;
   }
 
@@ -267,7 +303,9 @@ export function enrichSummaryJourneyMetrics(
 
   return {
     ...summary,
-    ...journey,
+    last_page_viewed: journey.last_page_viewed ?? summary.last_page_viewed ?? null,
+    abandoned_before_end: journey.abandoned_before_end ?? summary.abandoned_before_end ?? false,
+    abandonment_page: journey.abandonment_page ?? summary.abandonment_page ?? null,
     ...(idle_time_seconds !== undefined ? { idle_time_seconds } : {}),
   };
 }
@@ -325,6 +363,8 @@ export function buildSessionPageHeatmap(
     viewedPct: viewed.has(page) ? 100 : 0,
     completedCount: completed.has(page) ? 1 : 0,
     completedPct: completed.has(page) ? 100 : 0,
+    gapCount: viewed.has(page) && !completed.has(page) ? 1 : 0,
+    gapPct: viewed.has(page) && !completed.has(page) ? 100 : 0,
     abandonmentCount: summary.abandonment_page === page ? 1 : 0,
   }));
 }

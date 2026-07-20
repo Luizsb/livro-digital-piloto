@@ -50,6 +50,8 @@ export interface GroupParticipantResourceRow {
   video_played: boolean;
   video_progress_pct: number;
   video_watch_seconds: number;
+  video_playback_wall_seconds: number;
+  video_seek_count: number;
   video_completed: boolean;
   video_skip_suspected: boolean;
   image_zoom_total: number;
@@ -153,6 +155,8 @@ export function buildGroupResourcesDetail(
       video_played: summary.escola_digital_video_play_count > 0,
       video_progress_pct: summary.escola_digital_video_max_progress_percent,
       video_watch_seconds: summary.escola_digital_video_watch_total_seconds,
+      video_playback_wall_seconds: summary.escola_digital_video_playback_wall_seconds,
+      video_seek_count: summary.escola_digital_video_seek_count,
       video_completed: summary.escola_digital_video_watched_to_end,
       video_skip_suspected: videoCredibility.suspectedSkip,
       image_zoom_total: summary.image_zoom_total,

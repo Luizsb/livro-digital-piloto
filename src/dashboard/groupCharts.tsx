@@ -223,6 +223,8 @@ export function PageJourneyChart({
     viewedPct: number;
     completedCount: number;
     completedPct: number;
+    gapCount: number;
+    gapPct: number;
     abandonmentCount: number;
   }>;
   sessionCount: number;
@@ -239,6 +241,10 @@ export function PageJourneyChart({
           Concluída
         </span>
         <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-6 rounded bg-slate-400" aria-hidden />
+          Vista sem conclusão
+        </span>
+        <span className="flex items-center gap-1.5">
           <span className="h-2.5 w-6 rounded bg-amber-500" aria-hidden />
           Ponto de abandono
         </span>
@@ -248,6 +254,8 @@ export function PageJourneyChart({
           {pages.map((item) => {
             const abandonPct =
               sessionCount > 0 ? Math.round((item.abandonmentCount / sessionCount) * 100) : 0;
+            const gapPct =
+              sessionCount > 0 ? Math.round((item.gapCount / sessionCount) * 100) : 0;
 
             return (
               <div key={item.page} className="flex min-w-0 flex-1 flex-col items-center gap-1">
@@ -264,6 +272,13 @@ export function PageJourneyChart({
                     }}
                     title={`Concluída: ${item.completedCount}/${sessionCount} (${item.completedPct}%)`}
                   />
+                  {item.gapCount > 0 ? (
+                    <div
+                      className="w-2.5 rounded-t bg-slate-400"
+                      style={{ height: `${Math.max(gapPct, 8)}%` }}
+                      title={`Vista sem conclusão: ${item.gapCount}/${sessionCount} (${gapPct}%)`}
+                    />
+                  ) : null}
                   {item.abandonmentCount > 0 ? (
                     <div
                       className="w-2.5 rounded-t bg-amber-500"
@@ -280,6 +295,11 @@ export function PageJourneyChart({
                   <p className="text-emerald-600">
                     {item.completedCount} ({item.completedPct}%)
                   </p>
+                  {item.gapCount > 0 ? (
+                    <p className="text-slate-600">
+                      {item.gapCount} ({gapPct}%)
+                    </p>
+                  ) : null}
                   {item.abandonmentCount > 0 ? (
                     <p className="text-amber-600">
                       {item.abandonmentCount} ({abandonPct}%)

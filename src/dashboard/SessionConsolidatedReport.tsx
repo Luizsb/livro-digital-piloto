@@ -14,12 +14,36 @@ import {
   getParticipantLabel,
 } from './reportExtractors';
 import {
+  ABANDONMENT_EXPLANATION,
+  ABANDONMENT_PAGE_LABEL,
+  AVG_SECONDS_PER_COMPLETED_PAGE_EXPLANATION,
+  AVG_SECONDS_PER_COMPLETED_PAGE_LABEL,
+  CHAPTER_PAGES_COMPLETED_EXPLANATION,
+  CHAPTER_PAGES_COMPLETED_LABEL,
+  CHAPTER_PAGES_OPENED_EXPLANATION,
+  CHAPTER_PAGES_OPENED_LABEL,
+  CHAPTER_STATUS_LABEL,
+  computePagesOpenCompletionGap,
+  formatLastPageDisplay,
+  formatOpenCompletionGapDisplay,
+  formatPagesFractionWithPercent,
+  formatViewedPagesCompletionDisplay,
+  LAST_PAGE_VIEWED_LABEL,
+  OPEN_COMPLETION_GAP_EXPLANATION,
+  OPEN_COMPLETION_GAP_LABEL,
+  PAGE_COMPLETION_RATE_EXPLANATION,
   PAGE_COMPLETION_RATE_LABEL,
   READING_DEPTH_EXPLANATION,
   READING_DEPTH_LABEL,
+  resolvePagesCompletedCoveragePercent,
+  resolvePagesViewedCoveragePercent,
   TAB_FOCUS_RETURN_COUNT_LABEL,
   TAB_HIDDEN_COUNT_LABEL,
 } from '@analytics/metricDisplayLabels';
+import {
+  classifyChapterProgress,
+  getChapterProgressLabel,
+} from './reportExtractors';
 import {
   SessionChapterProgressSection,
   SessionFeedbackVisualSection,
@@ -42,6 +66,17 @@ export function SessionConsolidatedReport({ parsed }: { parsed: ParsedDashboardR
   const visibleRatio = extractVisibleTimeRatio(events, summary);
   const interpretationAlerts = buildInterpretationAlerts(summary);
   const sessionInsight = buildSessionInsight(parsed);
+  const chapterStatus = getChapterProgressLabel(
+    classifyChapterProgress(
+      summary.pages_viewed_count,
+      summary.pages_completed_count,
+      totalPages,
+    ),
+  );
+  const pagesOpenedPct = resolvePagesViewedCoveragePercent(summary, totalPages);
+  const pagesCompletedPct = resolvePagesCompletedCoveragePercent(summary, totalPages);
+  const openCompletionGap = computePagesOpenCompletionGap(summary);
+  const avgCompletedPageSeconds = summary.avg_seconds_per_completed_page ?? 0;
 
   return (
     <div className="space-y-6">
@@ -91,14 +126,52 @@ export function SessionConsolidatedReport({ parsed }: { parsed: ParsedDashboardR
           />
         )}
         <MetricCard
-          label="Páginas visualizadas"
-          value={`${summary.pages_viewed_count}/${totalPages}`}
+          label={CHAPTER_PAGES_OPENED_LABEL}
+          value={formatPagesFractionWithPercent(
+            summary.pages_viewed_count,
+            totalPages,
+            pagesOpenedPct,
+          )}
+          hint={CHAPTER_PAGES_OPENED_EXPLANATION}
         />
         <MetricCard
-          label="Páginas concluídas"
-          value={`${summary.pages_completed_count}/${totalPages}`}
+          label={CHAPTER_PAGES_COMPLETED_LABEL}
+          value={formatPagesFractionWithPercent(
+            summary.pages_completed_count,
+            totalPages,
+            pagesCompletedPct,
+          )}
+          hint={CHAPTER_PAGES_COMPLETED_EXPLANATION}
         />
-        <MetricCard label={PAGE_COMPLETION_RATE_LABEL} value={`${summary.completion_rate}%`} />
+        <MetricCard
+          label={PAGE_COMPLETION_RATE_LABEL}
+          value={formatViewedPagesCompletionDisplay(summary)}
+          hint={PAGE_COMPLETION_RATE_EXPLANATION}
+        />
+        <MetricCard label={CHAPTER_STATUS_LABEL} value={chapterStatus} />
+        <MetricCard
+          label={
+            summary.abandoned_before_end && summary.abandonment_page != null
+              ? ABANDONMENT_PAGE_LABEL
+              : LAST_PAGE_VIEWED_LABEL
+          }
+          value={formatLastPageDisplay(summary)}
+          hint={
+            summary.abandoned_before_end ? ABANDONMENT_EXPLANATION : 'Última página registrada na sessão'
+          }
+        />
+        <MetricCard
+          label={OPEN_COMPLETION_GAP_LABEL}
+          value={formatOpenCompletionGapDisplay(openCompletionGap)}
+          hint={OPEN_COMPLETION_GAP_EXPLANATION}
+        />
+        {avgCompletedPageSeconds > 0 ? (
+          <MetricCard
+            label={AVG_SECONDS_PER_COMPLETED_PAGE_LABEL}
+            value={formatDuration(Math.round(avgCompletedPageSeconds))}
+            hint={AVG_SECONDS_PER_COMPLETED_PAGE_EXPLANATION}
+          />
+        ) : null}
         <MetricCard
           label={READING_DEPTH_LABEL}
           value={summary.reading_depth_label ?? '—'}

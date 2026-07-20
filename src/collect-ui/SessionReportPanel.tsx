@@ -26,6 +26,7 @@ import { getSessionStatus } from '@analytics/sessionStatus';
 import { formatDurationClock } from '@shared/lib/formatDuration';
 import { formatDateTimeBr } from '@shared/lib/formatDateTimeBr';
 import {
+  formatViewedPagesCompletionDisplay,
   MODAL_TIME_LABEL,
   PAGE_COMPLETION_RATE_LABEL,
   TAB_FOCUS_RETURN_COUNT_LABEL,
@@ -50,7 +51,9 @@ function buildCompactSummaryLine(
   const parts: string[] = [];
 
   if (journey.pages_viewed_count > 0) {
-    parts.push(`Págs. ${journey.pages_viewed_count} (${PAGE_COMPLETION_RATE_LABEL.toLowerCase()}: ${journey.completion_rate}%)`);
+    parts.push(
+      `Págs. ${journey.pages_viewed_count} (${formatViewedPagesCompletionDisplay(journey).toLowerCase()} entre vistas)`,
+    );
   }
   if (content.images_viewed_count > 0) {
     parts.push(`Img. ${content.images_viewed_count}`);
@@ -354,7 +357,9 @@ function CollectionSummary({
             </div>
             <div className="col-span-2">
               <dt className="text-slate-500">{PAGE_COMPLETION_RATE_LABEL}</dt>
-              <dd className="font-semibold text-[#80298F]">{journey.completion_rate}%</dd>
+              <dd className="font-semibold text-[#80298F]">
+                {formatViewedPagesCompletionDisplay(journey)}
+              </dd>
             </div>
           </dl>
         </div>

@@ -175,7 +175,11 @@ Exibido em `EventReportPanel.tsx` (bloco **Resumo da coleta** do acordeão):
 - **Timer de sessão** ao vivo (desde `session_started`; congela ao finalizar)
 - Páginas visualizadas (contagem + lista)
 - Páginas concluídas (contagem + lista)
-- Taxa de conclusão **de páginas** = `concluídas / visualizadas × 100` (campo técnico: `completion_rate`). No dashboard: **não** usar só “Taxa de conclusão” — evita confusão com conclusão pedagógica do capítulo (`chapter_completed`).
+- Taxa de conclusão **das páginas vistas** = `concluídas / visualizadas × 100` (campo técnico: `completion_rate`). No dashboard: **“Conclusão das páginas vistas”** — distinto de **abertura do capítulo** (`pages_viewed ÷ total`) e **conclusão no capítulo** (`pages_completed ÷ total`).
+- **Ritmo por página vista** (`reading_depth`): tempo visível médio por página aberta — exibir como “Ritmo por página vista”, não “profundidade de leitura”.
+- **Última página / abandono:** `last_page_viewed`, `abandonment_page` (quando `abandoned_before_end`).
+- **Gap abertura × conclusão:** páginas em `pages_viewed` que não estão em `pages_completed`.
+- **Tempo médio por página concluída:** `avg_seconds_per_completed_page` em `session_finished`.
 
 O `summary` do JSON exportado inclui os mesmos campos agregados.
 

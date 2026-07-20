@@ -283,9 +283,13 @@ export function GroupResourcesReport({ report }: { report: GroupReport }) {
                       <>
                         {row.video_progress_pct}% no arquivo ·{' '}
                         {formatDuration(row.video_watch_seconds)} no timeline
+                        {row.video_playback_wall_seconds > 0
+                          ? ` · ${formatDuration(row.video_playback_wall_seconds)} reproduzindo`
+                          : ''}
                         {row.escola_seconds > 0
                           ? ` · ${formatDuration(row.escola_seconds)} no modal`
                           : ''}
+                        {row.video_seek_count > 0 ? ` · ${row.video_seek_count} pulo(s)` : ''}
                         {row.video_completed ? ' · concluiu' : ''}
                         {row.video_skip_suspected ? (
                           <span className="mt-1 block text-xs font-medium text-amber-700">

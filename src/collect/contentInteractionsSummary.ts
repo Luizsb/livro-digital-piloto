@@ -24,6 +24,9 @@ export interface ContentInteractionsSummary {
   escola_digital_video_watched_to_end: boolean;
   escola_digital_video_max_progress_percent: number;
   escola_digital_video_watch_total_seconds: number;
+  escola_digital_video_playback_wall_seconds: number;
+  escola_digital_video_seek_count: number;
+  escola_digital_video_largest_skip_seconds: number;
 }
 
 export function buildContentInteractionsSummary(
@@ -46,6 +49,41 @@ export function buildContentInteractionsSummary(
   let escolaVideoWatchedToEnd = false;
   let escolaVideoMaxProgress = 0;
   let escolaVideoWatchMaxSeconds = 0;
+  let escolaVideoPlaybackWallSeconds = 0;
+  let escolaVideoSeekCount = 0;
+  let escolaVideoLargestSkipSeconds = 0;
+
+  const absorbEscolaVideoMetrics = (meta: Record<string, unknown>): void => {
+    if (typeof meta.max_progress_percent === 'number') {
+      escolaVideoMaxProgress = Math.max(escolaVideoMaxProgress, meta.max_progress_percent);
+    }
+
+    const timelineSeconds =
+      typeof meta.timeline_max_seconds === 'number'
+        ? meta.timeline_max_seconds
+        : typeof meta.watch_duration_seconds === 'number'
+          ? meta.watch_duration_seconds
+          : null;
+    if (timelineSeconds !== null) {
+      escolaVideoWatchMaxSeconds = Math.max(escolaVideoWatchMaxSeconds, timelineSeconds);
+    }
+
+    if (typeof meta.playback_wall_seconds === 'number') {
+      escolaVideoPlaybackWallSeconds = Math.max(
+        escolaVideoPlaybackWallSeconds,
+        meta.playback_wall_seconds,
+      );
+    }
+    if (typeof meta.seek_count === 'number') {
+      escolaVideoSeekCount = Math.max(escolaVideoSeekCount, meta.seek_count);
+    }
+    if (typeof meta.largest_skip_seconds === 'number') {
+      escolaVideoLargestSkipSeconds = Math.max(
+        escolaVideoLargestSkipSeconds,
+        meta.largest_skip_seconds,
+      );
+    }
+  };
 
   for (const event of events) {
     const meta = event.metadata ?? {};
@@ -113,30 +151,14 @@ export function buildContentInteractionsSummary(
       if (meta.watched_to_end === true) {
         escolaVideoWatchedToEnd = true;
       }
-      if (typeof meta.max_progress_percent === 'number') {
-        escolaVideoMaxProgress = Math.max(escolaVideoMaxProgress, meta.max_progress_percent);
-      }
-      if (typeof meta.watch_duration_seconds === 'number') {
-        escolaVideoWatchMaxSeconds = Math.max(
-          escolaVideoWatchMaxSeconds,
-          meta.watch_duration_seconds,
-        );
-      }
+      absorbEscolaVideoMetrics(meta);
     }
 
     if (
       event.event_name === ANALYTICS_EVENT_NAMES.videoProgressRecorded &&
       isEscolaDigitalVideo
     ) {
-      if (typeof meta.max_progress_percent === 'number') {
-        escolaVideoMaxProgress = Math.max(escolaVideoMaxProgress, meta.max_progress_percent);
-      }
-      if (typeof meta.watch_duration_seconds === 'number') {
-        escolaVideoWatchMaxSeconds = Math.max(
-          escolaVideoWatchMaxSeconds,
-          meta.watch_duration_seconds,
-        );
-      }
+      absorbEscolaVideoMetrics(meta);
     }
   }
 
@@ -159,5 +181,8 @@ export function buildContentInteractionsSummary(
     escola_digital_video_watched_to_end: escolaVideoWatchedToEnd,
     escola_digital_video_max_progress_percent: escolaVideoMaxProgress,
     escola_digital_video_watch_total_seconds: escolaVideoWatchMaxSeconds,
+    escola_digital_video_playback_wall_seconds: escolaVideoPlaybackWallSeconds,
+    escola_digital_video_seek_count: escolaVideoSeekCount,
+    escola_digital_video_largest_skip_seconds: escolaVideoLargestSkipSeconds,
   };
 }

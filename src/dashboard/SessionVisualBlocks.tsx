@@ -10,9 +10,16 @@ import {
   PAGE_JOURNEY_LABELS,
 } from './reportExtractors';
 import {
+  computePagesOpenCompletionGap,
+  formatOpenCompletionGapDisplay,
+  formatViewedPagesCompletionDisplay,
   MODAL_TIME_LABEL,
+  READING_DEPTH_LABEL,
   VIDEO_COMPLETED_LABEL,
+  VIDEO_LARGEST_SKIP_LABEL,
   VIDEO_MAX_PROGRESS_LABEL,
+  VIDEO_PLAYBACK_WALL_LABEL,
+  VIDEO_SEEK_COUNT_LABEL,
   VIDEO_METRICS_EXPLANATION,
   VIDEO_WATCH_TIME_LABEL,
 } from '@analytics/metricDisplayLabels';
@@ -108,6 +115,7 @@ export function SessionChapterProgressSection({
   const incompletePages = summary.pages_viewed.filter(
     (page) => !summary.pages_completed.includes(page),
   );
+  const openCompletionGap = computePagesOpenCompletionGap(summary);
 
   return (
     <Section
@@ -119,9 +127,8 @@ export function SessionChapterProgressSection({
       >
         <p className="text-lg font-bold">{getChapterProgressLabel(progress)}</p>
         <p className="mt-1 text-sm opacity-90">
-          {summary.pages_completed_count}/{totalPages} páginas concluídas ·{' '}
-          {summary.pages_viewed_count}/{totalPages} visualizadas · {summary.completion_rate}% de
-          conclusão
+          {formatViewedPagesCompletionDisplay(summary).toLowerCase()} concluídas entre as páginas
+          abertas
         </p>
       </div>
       {progress === 'viewed_all_incomplete' && incompletePages.length > 0 ? (
@@ -130,9 +137,17 @@ export function SessionChapterProgressSection({
           <span className="font-semibold">{incompletePages.join(', ')}</span>
         </p>
       ) : null}
+      {openCompletionGap.count > 0 ? (
+        <p className="mt-3 text-sm text-slate-600">
+          Gap abertura × conclusão:{' '}
+          <span className="font-semibold text-slate-800">
+            {formatOpenCompletionGapDisplay(openCompletionGap)}
+          </span>
+        </p>
+      ) : null}
       {summary.reading_depth_label ? (
         <p className="mt-3 text-sm text-slate-600">
-          Profundidade de leitura:{' '}
+          {READING_DEPTH_LABEL}:{' '}
           <span className="font-semibold text-[#80298F]">{summary.reading_depth_label}</span>
         </p>
       ) : null}
@@ -284,6 +299,12 @@ export function SessionEngagementSection({ summary }: { summary: EventSummary })
     });
   }
   if (summary.escola_digital_video_play_count > 0) {
+    if (summary.escola_digital_video_playback_wall_seconds > 0) {
+      escolaMetrics.push({
+        label: VIDEO_PLAYBACK_WALL_LABEL,
+        value: formatDuration(summary.escola_digital_video_playback_wall_seconds),
+      });
+    }
     if (summary.escola_digital_video_watch_total_seconds > 0) {
       escolaMetrics.push({
         label: VIDEO_WATCH_TIME_LABEL,
@@ -294,6 +315,18 @@ export function SessionEngagementSection({ summary }: { summary: EventSummary })
       escolaMetrics.push({
         label: VIDEO_MAX_PROGRESS_LABEL,
         value: `${summary.escola_digital_video_max_progress_percent}%`,
+      });
+    }
+    if (summary.escola_digital_video_seek_count > 0) {
+      escolaMetrics.push({
+        label: VIDEO_SEEK_COUNT_LABEL,
+        value: `${summary.escola_digital_video_seek_count}×`,
+      });
+    }
+    if (summary.escola_digital_video_largest_skip_seconds > 0) {
+      escolaMetrics.push({
+        label: VIDEO_LARGEST_SKIP_LABEL,
+        value: formatDuration(summary.escola_digital_video_largest_skip_seconds),
       });
     }
     escolaMetrics.push({

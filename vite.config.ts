@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+import { geminiProxyPlugin } from './src/server/geminiProxyPlugin';
 
 /** Base absoluta do GitHub Pages — assets funcionam em subrotas como /teste/. */
 export const GITHUB_PAGES_BASE = '/livro-digital-piloto/';
@@ -75,7 +76,7 @@ export default defineConfig(({ command }) => {
       react(),
       rewriteRootAssetUrls(base),
       pages404Fallback(),
-      ...(command === 'serve' ? [devSessionPlugin()] : []),
+      ...(command === 'serve' ? [devSessionPlugin(), geminiProxyPlugin()] : []),
     ],
     define:
       command === 'build'

@@ -95,6 +95,50 @@ Sempre que houver mudança relevante no piloto:
 
 ## Registro cronológico
 
+### 2026-07-20 — Filtro de qualidade no grupo (score ≥ 85)
+
+**Tipo:** feature + UX + docs  
+**MVP:** dashboard  
+**Resumo:** Análises de grupo padronizadas com `data_quality_score` ≥ 85. Toggle **Incluir sessões duvidosas** na aba Consolidado reincorpora o lote completo; Técnico & QA sempre mostra todas as sessões. Banner indica quantas sessões entraram nas métricas.  
+**Arquivos:** `buildGroupReport.ts`, `GroupReportContent.tsx`, `DashboardPage.tsx`, `types.ts`  
+**Docs atualizados:** `DASHBOARD-MVP.md`, `EVIDENCIAS.md`  
+**Como validar:** carregar grupo com sessões score &lt; 85 → KPIs usam só confiáveis → Consolidado → ativar toggle → métricas incluem todas → Técnico & QA inalterado.
+
+---
+
+### 2026-07-20 — Relatório editorial & melhoria de produto
+
+**Tipo:** feature + docs  
+**MVP:** dashboard  
+**Resumo:** Nova aba **Editorial & produto** no LD Insights (grupo): backlog sugerido por área (conteúdo, recurso, UX, técnico), páginas para revisão, imagens com interação, recursos subutilizados, dimensões de feedback e experiência por dispositivo.  
+**Arquivos:** `GroupEditorialImprovementReport.tsx`, `buildGroupEditorialImprovement.ts`, `GroupReportContent.tsx`, `projectHubContent.ts`  
+**Docs atualizados:** `DASHBOARD-MVP.md`, `CATÁLOGO`, `EVIDENCIAS.md`  
+**Como validar:** carregar grupo → aba Editorial & produto → conferir backlog e tabelas.
+
+---
+
+### 2026-07-20 — Retomada pedagógica + métricas de jornada no grupo
+
+**Tipo:** feature + UX + docs  
+**MVP:** jornada + dashboard  
+**Resumo:** Aba **Retomada pedagógica** no LD Insights (grupo): páginas prioritárias, recursos pouco adotados, participantes com sinais e pontos para discussão. Consolidado ampliado: tempo médio por página concluída, gap e abandono na tabela comparativa. Rótulos de jornada renomeados (Abertura/Conclusão no capítulo, Ritmo por página vista).  
+**Arquivos:** `GroupPedagogicalResumptionReport.tsx`, `buildGroupPedagogicalResumption.ts`, `GroupReportContent.tsx`, `buildGroupReport.ts`, `metricDisplayLabels.ts`  
+**Docs atualizados:** `DASHBOARD-MVP.md`, `CATÁLOGO`, `MVP-02`, `EVIDENCIAS.md`, `projectHubContent.ts`  
+**Como validar:** carregar grupo → aba Retomada pedagógica → ver páginas prioritárias e tabela de participantes; Consolidado → KPI tempo médio/página e tabela com gap/abandono.
+
+---
+
+### 2026-07-20 — Jornada: rótulos, métricas de retomada e heatmap ampliado
+
+**Tipo:** UX + feature  
+**MVP:** jornada + dashboard  
+**Resumo:** Renomeação de métricas de jornada (Abertura/Conclusão no capítulo, Conclusão das vistas, Ritmo por página vista, Inventário editorial). Novos cards: última página/abandono, gap abertura×conclusão, tempo médio por página concluída. Heatmap de grupo com barra “vista sem conclusão” e KPI agregado de gap. Vídeo etapa 2 (playback wall, seeks) e Resumo com IA (JSON + proxy Gemini) documentados no catálogo.  
+**Arquivos:** `metricDisplayLabels.ts`, `SessionConsolidatedReport.tsx`, `GroupReportContent.tsx`, `groupCharts.tsx`, `buildGroupReport.ts`, `reportExtractors.ts`, `geminiClient.ts`, `GroupAiSummarySection.tsx`  
+**Docs atualizados:** `DASHBOARD-MVP.md`, `CATÁLOGO-EVENTOS-E-RELATÓRIOS.md`, `MVP-02-JORNADA-LEITURA.md`, `README.md`, `EVIDENCIAS.md`  
+**Como validar:** exportar sessão parcial (1/10 págs) → Consolidado mostra abertura 10%, conclusão no capítulo 10%, conclusão das vistas 100%, abandono e gap → carregar grupo → heatmap com 4 barras por página.
+
+---
+
 ### 2026-07-06 — Remoção de `page_revisited`
 
 **Tipo:** decisão de produto / simplificação  

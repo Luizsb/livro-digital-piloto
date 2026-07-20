@@ -65,6 +65,9 @@ export interface EventSummary
   escola_digital_video_watched_to_end: boolean;
   escola_digital_video_max_progress_percent: number;
   escola_digital_video_watch_total_seconds: number;
+  escola_digital_video_playback_wall_seconds: number;
+  escola_digital_video_seek_count: number;
+  escola_digital_video_largest_skip_seconds: number;
   feedback_count: number;
   feedback: ReturnType<typeof buildFeedbackSummary>;
   reading_depth?: string;
@@ -78,6 +81,8 @@ export interface EventSummary
   last_page_viewed?: number | null;
   abandoned_before_end?: boolean;
   abandonment_page?: number | null;
+  avg_seconds_per_viewed_page?: number;
+  avg_seconds_per_completed_page?: number;
   idle_time_seconds?: number;
 }
 
@@ -242,6 +247,9 @@ export function buildEventSummary(): EventSummary {
     escola_digital_video_watched_to_end: content.escola_digital_video_watched_to_end,
     escola_digital_video_max_progress_percent: content.escola_digital_video_max_progress_percent,
     escola_digital_video_watch_total_seconds: content.escola_digital_video_watch_total_seconds,
+    escola_digital_video_playback_wall_seconds: content.escola_digital_video_playback_wall_seconds,
+    escola_digital_video_seek_count: content.escola_digital_video_seek_count,
+    escola_digital_video_largest_skip_seconds: content.escola_digital_video_largest_skip_seconds,
     feedback_count: feedbackCount,
     feedback,
     reading_depth: lastReadingDepth,

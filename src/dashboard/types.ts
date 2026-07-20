@@ -51,6 +51,9 @@ export interface GroupSessionRow {
   idleTimeSeconds: number | null;
   abandonedBeforeEnd: boolean;
   abandonmentPage: number | null;
+  lastPageViewed: number | null;
+  openCompletionGap: number;
+  avgCompletedPageSeconds: number | null;
   readingDepthLabel: string | null;
   dataQualityScore: number | null;
   feedbackSubmitted: boolean;
@@ -70,12 +73,21 @@ export interface PageHeatmapItem {
   viewedPct: number;
   completedCount: number;
   completedPct: number;
+  /** Sessões que viram a página mas não a concluíram (tempo mínimo). */
+  gapCount: number;
+  gapPct: number;
   abandonmentCount: number;
 }
 
 export interface GroupReportSummary {
   avg_pages_viewed: number;
+  avg_pages_completed: number;
   avg_completion_rate: number;
+  /** Média de páginas vistas sem conclusão por sessão. */
+  avg_open_completion_gap: number;
+  /** Sessões com ao menos uma página vista sem conclusão. */
+  sessions_with_page_gap_pct: number;
+  avg_seconds_per_completed_page: number | null;
   /** Páginas concluídas em 100% (tempo mínimo em todas). */
   full_completion_pct: number;
   /** Viu todas as páginas, mas não concluiu 100% (tempo insuficiente). */
@@ -181,6 +193,21 @@ export interface GroupDataQuality {
   session_quality_issues: GroupSessionQualityIssue[];
 }
 
+export interface GroupQualityFilterExcludedSession {
+  participant_id: string;
+  file_name: string;
+  score: number | null;
+}
+
+/** Metadados do filtro padrão score ≥ 85 nas análises de grupo. */
+export interface GroupQualityFilter {
+  applied: boolean;
+  threshold: number;
+  total_sessions_after_dedup: number;
+  excluded_count: number;
+  excluded_sessions: GroupQualityFilterExcludedSession[];
+}
+
 /** Relatório consolidado multi-sessão exportável pelo LD Insights. */
 export interface GroupReport {
   report_type: 'group_summary';
@@ -202,6 +229,7 @@ export interface GroupReport {
   feedback_analytics: GroupFeedbackAnalytics;
   technical_analytics: GroupTechnicalAnalytics;
   data_quality: GroupDataQuality;
+  quality_filter: GroupQualityFilter;
   advanced_analytics: GroupAdvancedAnalytics;
   resources_detail: GroupResourcesDetail;
   technical_detail: GroupTechnicalDetail;

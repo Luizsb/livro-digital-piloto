@@ -1,6 +1,10 @@
 import type { ReactNode } from 'react';
 import type { ChapterManifest } from '@book/chapter/chapterManifest';
 import { buildDigitalResourceCoverageRows } from '@book/chapter/chapterManifest';
+import {
+  CHAPTER_MANIFEST_COVERAGE_EXPLANATION,
+  CHAPTER_MANIFEST_COVERAGE_TITLE,
+} from '@analytics/metricDisplayLabels';
 import type { ParsedDashboardReport } from './types';
 import type { DashboardAlert } from './types';
 import { formatCoverageRate, formatExportedAt } from './reportExtractors';
@@ -151,7 +155,7 @@ export function ChapterCoverageSection({
 }) {
   if (typeof summary.expected_pages_count !== 'number') {
     return (
-      <DashboardSection title="Cobertura do capítulo">
+      <DashboardSection title={CHAPTER_MANIFEST_COVERAGE_TITLE}>
         <p className="text-sm text-slate-500">
           Manifest do capítulo indisponível para este relatório.
         </p>
@@ -198,10 +202,8 @@ export function ChapterCoverageSection({
   ];
 
   return (
-    <DashboardSection title="Cobertura do capítulo">
-      <p className="mb-4 text-sm text-slate-600">
-        Compara o que foi coletado com o inventário esperado do capítulo (manifest).
-      </p>
+    <DashboardSection title={CHAPTER_MANIFEST_COVERAGE_TITLE}>
+      <p className="mb-4 text-sm text-slate-600">{CHAPTER_MANIFEST_COVERAGE_EXPLANATION}</p>
       <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {coverageRows.map((row) => (
           <div key={row.label} className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
@@ -226,6 +228,69 @@ export function ChapterCoverageSection({
   );
 }
 
+export interface ReportViewTab<T extends string> {
+  id: T;
+  label: string;
+  hint: string;
+  /** Tag curta de categoria (ex.: Pedagogia, QA). */
+  tag: string;
+}
+
+export function ReportViewTabs<T extends string>({
+  view,
+  onChange,
+  tabs,
+  meta,
+}: {
+  view: T;
+  onChange: (view: T) => void;
+  tabs: Array<ReportViewTab<T>>;
+  meta?: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 shadow-sm">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+        {tabs.map((tab) => {
+          const selected = view === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => onChange(tab.id)}
+              aria-pressed={selected}
+              className={`flex min-h-[5.75rem] flex-col rounded-xl border-2 p-4 text-left transition-all duration-150 ${
+                selected
+                  ? 'border-[#80298F] bg-gradient-to-br from-[#80298F] to-[#6b2278] text-white shadow-md shadow-[#80298F]/25 ring-2 ring-[#80298F]/20'
+                  : 'border-slate-200 bg-white text-slate-800 hover:border-[#80298F]/35 hover:shadow-md'
+              }`}
+            >
+              <span
+                className={`inline-flex w-fit rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                  selected ? 'bg-white/20 text-white' : 'bg-[#F9DDFF]/80 text-[#80298F]'
+                }`}
+              >
+                {tab.tag}
+              </span>
+              <span className="mt-2.5 text-sm font-bold leading-snug">{tab.label}</span>
+              <span
+                className={`mt-1.5 text-xs leading-relaxed ${
+                  selected ? 'text-white/85' : 'text-slate-500'
+                }`}
+              >
+                {tab.hint}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      {meta ? (
+        <p className="mt-4 border-t border-slate-200/80 pt-3 text-xs text-slate-500">{meta}</p>
+      ) : null}
+    </div>
+  );
+}
+
+/** @deprecated Use ReportViewTabs */
 export function SessionReportViewTabs<T extends string>({
   view,
   onChange,
@@ -234,35 +299,18 @@ export function SessionReportViewTabs<T extends string>({
 }: {
   view: T;
   onChange: (view: T) => void;
-  tabs: Array<{ id: T; label: string; hint: string }>;
+  tabs: Array<{ id: T; label: string; hint: string; tag?: string }>;
   meta?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
-      <div className="grid gap-2 sm:grid-cols-3">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => onChange(tab.id)}
-            className={`rounded-xl px-4 py-3 text-left transition ${
-              view === tab.id
-                ? 'bg-[#80298F] text-white shadow-md shadow-[#80298F]/20'
-                : 'text-slate-700 hover:bg-slate-50'
-            }`}
-          >
-            <span className="block text-sm font-bold">{tab.label}</span>
-            <span
-              className={`mt-0.5 block text-xs ${
-                view === tab.id ? 'text-white/85' : 'text-slate-500'
-              }`}
-            >
-              {tab.hint}
-            </span>
-          </button>
-        ))}
-      </div>
-      {meta ? <p className="mt-3 px-2 text-xs text-slate-500">{meta}</p> : null}
-    </div>
+    <ReportViewTabs
+      view={view}
+      onChange={onChange}
+      meta={meta}
+      tabs={tabs.map((tab) => ({
+        ...tab,
+        tag: tab.tag ?? 'Relatório',
+      }))}
+    />
   );
 }

@@ -23,7 +23,7 @@ function buildNextSteps(report: GroupReport): string[] {
     steps.push('Reforçar o uso do botão do professor com orientação na aplicação do teste.');
   }
   if (report.summary.partial_view_pct > 30) {
-    steps.push('Analisar páginas com abandono alto para retomada pedagógica.');
+    steps.push('Abrir a aba Retomada pedagógica — páginas com abandono e gap no grupo.');
   }
   if (technical_analytics.sessions_with_technical_issues > 0) {
     steps.push(
@@ -37,7 +37,7 @@ function buildNextSteps(report: GroupReport): string[] {
     steps.push('Expandir o piloto para mais turmas e capítulos com o mesmo modelo de coleta.');
     steps.push('Conectar ingestão automática de JSONs (backend ou BI) para painel contínuo.');
   } else {
-    steps.push('Evoluir para relatórios de retomada pedagógica e editorial com a mesma base de eventos.');
+    steps.push('Usar Retomada pedagógica (aula) e Editorial & produto (backlog DIA LD) com base no lote.');
   }
 
   return steps.slice(0, 4);
@@ -70,7 +70,7 @@ function buildStakeholderEvidence(report: GroupReport) {
       emoji: '🏫',
       bullets: [
         `${summary.full_completion_pct}% concluíram 100% das páginas com tempo mínimo.`,
-        `Taxa média de conclusão por página: ${summary.avg_completion_rate}%.`,
+        `Conclusão média das páginas vistas: ${summary.avg_completion_rate}%.`,
         `${technical_analytics.sessions_with_technical_issues} ${pluralSessao(technical_analytics.sessions_with_technical_issues)} com alerta técnico.`,
         'Sinais de adoção, estabilidade e perfil de dispositivo para acompanhamento.',
       ],

@@ -2,17 +2,32 @@ import { useState } from 'react';
 import type { ParsedDashboardReport } from './types';
 import { useScrollToTopOnChange } from '@shared/hooks/useScrollToTopOnChange';
 import { formatExportedAt, getParticipantLabel } from './reportExtractors';
-import { SessionReportViewTabs } from './reportUi';
+import { ReportViewTabs, type ReportViewTab } from './reportUi';
 import { SessionConsolidatedReport } from './SessionConsolidatedReport';
 import { SessionResourcesReport } from './SessionResourcesReport';
 import { SessionTechnicalReport } from './SessionTechnicalReport';
 
 type SessionReportView = 'consolidated' | 'resources' | 'technical';
 
-const SESSION_TABS: Array<{ id: SessionReportView; label: string; hint: string }> = [
-  { id: 'consolidated', label: 'Consolidado', hint: 'Jornada, resumo e feedback' },
-  { id: 'resources', label: 'Recursos digitais', hint: 'ODA, vídeo, professor e imagens' },
-  { id: 'technical', label: 'Técnico & QA', hint: 'Performance, erros e qualidade' },
+const SESSION_TABS: Array<ReportViewTab<SessionReportView>> = [
+  {
+    id: 'consolidated',
+    label: 'Consolidado',
+    tag: 'Jornada',
+    hint: 'Progresso, abandono, gap, ritmo e feedback',
+  },
+  {
+    id: 'resources',
+    label: 'Recursos digitais',
+    tag: 'Recursos',
+    hint: 'ODA, vídeo, professor e inventário',
+  },
+  {
+    id: 'technical',
+    label: 'Técnico & QA',
+    tag: 'QA',
+    hint: 'Performance, erros e qualidade da coleta',
+  },
 ];
 
 export function SessionReportContent({ parsed }: { parsed: ParsedDashboardReport }) {
@@ -31,7 +46,7 @@ export function SessionReportContent({ parsed }: { parsed: ParsedDashboardReport
         </div>
       ))}
 
-      <SessionReportViewTabs
+      <ReportViewTabs
         view={view}
         onChange={setView}
         tabs={SESSION_TABS}

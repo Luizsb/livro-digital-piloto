@@ -61,23 +61,47 @@ function enrichTeacherButtonSummary(
   };
 }
 
-/** JSONs antigos sem métricas de vídeo são enriquecidos a partir dos eventos. */
+/** JSONs antigos sem métricas de vídeo (ou sem campos da etapa 2) são enriquecidos a partir dos eventos. */
 function enrichEscolaDigitalVideoSummary(
   summary: EventSummary,
   events: AnalyticsEvent[],
 ): EventSummary {
-  if (typeof summary.escola_digital_video_play_count === 'number') {
-    return summary;
-  }
+  const defaults = {
+    escola_digital_video_play_count: 0,
+    escola_digital_video_completed_count: 0,
+    escola_digital_video_watched_to_end: false,
+    escola_digital_video_max_progress_percent: 0,
+    escola_digital_video_watch_total_seconds: 0,
+    escola_digital_video_playback_wall_seconds: 0,
+    escola_digital_video_seek_count: 0,
+    escola_digital_video_largest_skip_seconds: 0,
+  };
 
   if (events.length === 0) {
     return {
       ...summary,
-      escola_digital_video_play_count: 0,
-      escola_digital_video_completed_count: 0,
-      escola_digital_video_watched_to_end: false,
-      escola_digital_video_max_progress_percent: 0,
-      escola_digital_video_watch_total_seconds: 0,
+      escola_digital_video_play_count:
+        summary.escola_digital_video_play_count ?? defaults.escola_digital_video_play_count,
+      escola_digital_video_completed_count:
+        summary.escola_digital_video_completed_count ??
+        defaults.escola_digital_video_completed_count,
+      escola_digital_video_watched_to_end:
+        summary.escola_digital_video_watched_to_end ??
+        defaults.escola_digital_video_watched_to_end,
+      escola_digital_video_max_progress_percent:
+        summary.escola_digital_video_max_progress_percent ??
+        defaults.escola_digital_video_max_progress_percent,
+      escola_digital_video_watch_total_seconds:
+        summary.escola_digital_video_watch_total_seconds ??
+        defaults.escola_digital_video_watch_total_seconds,
+      escola_digital_video_playback_wall_seconds:
+        summary.escola_digital_video_playback_wall_seconds ??
+        defaults.escola_digital_video_playback_wall_seconds,
+      escola_digital_video_seek_count:
+        summary.escola_digital_video_seek_count ?? defaults.escola_digital_video_seek_count,
+      escola_digital_video_largest_skip_seconds:
+        summary.escola_digital_video_largest_skip_seconds ??
+        defaults.escola_digital_video_largest_skip_seconds,
     };
   }
 
@@ -89,6 +113,9 @@ function enrichEscolaDigitalVideoSummary(
     escola_digital_video_watched_to_end: content.escola_digital_video_watched_to_end,
     escola_digital_video_max_progress_percent: content.escola_digital_video_max_progress_percent,
     escola_digital_video_watch_total_seconds: content.escola_digital_video_watch_total_seconds,
+    escola_digital_video_playback_wall_seconds: content.escola_digital_video_playback_wall_seconds,
+    escola_digital_video_seek_count: content.escola_digital_video_seek_count,
+    escola_digital_video_largest_skip_seconds: content.escola_digital_video_largest_skip_seconds,
   };
 }
 

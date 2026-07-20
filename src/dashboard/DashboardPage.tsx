@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type DragEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
 import { parseReportFile, parseMultipleReportFiles, ReportParseError } from './parseReport';
 import type { DashboardViewMode, ParsedDashboardReport } from './types';
 import { aggregateSessionReports } from './buildGroupReport';
@@ -17,13 +17,26 @@ function DashboardPage() {
   const [groupLoadErrors, setGroupLoadErrors] = useState<{ fileName: string; message: string }[]>(
     [],
   );
+  const [includeDubiousSessions, setIncludeDubiousSessions] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
-  const groupReport = useMemo(
+  const filteredGroupReport = useMemo(
     () => aggregateSessionReports(groupSessions, groupLoadErrors),
     [groupSessions, groupLoadErrors],
   );
+  const fullGroupReport = useMemo(
+    () =>
+      aggregateSessionReports(groupSessions, groupLoadErrors, {
+        includeLowQualitySessions: true,
+      }),
+    [groupSessions, groupLoadErrors],
+  );
+  const groupReport = includeDubiousSessions ? fullGroupReport : filteredGroupReport;
+
+  useEffect(() => {
+    setIncludeDubiousSessions(false);
+  }, [groupSessions]);
 
   const handleSingleFile = async (file: File | null) => {
     if (!file) return;
@@ -201,7 +214,7 @@ function DashboardPage() {
             <p className="text-sm font-semibold text-slate-800">Tipo de relatório</p>
             <p className="text-xs text-slate-500">
               {mode === 'group'
-                ? 'Executivo, consolidado, recursos ou técnico & QA'
+                ? '7 visões: estratégia, jornada, pedagogia, produto, recursos, QA e IA'
                 : 'Consolidado, recursos digitais ou técnico & QA'}
             </p>
           </div>
@@ -293,7 +306,12 @@ function DashboardPage() {
 
         {mode === 'single' && parsed ? <SessionReportContent parsed={parsed} /> : null}
         {mode === 'group' && groupSessions.length > 0 ? (
-          <GroupReportContent report={groupReport} />
+          <GroupReportContent
+            analyticalReport={filteredGroupReport}
+            fullReport={fullGroupReport}
+            includeDubiousSessions={includeDubiousSessions}
+            onIncludeDubiousSessionsChange={setIncludeDubiousSessions}
+          />
         ) : null}
       </main>
       {hasContent ? <ScrollToTopButton /> : null}

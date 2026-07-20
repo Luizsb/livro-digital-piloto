@@ -6,6 +6,19 @@ import { pluralSessao, pluralValida, pluralParticipante } from '@shared/lib/plur
 import { GroupExecutiveSection } from './GroupExecutiveSection';
 import { GroupResourcesReport } from './GroupResourcesReport';
 import { GroupTechnicalReport } from './GroupTechnicalReport';
+import { GroupAiSummarySection } from './GroupAiSummarySection';
+import { GroupPedagogicalResumptionReport } from './GroupPedagogicalResumptionReport';
+import { GroupEditorialImprovementReport } from './GroupEditorialImprovementReport';
+import { ReportViewTabs, type ReportViewTab } from './reportUi';
+import {
+  AVG_SECONDS_PER_COMPLETED_PAGE_LABEL,
+  AVG_SECONDS_PER_COMPLETED_PAGE_EXPLANATION,
+  CHAPTER_PAGES_COMPLETED_LABEL,
+  CHAPTER_PAGES_OPENED_LABEL,
+  computeChapterCoveragePercent,
+  OPEN_COMPLETION_GAP_LABEL,
+  PAGE_COMPLETION_RATE_LABEL,
+} from '@analytics/metricDisplayLabels';
 import {
   DimensionScoreBars,
   DonutChart,
@@ -70,7 +83,14 @@ const CHAPTER_STATUS_COLORS = {
   partial_view: '#94a3b8',
 };
 
-type GroupReportView = 'executive' | 'consolidated' | 'resources' | 'technical';
+type GroupReportView =
+  | 'executive'
+  | 'consolidated'
+  | 'retomada'
+  | 'editorial'
+  | 'resources'
+  | 'technical'
+  | 'ai';
 
 function GroupReportWarnings({ report }: { report: GroupReport }) {
   const { data_quality } = report;
@@ -115,64 +135,179 @@ function GroupReportViewTabs({
   onChange: (view: GroupReportView) => void;
   report: GroupReport;
 }) {
-  const tabs: Array<{ id: GroupReportView; label: string; hint: string }> = [
+  const tabs: Array<ReportViewTab<GroupReportView>> = [
     {
       id: 'executive',
       label: 'Executivo',
-      hint: 'Síntese estratégica do piloto',
+      tag: 'Estratégia',
+      hint: 'Síntese para empresa, escola e produto',
     },
     {
       id: 'consolidated',
       label: 'Consolidado',
-      hint: 'Jornada, feedback e comparativo',
+      tag: 'Jornada',
+      hint: 'Heatmap, KPIs, feedback e comparativo',
+    },
+    {
+      id: 'retomada',
+      label: 'Retomada pedagógica',
+      tag: 'Pedagogia',
+      hint: 'Páginas, recursos e participantes',
+    },
+    {
+      id: 'editorial',
+      label: 'Editorial & produto',
+      tag: 'Produto',
+      hint: 'Backlog de melhorias do capítulo',
     },
     {
       id: 'resources',
       label: 'Recursos digitais',
+      tag: 'Recursos',
       hint: 'ODA, vídeo, imagens e professor',
     },
     {
       id: 'technical',
       label: 'Técnico & QA',
+      tag: 'QA',
       hint: 'Performance, erros e qualidade',
+    },
+    {
+      id: 'ai',
+      label: 'Resumo com IA',
+      tag: 'IA',
+      hint: 'Narrativa executiva (Gemini)',
     },
   ];
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
-      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => onChange(tab.id)}
-            className={`flex-1 rounded-xl px-4 py-3 text-left transition ${
-              view === tab.id
-                ? 'bg-[#80298F] text-white shadow-md shadow-[#80298F]/20'
-                : 'text-slate-700 hover:bg-slate-50'
-            }`}
-          >
-            <span className="block text-sm font-bold">{tab.label}</span>
-            <span
-              className={`mt-0.5 block text-xs ${
-                view === tab.id ? 'text-white/85' : 'text-slate-500'
-              }`}
-            >
-              {tab.hint}
-            </span>
-          </button>
-        ))}
+    <ReportViewTabs
+      view={view}
+      onChange={onChange}
+      tabs={tabs}
+      meta={`${report.participants_count} ${pluralParticipante(report.participants_count)} · ${report.valid_sessions_count} ${pluralSessao(report.valid_sessions_count)} ${pluralValida(report.valid_sessions_count)}${
+        report.quality_filter.applied && report.quality_filter.excluded_count > 0
+          ? ` · score ≥ ${report.quality_filter.threshold}`
+          : ''
+      } · cap. ${report.chapter_id}`}
+    />
+  );
+}
+
+function GroupQualityFilterNotice({ report }: { report: GroupReport }) {
+  const { quality_filter: q } = report;
+
+  if (q.applied && q.excluded_count > 0) {
+    return (
+      <div className="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-950">
+        <p>
+          Análises com{' '}
+          <strong>
+            {report.valid_sessions_count} de {q.total_sessions_after_dedup}{' '}
+            {pluralSessao(q.total_sessions_after_dedup)}
+          </strong>{' '}
+          (score ≥ {q.threshold}).{' '}
+          <strong>
+            {q.excluded_count} {pluralSessao(q.excluded_count)} duvidosa
+            {q.excluded_count === 1 ? '' : 's'}
+          </strong>{' '}
+          {q.excluded_count === 1 ? 'foi excluída' : 'foram excluídas'} das métricas. A aba{' '}
+          <strong>Técnico & QA</strong> continua mostrando o lote completo.
+        </p>
       </div>
-      <p className="mt-3 px-2 text-xs text-slate-500">
-        {report.participants_count} {pluralParticipante(report.participants_count)} ·{' '}
-        {report.valid_sessions_count} {pluralSessao(report.valid_sessions_count)}{' '}
-        {pluralValida(report.valid_sessions_count)} · cap. {report.chapter_id}
-      </p>
+    );
+  }
+
+  if (!q.applied && q.total_sessions_after_dedup > 0) {
+    return (
+      <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+        <p>
+          Filtro de qualidade <strong>desativado</strong> — analisando todas as{' '}
+          {q.total_sessions_after_dedup} {pluralSessao(q.total_sessions_after_dedup)}, incluindo
+          sessões com score &lt; {q.threshold}.
+        </p>
+      </div>
+    );
+  }
+
+  return null;
+}
+
+function GroupQualityFilterControl({
+  report,
+  includeDubiousSessions,
+  onIncludeDubiousSessionsChange,
+}: {
+  report: GroupReport;
+  includeDubiousSessions: boolean;
+  onIncludeDubiousSessionsChange: (value: boolean) => void;
+}) {
+  const { quality_filter: q } = report;
+  const hasDubiousSessions = q.excluded_count > 0;
+
+  if (!hasDubiousSessions && !includeDubiousSessions) {
+    return (
+      <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950">
+        Todas as {q.total_sessions_after_dedup} {pluralSessao(q.total_sessions_after_dedup)} têm
+        score ≥ {q.threshold} — nenhuma sessão duvidosa para incluir.
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-slate-900">Filtro de qualidade da coleta</p>
+          <p className="mt-1 text-sm text-slate-600">
+            Por padrão, KPIs e heatmaps usam apenas sessões com{' '}
+            <code className="rounded bg-white px-1 py-0.5 text-xs">data_quality_score</code> ≥{' '}
+            {q.threshold}. Sessões abaixo desse limiar podem distorcer médias de jornada e recursos.
+          </p>
+        </div>
+        <label className="flex shrink-0 cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm">
+          <input
+            type="checkbox"
+            checked={includeDubiousSessions}
+            onChange={(event) => onIncludeDubiousSessionsChange(event.target.checked)}
+            className="size-4 rounded border-slate-300 text-[#80298F] focus:ring-[#80298F]"
+          />
+          Incluir sessões duvidosas
+        </label>
+      </div>
+      {q.excluded_count > 0 && !includeDubiousSessions ? (
+        <details className="mt-3 text-sm text-slate-700">
+          <summary className="cursor-pointer font-medium text-slate-800">
+            {q.excluded_count} sessão(ões) excluída(s) do consolidado
+          </summary>
+          <ul className="mt-2 space-y-1 pl-1">
+            {q.excluded_sessions.map((item) => (
+              <li key={`${item.participant_id}:${item.file_name}`}>
+                <span className="font-medium text-[#80298F]">{item.participant_id}</span>
+                {' · '}
+                score {item.score ?? '—'}
+                {' · '}
+                <span className="text-xs text-slate-500">{item.file_name}</span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
     </div>
   );
 }
 
-function GroupConsolidatedReport({ report }: { report: GroupReport }) {
+function GroupConsolidatedReport({
+  report,
+  filterReferenceReport,
+  includeDubiousSessions,
+  onIncludeDubiousSessionsChange,
+}: {
+  report: GroupReport;
+  filterReferenceReport: GroupReport;
+  includeDubiousSessions: boolean;
+  onIncludeDubiousSessionsChange: (value: boolean) => void;
+}) {
   const n = report.valid_sessions_count;
   const {
     summary,
@@ -213,6 +348,11 @@ function GroupConsolidatedReport({ report }: { report: GroupReport }) {
 
   return (
     <div className="space-y-6">
+      <GroupQualityFilterControl
+        report={filterReferenceReport}
+        includeDubiousSessions={includeDubiousSessions}
+        onIncludeDubiousSessionsChange={onIncludeDubiousSessionsChange}
+      />
       <Section
         title="Visão geral do grupo"
         subtitle={`${report.participants_count} ${pluralParticipante(report.participants_count)} · ${n} ${pluralSessao(n)} ${pluralValida(n)} · cap. ${report.chapter_id}`}
@@ -239,15 +379,33 @@ function GroupConsolidatedReport({ report }: { report: GroupReport }) {
             }
           />
           <MetricCard
-            label="Páginas vistas (média)"
+            label={CHAPTER_PAGES_OPENED_LABEL}
             value={String(summary.avg_pages_viewed)}
-            hint={`de ${page_analytics.total_pages} por sessão`}
+            hint={`de ${page_analytics.total_pages} por sessão (~${computeChapterCoveragePercent(Math.round(summary.avg_pages_viewed), page_analytics.total_pages)}% do capítulo)`}
           />
           <MetricCard
-            label="Média de páginas concluídas"
-            value={`${summary.avg_completion_rate}%`}
-            hint="Das páginas vistas, quantas atingiram tempo mínimo"
+            label={CHAPTER_PAGES_COMPLETED_LABEL}
+            value={`${Math.round(summary.avg_pages_completed)} de ${page_analytics.total_pages}`}
+            hint={`~${computeChapterCoveragePercent(Math.round(summary.avg_pages_completed), page_analytics.total_pages)}% do capítulo concluído em média`}
           />
+          <MetricCard
+            label={PAGE_COMPLETION_RATE_LABEL}
+            value={`${summary.avg_completion_rate}%`}
+            hint="Média: das páginas vistas, quantas atingiram tempo mínimo"
+          />
+          <MetricCard
+            label={OPEN_COMPLETION_GAP_LABEL}
+            value={`${Math.round(summary.avg_open_completion_gap)} pág./sessão`}
+            hint={`${summary.sessions_with_page_gap_pct}% das sessões com ao menos uma página vista sem conclusão`}
+          />
+          {summary.avg_seconds_per_completed_page !== null &&
+          summary.avg_seconds_per_completed_page > 0 ? (
+            <MetricCard
+              label={AVG_SECONDS_PER_COMPLETED_PAGE_LABEL}
+              value={formatDuration(Math.round(summary.avg_seconds_per_completed_page))}
+              hint={AVG_SECONDS_PER_COMPLETED_PAGE_EXPLANATION}
+            />
+          ) : null}
           <MetricCard
             label="Tempo visível (média)"
             value={formatDuration(summary.avg_visible_time_seconds)}
@@ -304,11 +462,29 @@ function GroupConsolidatedReport({ report }: { report: GroupReport }) {
       </Section>
 
       <Section
-        title="Jornada por página"
-        subtitle="Onde o grupo avançou, concluiu ou abandonou — visualização comparativa por página."
+        title="Heatmap de jornada por página"
+        subtitle="Visualizada · concluída · vista sem conclusão · ponto de abandono — comparativo entre sessões."
       >
         <PageJourneyChart pages={page_analytics.heatmap} sessionCount={n} />
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {page_analytics.heatmap
+            .filter((item) => item.gapCount > 0)
+            .sort((a, b) => b.gapCount - a.gapCount)
+            .slice(0, 3)
+            .map((item) => (
+              <div
+                key={`gap-${item.page}`}
+                className="rounded-lg border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm"
+              >
+                <span className="font-semibold text-slate-800">
+                  Vista sem conclusão · pág. {item.page}
+                </span>
+                <p className="mt-1 text-slate-600">
+                  {item.gapCount} {pluralSessao(item.gapCount)} (
+                  {n > 0 ? Math.round((item.gapCount / n) * 100) : 0}%)
+                </p>
+              </div>
+            ))}
           {page_analytics.heatmap
             .filter((item) => item.abandonmentCount > 0)
             .sort((a, b) => b.abandonmentCount - a.abandonmentCount)
@@ -328,7 +504,10 @@ function GroupConsolidatedReport({ report }: { report: GroupReport }) {
         </div>
       </Section>
 
-      <Section title="Profundidade de leitura">
+      <Section
+        title="Ritmo por página vista"
+        subtitle="Tempo visível médio em cada página aberta — não mede cobertura do capítulo."
+      >
         <HorizontalBarChart items={summary.reading_depth_distribution} total={n} />
       </Section>
 
@@ -417,8 +596,11 @@ function GroupConsolidatedReport({ report }: { report: GroupReport }) {
             <thead>
               <tr className="border-b border-slate-200 text-slate-500">
                 <th className="pb-2 pr-4 font-medium">Participante</th>
-                <th className="pb-2 pr-4 font-medium">Páginas</th>
-                <th className="pb-2 pr-4 font-medium">Conclusão</th>
+                <th className="pb-2 pr-4 font-medium">Abertura</th>
+                <th className="pb-2 pr-4 font-medium">Gap</th>
+                <th className="pb-2 pr-4 font-medium">Conclusão (vistas)</th>
+                <th className="pb-2 pr-4 font-medium">Abandono</th>
+                <th className="pb-2 pr-4 font-medium">Tempo/pág.</th>
                 <th className="pb-2 pr-4 font-medium">Status</th>
                 <th className="pb-2 pr-4 font-medium">Foco</th>
                 <th className="pb-2 pr-4 font-medium">Recursos</th>
@@ -436,13 +618,23 @@ function GroupConsolidatedReport({ report }: { report: GroupReport }) {
                   <td className="py-2.5 pr-4 font-semibold text-[#80298F]">{row.participantId}</td>
                   <td className="py-2.5 pr-4 text-slate-700">
                     {row.pagesViewedCount}/{row.totalPages}
-                    {row.abandonedBeforeEnd && row.abandonmentPage != null ? (
-                      <span className="ml-1 text-xs text-amber-700">
-                        (parou pág. {row.abandonmentPage})
-                      </span>
-                    ) : null}
+                  </td>
+                  <td className="py-2.5 pr-4 text-slate-700">
+                    {row.openCompletionGap > 0 ? `${row.openCompletionGap} pág.` : '—'}
                   </td>
                   <td className="py-2.5 pr-4 text-slate-700">{row.completionRate}%</td>
+                  <td className="py-2.5 pr-4 text-slate-700">
+                    {row.abandonmentPage != null
+                      ? `Pág. ${row.abandonmentPage}`
+                      : row.lastPageViewed != null
+                        ? `Últ. pág. ${row.lastPageViewed}`
+                        : '—'}
+                  </td>
+                  <td className="py-2.5 pr-4 text-slate-700">
+                    {row.avgCompletedPageSeconds != null
+                      ? formatDuration(Math.round(row.avgCompletedPageSeconds))
+                      : '—'}
+                  </td>
                   <td className="py-2.5 pr-4 text-slate-700">{row.chapterStatus}</td>
                   <td className="py-2.5 pr-4 text-slate-700">
                     {row.tabHiddenCount > 0 ? (
@@ -479,25 +671,50 @@ function GroupConsolidatedReport({ report }: { report: GroupReport }) {
   );
 }
 
-export function GroupReportContent({ report }: { report: GroupReport }) {
+export function GroupReportContent({
+  analyticalReport,
+  fullReport,
+  includeDubiousSessions,
+  onIncludeDubiousSessionsChange,
+}: {
+  analyticalReport: GroupReport;
+  fullReport: GroupReport;
+  includeDubiousSessions: boolean;
+  onIncludeDubiousSessionsChange: (value: boolean) => void;
+}) {
   const [view, setView] = useState<GroupReportView>('executive');
   useScrollToTopOnChange(view);
+
+  const report = view === 'technical' ? fullReport : includeDubiousSessions ? fullReport : analyticalReport;
+  const showQualityNotice = view !== 'technical';
 
   return (
     <div className="space-y-6">
       <GroupReportWarnings report={report} />
+      {showQualityNotice ? <GroupQualityFilterNotice report={report} /> : null}
       <GroupReportViewTabs view={view} onChange={setView} report={report} />
       {view === 'executive' ? (
         <GroupExecutiveSection
           report={report}
           onOpenConsolidated={() => setView('consolidated')}
         />
+      ) : view === 'retomada' ? (
+        <GroupPedagogicalResumptionReport report={report} />
+      ) : view === 'editorial' ? (
+        <GroupEditorialImprovementReport report={report} />
       ) : view === 'resources' ? (
         <GroupResourcesReport report={report} />
       ) : view === 'technical' ? (
-        <GroupTechnicalReport report={report} />
+        <GroupTechnicalReport report={fullReport} />
+      ) : view === 'ai' ? (
+        <GroupAiSummarySection report={report} />
       ) : (
-        <GroupConsolidatedReport report={report} />
+        <GroupConsolidatedReport
+          report={report}
+          filterReferenceReport={analyticalReport}
+          includeDubiousSessions={includeDubiousSessions}
+          onIncludeDubiousSessionsChange={onIncludeDubiousSessionsChange}
+        />
       )}
     </div>
   );

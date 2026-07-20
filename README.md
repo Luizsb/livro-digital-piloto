@@ -73,7 +73,7 @@ Dois arquivos — **limiares universais** vs **páginas por livro**:
 | **Primeira / última página, página inicial** | `chapterPageConfig` → `CHAPTER_PAGE_REGISTRY` |
 | Gatilho de scroll (`page_viewed`) | `ldConfig` → `scroll.*` |
 | Exposição de imagem (`image_viewed`) | `ldConfig` → `image.*` |
-| Profundidade de leitura | `ldConfig` → `readingQuality.*` |
+| Profundidade de leitura (ritmo) | `ldConfig` → `readingQuality.*` |
 
 Ao portar um **novo livro/capítulo**, adicione uma entrada em `CHAPTER_PAGE_REGISTRY` e alinhe os `data-book-page` em `Book.tsx` / `Pagination.tsx`.
 
@@ -92,7 +92,7 @@ Guia completo: **[docs/CONFIGURACAO-ANALYTICS.md](docs/CONFIGURACAO-ANALYTICS.md
 | [docs/MVP-04-FEEDBACK.md](docs/MVP-04-FEEDBACK.md) | Feedback, `chapter_finished` / `chapter_completed` |
 | [docs/MVP-05-BOTAO-PROFESSOR.md](docs/MVP-05-BOTAO-PROFESSOR.md) | Botão Para o Professor |
 | [docs/MVP-06-SAUDE-TECNICA.md](docs/MVP-06-SAUDE-TECNICA.md) | Erros, tempo de carga, peso observado na sessão |
-| [docs/DASHBOARD-MVP.md](docs/DASHBOARD-MVP.md) | **LD Insights** — dashboard do JSON |
+| [docs/DASHBOARD-MVP.md](docs/DASHBOARD-MVP.md) | **LD Insights** — abas individual (Consolidado, Recursos, Técnico) e grupo (Executivo, Consolidado, Retomada, Editorial, Recursos, Técnico, IA) |
 | [docs/CONFIGURACAO-ANALYTICS.md](docs/CONFIGURACAO-ANALYTICS.md) | Limiares e tempos — referência completa |
 | [docs/CATÁLOGO-EVENTOS-E-RELATÓRIOS.md](docs/CATÁLOGO-EVENTOS-E-RELATÓRIOS.md) | **Catálogo único** — eventos, KPIs, relatórios; regra **uso vs aprendizagem** |
 | [docs/EVIDENCIAS.md](docs/EVIDENCIAS.md) | Histórico de evoluções — manter atualizado |

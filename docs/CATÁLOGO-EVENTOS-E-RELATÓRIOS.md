@@ -68,7 +68,7 @@ Com os eventos atuais, é correto dizer que o participante:
 
 **Exposição ≠ atenção:** `image_viewed` indica que o asset entrou na tela, não que o participante prestou atenção ou compreendeu.
 
-**Profundidade de leitura** (`reading_depth`) é classificação de **tempo visível por página** — proxy de engajamento com o texto, não de aprendizagem.
+**Ritmo por página vista** (`reading_depth`, label legado “profundidade de leitura”) é classificação de **tempo visível por página aberta** — proxy de engajamento com o texto, não de aprendizagem nem de cobertura do capítulo.
 
 ### O que ainda não dá para afirmar
 
@@ -148,9 +148,9 @@ Arquivo gerado por **Exportar eventos JSON** (`src/ld/exportEvents.ts`):
 | Grupo | Campos | Origem |
 |-------|--------|--------|
 | **Identificação** | `book_id`, `chapter_id`, `participant_ids`, `session_ids`, `total_events` | Agregação |
-| **Jornada** | `pages_viewed`, `pages_completed`, `pages_viewed_count`, `pages_completed_count`, `completion_rate`, `last_page_viewed`, `abandoned_before_end`, `abandonment_page` | `page_viewed` / `page_completed` + derivados em `session_finished` |
+| **Jornada** | `pages_viewed`, `pages_completed`, `pages_viewed_count`, `pages_completed_count`, `completion_rate`, `last_page_viewed`, `abandoned_before_end`, `abandonment_page`, `avg_seconds_per_completed_page` | `page_viewed` / `page_completed` + derivados em `session_finished` |
 | **Tempo** | `duration_seconds`, `visible_time_seconds`, `hidden_time_seconds`, `visible_time_ratio`, `visibility_change_count`, `idle_time_seconds` | `session_finished` + `idle_started` / `idle_finished` |
-| **Profundidade** | `reading_depth`, `reading_depth_label` | `session_finished` (baseado em tempo **visível**) |
+| **Ritmo de leitura** | `reading_depth`, `reading_depth_label`, `avg_seconds_per_viewed_page` | `session_finished` (tempo **visível** por página) |
 | **Imagens** | `images_viewed_unique`, `images_viewed_unique_count`, `image_zoom_total`, `image_zoom_unique_count`, `images_with_errors` | eventos de imagem |
 | **Recursos** | `resources_opened_total`, `oda_opened_count`, `oda_engagement_total_seconds`, `escola_digital_*`, `escola_digital_video_*` | MVP-03 |
 | **Professor** | `teacher_button_opened_count`, `teacher_button_total_seconds`, `teacher_button_usage_by_section`, `most_opened_teacher_section` | MVP-05 |
@@ -159,7 +159,7 @@ Arquivo gerado por **Exportar eventos JSON** (`src/ld/exportEvents.ts`):
 | **Ambiente** | `device_type`, `os_name`, `browser_name`, `screen_*`, `viewport_*`, `app_language`, `browser_language` | `session_started` |
 | **Saúde técnica** | `page_load_time_ms`, `ttfb_ms`, `session_bytes_transferred`, `runtime_errors_count`, `has_technical_issues`, … | MVP-06 |
 | **Qualidade da coleta** | `data_quality_score`, `event_integrity_status`, `missing_expected_events`, `duplicate_event_warnings`, `inconsistent_event_warnings`, `unexpected_event_warnings` | `collectionQuality.ts` |
-| **Cobertura do capítulo** | `expected_*_count`, `*_coverage_rate`, `pages_not_viewed`, `images_not_exposed`, `resources_not_opened`, `teacher_buttons_not_used`, `activities_not_started` | `chapterManifest.ts` + eventos |
+| **Inventário editorial** | `expected_*_count`, `*_coverage_rate`, `pages_not_viewed`, `images_not_exposed`, `resources_not_opened`, `teacher_buttons_not_used`, `activities_not_started` | `chapterManifest.ts` + eventos |
 
 ---
 
@@ -174,7 +174,7 @@ O **manifest** descreve o que o capítulo **deveria conter** nesta versão do li
 
 **Código:** `src/ld/chapterManifest.ts` → `CHAPTER_MANIFEST_REGISTRY`  
 **Export:** objeto `chapter_manifest` na raiz do JSON  
-**Dashboard:** seção **Cobertura do capítulo** no LD Insights
+**Dashboard:** seção **Inventário editorial do capítulo** (aba Recursos) no LD Insights
 
 ### Estrutura do manifest (cap. 07 piloto)
 
@@ -359,15 +359,30 @@ Legenda das colunas:
 | event_name | Label | Quando dispara | Metadata principal | KPI | Público | Relatório sugerido |
 |------------|-------|----------------|-------------------|-----|---------|-------------------|
 | `page_viewed` | Página visualizada | Marcador `data-book-page` cruza gatilho de scroll (1× por página/sessão) | `page` | Cobertura; funil por página | P, E, R | Jornada (emoji por página no dashboard) |
-| `page_completed` | Página concluída | ≥5 s visível na aba** ou encerramento na página | `page`, `duration_seconds`, `completion_reason` | Taxa de conclusão **de páginas**; tempo por página | P, E, R | `completion_rate` no summary; exibir como “Taxa de conclusão de páginas” |
+| `page_completed` | Página concluída | ≥5 s visível na aba** ou encerramento na página | `page`, `duration_seconds`, `completion_reason` | Conclusão no capítulo; tempo por página concluída | P, E, R | `completion_rate` = conclusão **das vistas**; `avg_seconds_per_completed_page` |
 
-**Abandono (derivado, sem evento novo):** `last_page_viewed` (última página cronológica), `abandoned_before_end` (`pages_viewed_count < total`), `abandonment_page` (última página quando abandonou). Presentes em `chapter_finished`, `session_finished` e `summary`.
+**Abandono (derivado):** `last_page_viewed`, `abandoned_before_end`, `abandonment_page`. Cards no Consolidado + heatmap de abandono no grupo.
+
+**Gap abertura × conclusão (derivado):** páginas em `pages_viewed` que não estão em `pages_completed` — varredura ou tempo insuficiente.
 
 **Inatividade (aba visível):** `idle_started` / `idle_finished` (eventos) e `idle_time_seconds` (agregado em `session_finished`). Limiar: `ldConfig.idle.thresholdSeconds` (padrão 60 s).
 
 ** Regra atual: `ldConfig.page.completeMinSeconds` (padrão 5 s). Tempo pausa fora da aba.
 
-**Profundidade de leitura** (`reading_depth`): derivada de `visible_time_seconds ÷ pages_viewed_count`. No dashboard, exibir sempre a explicação: *“Classificação baseada no tempo visível médio por página visualizada.”*
+**Ritmo por página vista** (`reading_depth`): derivada de `visible_time_seconds ÷ pages_viewed_count`. No dashboard: label **“Ritmo por página vista”** (valores: Leitura rápida … Leitura aprofundada).
+
+### Rótulos de exibição no dashboard (jornada)
+
+| Campo técnico | Rótulo no LD Insights |
+|---------------|----------------------|
+| `pages_viewed_count / total` | **Abertura do capítulo** |
+| `pages_completed_count / total` | **Conclusão no capítulo** |
+| `completion_rate` | **Conclusão das páginas vistas** |
+| `reading_depth_label` | **Ritmo por página vista** |
+| `last_page_viewed` / `abandonment_page` | **Última página vista** / **Ponto de abandono** |
+| `avg_seconds_per_completed_page` | **Tempo médio por página concluída** |
+| gap (`pages_viewed − pages_completed`) | **Gap abertura × conclusão** |
+| manifest `*_coverage_rate` | **Inventário editorial do capítulo** (aba Recursos) |
 
 | Valor | Label | Média por página visualizada |
 |-------|-------|---------------------------|
@@ -475,18 +490,25 @@ Classificação no dashboard: Bom ≤2,5 s · Moderado ≤4 s · Lento.
 
 ## O que o LD Insights já exibe
 
-| Seção | Dados |
-|-------|-------|
-| Cards principais | Participante, duração total, tempo visível, fora da aba, % visível, páginas, status, profundidade, feedback |
-| Resumo interpretativo | Texto narrativo (usa **tempo visível**) |
-| Ambiente de acesso | Dispositivo, SO, navegador, resolução |
-| Saúde técnica | Carga, TTFB, peso, erros |
-| **Qualidade da coleta** | Score 0–100, status de integridade, validações por categoria (sessão, jornada, conteúdo, professor), avisos detalhados |
-| **Cobertura do capítulo** | Taxas de exposição/abertura/uso vs inventário do manifest; itens faltantes |
-| Saúde da coleta | Checklist rápido do ciclo de vida da sessão |
-| Jornada de leitura | Páginas 3–12 com status visual |
-| Imagens / recursos / professor | Engajamento com conteúdo |
-| Alertas | Varredura rápida, capítulo parcial, **saída da aba**, comentário aberto |
+### Sessão individual (abas)
+
+| Aba | Foco |
+|-----|------|
+| Consolidado | Jornada, métricas de abertura/conclusão, abandono, gap, ritmo, feedback |
+| Recursos digitais | ODA, vídeo, professor, inventário editorial |
+| Técnico & QA | Performance, erros, qualidade da coleta |
+
+### Grupo / turma (abas)
+
+| Aba | Foco |
+|-----|------|
+| Executivo | Síntese estratégica e valor por stakeholder |
+| Consolidado | Heatmap, KPIs, feedback agregado, comparativo entre participantes |
+| Retomada pedagógica | Páginas prioritárias, recursos ignorados, sinais por participante, pontos para aula |
+| Editorial & produto | Backlog de melhorias (conteúdo, recurso, UX, técnico), imagens com zoom, feedback UX, dispositivos |
+| Recursos digitais | Funil de adoção e cobertura do manifest |
+| Técnico & QA | Performance agregada e QA por sessão |
+| Resumo com IA | Narrativa executiva (Gemini, sob demanda) |
 
 Ver [DASHBOARD-MVP.md](./DASHBOARD-MVP.md).
 

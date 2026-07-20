@@ -6,6 +6,8 @@ import {
 import type {
   ParsedDashboardReport,
   GroupReport,
+  GroupQualityFilter,
+  GroupQualityFilterExcludedSession,
   GroupSessionRow,
   PageHeatmapItem,
 } from './types';
@@ -20,7 +22,45 @@ import { formatBrowserLabel } from '@analytics/deviceContext';
 import { formatDateTimeBr } from '@shared/lib/formatDateTimeBr';
 import { pluralSessao, pluralValida } from '@shared/lib/pluralizePt';
 
-const RELIABLE_QUALITY_THRESHOLD = 85;
+export const RELIABLE_QUALITY_THRESHOLD = 85;
+
+export interface AggregateGroupReportOptions {
+  /** Quando false (padrão), só entram sessões com data_quality_score ≥ 85. */
+  includeLowQualitySessions?: boolean;
+}
+
+export function isReliableQualitySession(session: ParsedDashboardReport): boolean {
+  const score = session.summary.data_quality_score;
+  return typeof score === 'number' && score >= RELIABLE_QUALITY_THRESHOLD;
+}
+
+function buildExcludedSessionEntry(
+  session: ParsedDashboardReport,
+): GroupQualityFilterExcludedSession {
+  const score = session.summary.data_quality_score;
+  return {
+    participant_id: getParticipantLabel(session.summary),
+    file_name: session.sourceFileName ?? '—',
+    score: typeof score === 'number' ? score : null,
+  };
+}
+
+function buildQualityFilter(
+  allSessions: ParsedDashboardReport[],
+  includeLowQuality: boolean,
+): GroupQualityFilter {
+  const excludedSessions = includeLowQuality
+    ? []
+    : allSessions.filter((s) => !isReliableQualitySession(s)).map(buildExcludedSessionEntry);
+
+  return {
+    applied: !includeLowQuality,
+    threshold: RELIABLE_QUALITY_THRESHOLD,
+    total_sessions_after_dedup: allSessions.length,
+    excluded_count: excludedSessions.length,
+    excluded_sessions: excludedSessions,
+  };
+}
 
 function average(values: number[]): number | null {
   if (values.length === 0) return null;
@@ -81,12 +121,16 @@ function buildPageHeatmap(sessions: ParsedDashboardReport[]): PageHeatmapItem[] 
   return pages.map((page) => {
     let viewedCount = 0;
     let completedCount = 0;
+    let gapCount = 0;
     let abandonmentCount = 0;
 
     for (const session of sessions) {
       const { summary } = session;
-      if (summary.pages_viewed.includes(page)) viewedCount += 1;
-      if (summary.pages_completed.includes(page)) completedCount += 1;
+      const viewed = summary.pages_viewed.includes(page);
+      const completed = summary.pages_completed.includes(page);
+      if (viewed) viewedCount += 1;
+      if (completed) completedCount += 1;
+      if (viewed && !completed) gapCount += 1;
       if (summary.abandonment_page === page) abandonmentCount += 1;
     }
 
@@ -96,6 +140,8 @@ function buildPageHeatmap(sessions: ParsedDashboardReport[]): PageHeatmapItem[] 
       viewedPct: pct(viewedCount, total),
       completedCount,
       completedPct: pct(completedCount, total),
+      gapCount,
+      gapPct: pct(gapCount, total),
       abandonmentCount,
     };
   });
@@ -118,6 +164,13 @@ function buildSessionRow(session: ParsedDashboardReport): GroupSessionRow {
     idleTimeSeconds: summary.idle_time_seconds ?? null,
     abandonedBeforeEnd: summary.abandoned_before_end === true,
     abandonmentPage: summary.abandonment_page ?? null,
+    lastPageViewed: summary.last_page_viewed ?? null,
+    openCompletionGap: Math.max(0, summary.pages_viewed_count - summary.pages_completed_count),
+    avgCompletedPageSeconds:
+      typeof summary.avg_seconds_per_completed_page === 'number' &&
+      summary.avg_seconds_per_completed_page > 0
+        ? summary.avg_seconds_per_completed_page
+        : null,
     readingDepthLabel: summary.reading_depth_label ?? null,
     dataQualityScore:
       typeof summary.data_quality_score === 'number' ? summary.data_quality_score : null,
@@ -252,7 +305,11 @@ function buildGroupInsights(report: Omit<GroupReport, 'insights'>): string[] {
     );
   }
 
-  if (data_quality.reliable_session_count < n) {
+  if (report.quality_filter.applied && report.quality_filter.excluded_count > 0) {
+    insights.push(
+      `Análises limitadas a ${n} sessões confiáveis (score ≥ ${data_quality.reliable_quality_threshold}); ${report.quality_filter.excluded_count} sessão(ões) duvidosa(s) ficou de fora.`,
+    );
+  } else if (data_quality.reliable_session_count < n) {
     insights.push(
       `${data_quality.reliable_session_count} de ${n} sessões têm qualidade da coleta ≥ ${data_quality.reliable_quality_threshold} — considere filtrar sessões com score baixo antes de conclusões definitivas.`,
     );
@@ -299,7 +356,11 @@ function emptyGroupReport(
     load_errors: loadErrors.map((e) => ({ file_name: e.fileName, message: e.message })),
     summary: {
       avg_pages_viewed: 0,
+      avg_pages_completed: 0,
       avg_completion_rate: 0,
+      avg_open_completion_gap: 0,
+      sessions_with_page_gap_pct: 0,
+      avg_seconds_per_completed_page: null,
       full_completion_pct: 0,
       viewed_all_incomplete_pct: 0,
       partial_view_pct: 0,
@@ -372,6 +433,13 @@ function emptyGroupReport(
       per_session_warnings_count: 0,
       session_quality_issues: [],
     },
+    quality_filter: {
+      applied: true,
+      threshold: RELIABLE_QUALITY_THRESHOLD,
+      total_sessions_after_dedup: 0,
+      excluded_count: 0,
+      excluded_sessions: [],
+    },
     advanced_analytics: {
       top_events: [],
       page_dwell: [],
@@ -402,13 +470,49 @@ function emptyGroupReport(
 export function aggregateSessionReports(
   reports: ParsedDashboardReport[],
   loadErrors: { fileName: string; message: string }[] = [],
+  options: AggregateGroupReportOptions = {},
 ): GroupReport {
+  const includeLowQuality = options.includeLowQualitySessions ?? false;
   const sourceReportsCount = reports.length;
-  const { valid: sessions, duplicateSessionIds, duplicateWarnings } = deduplicateSessions(reports);
+  const {
+    valid: allSessions,
+    duplicateSessionIds,
+    duplicateWarnings,
+  } = deduplicateSessions(reports);
+  const qualityFilter = buildQualityFilter(allSessions, includeLowQuality);
+  const sessions = includeLowQuality
+    ? allSessions
+    : allSessions.filter(isReliableQualitySession);
   const n = sessions.length;
 
   if (n === 0) {
-    return emptyGroupReport(loadErrors);
+    if (allSessions.length > 0 && !includeLowQuality) {
+      const generatedAt = new Date().toISOString();
+      return {
+        ...emptyGroupReport(loadErrors),
+        generated_at: generatedAt,
+        generated_at_br: formatDateTimeBr(generatedAt),
+        book_id: allSessions[0].summary.book_id,
+        chapter_id: allSessions[0].summary.chapter_id,
+        source_reports_count: sourceReportsCount,
+        invalid_sessions_count: duplicateSessionIds.length + loadErrors.length,
+        quality_filter: qualityFilter,
+        warnings: [
+          ...duplicateWarnings,
+          `Nenhuma sessão atinge score ≥ ${RELIABLE_QUALITY_THRESHOLD}. ${qualityFilter.excluded_count} sessão(ões) excluída(s) — ative "Incluir sessões duvidosas" no Consolidado para analisar o lote completo.`,
+        ],
+        data_quality: {
+          ...emptyGroupReport(loadErrors).data_quality,
+          duplicate_session_ids: [...new Set(duplicateSessionIds)],
+        },
+        insights: [
+          `Nenhuma sessão confiável (score ≥ ${RELIABLE_QUALITY_THRESHOLD}) neste lote.`,
+          'Ative "Incluir sessões duvidosas" no Consolidado ou revise a qualidade da coleta na aba Técnico & QA.',
+        ],
+      };
+    }
+
+    return { ...emptyGroupReport(loadErrors), quality_filter: qualityFilter };
   }
 
   const warnings: string[] = [...duplicateWarnings];
@@ -433,6 +537,12 @@ export function aggregateSessionReports(
   if (duplicateParticipants.length > 0) {
     warnings.push(
       `Participantes com mais de uma sessão no lote: ${duplicateParticipants.join(', ')}.`,
+    );
+  }
+
+  if (!includeLowQuality && qualityFilter.excluded_count > 0) {
+    warnings.push(
+      `Análises com ${n} de ${allSessions.length} sessões (data_quality_score ≥ ${RELIABLE_QUALITY_THRESHOLD}). ${qualityFilter.excluded_count} sessão(ões) duvidosa(s) excluída(s).`,
     );
   }
 
@@ -587,8 +697,18 @@ export function aggregateSessionReports(
   const partialViewCount = rows.filter(
     (r) => classifyChapterProgress(r.pagesViewedCount, r.pagesCompletedCount, r.totalPages) === 'partial_view',
   ).length;
+  const openCompletionGaps = rows.map(
+    (row) => Math.max(0, row.pagesViewedCount - row.pagesCompletedCount),
+  );
+  const sessionsWithPageGap = rows.filter(
+    (row) => row.pagesViewedCount > row.pagesCompletedCount,
+  ).length;
   const sessionsWithImageZoom = sessions.filter((s) => s.summary.image_zoom_total > 0).length;
   const generatedAt = new Date().toISOString();
+
+  const completedPageTimes = sessions
+    .map((s) => s.summary.avg_seconds_per_completed_page)
+    .filter((v): v is number => typeof v === 'number' && v > 0);
 
   const partial: Omit<GroupReport, 'insights'> = {
     report_type: 'group_summary',
@@ -604,7 +724,12 @@ export function aggregateSessionReports(
     load_errors: loadErrors.map((e) => ({ file_name: e.fileName, message: e.message })),
     summary: {
       avg_pages_viewed: average(rows.map((r) => r.pagesViewedCount)) ?? 0,
+      avg_pages_completed: average(rows.map((r) => r.pagesCompletedCount)) ?? 0,
       avg_completion_rate: average(rows.map((r) => r.completionRate)) ?? 0,
+      avg_open_completion_gap: average(openCompletionGaps) ?? 0,
+      sessions_with_page_gap_pct: pct(sessionsWithPageGap, n),
+      avg_seconds_per_completed_page:
+        completedPageTimes.length > 0 ? average(completedPageTimes) : null,
       full_completion_pct: pct(fullCompletionCount, n),
       viewed_all_incomplete_pct: pct(viewedAllIncompleteCount, n),
       partial_view_pct: pct(partialViewCount, n),
@@ -715,6 +840,7 @@ export function aggregateSessionReports(
       per_session_warnings_count: perSessionWarningsCount,
       session_quality_issues: sessionQualityIssues,
     },
+    quality_filter: qualityFilter,
     advanced_analytics: buildGroupAdvancedAnalytics(sessions),
     resources_detail: buildGroupResourcesDetail(sessions),
     technical_detail: buildGroupTechnicalDetail(
