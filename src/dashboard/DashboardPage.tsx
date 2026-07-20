@@ -1,13 +1,161 @@
 import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
 import { parseReportFile, parseMultipleReportFiles, ReportParseError } from './parseReport';
-import type { DashboardViewMode, ParsedDashboardReport } from './types';
+import type { DashboardViewMode, GroupReport, ParsedDashboardReport } from './types';
 import { aggregateSessionReports } from './buildGroupReport';
 import { downloadGroupReportJson } from './exportGroupReport';
+import {
+  downloadGroupReportCsv,
+  downloadGroupReportPdf,
+} from './exportGroupReportSchool';
 import GroupReportContent from './GroupReportContent';
 import SessionReportContent from './SessionReportContent';
 import { ScrollToTopButton } from '@shared/components/ScrollToTopButton';
 import { pluralSessao } from '@shared/lib/pluralizePt';
 import { formatExportedAt } from './reportExtractors';
+
+function IconDownload({ className = 'size-4' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+      <path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.69L6.3 8.49a.75.75 0 0 0-1.1 1.02l4.25 4.5c.3.32.8.32 1.1 0l4.25-4.5a.75.75 0 1 0-1.1-1.02l-2.95 3.12V2.75Z" />
+      <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
+    </svg>
+  );
+}
+
+function IconSwap({ className = 'size-4' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+      <path
+        fillRule="evenodd"
+        d="M13.2 3.2a.75.75 0 0 1 1.06 0l3 3a.75.75 0 0 1 0 1.06l-3 3a.75.75 0 1 1-1.06-1.06L14.94 7.5H5.75a.75.75 0 0 1 0-1.5h9.19l-1.74-1.74a.75.75 0 0 1 0-1.06ZM6.8 10.2a.75.75 0 0 1 0 1.06L5.06 13H14.25a.75.75 0 0 1 0 1.5H5.06l1.74 1.74a.75.75 0 1 1-1.06 1.06l-3-3a.75.75 0 0 1 0-1.06l3-3a.75.75 0 0 1 1.06 0Z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function IconHome({ className = 'size-4' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+      <path
+        fillRule="evenodd"
+        d="M9.293 2.293a1 1 0 0 1 1.414 0l7 7A1 1 0 0 1 17 11h-1v6a1 1 0 0 1-1 1h-3a1 1 0 0 1-1-1v-3H9v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6H3a1 1 0 0 1-.707-1.707l7-7Z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function GroupExportMenu({ report }: { report: GroupReport }) {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [open]);
+
+  const exportOptions = [
+    {
+      id: 'json',
+      label: 'JSON consolidado',
+      hint: 'Arquivo completo do relatório',
+      run: () => downloadGroupReportJson(report),
+    },
+    {
+      id: 'csv',
+      label: 'CSV (escola / BI)',
+      hint: 'KPIs, heatmap e participantes',
+      run: () => downloadGroupReportCsv(report),
+    },
+    {
+      id: 'pdf',
+      label: 'PDF resumido',
+      hint: 'Para enviar sem o dashboard',
+      run: () => downloadGroupReportPdf(report),
+    },
+  ] as const;
+
+  return (
+    <div ref={menuRef} className="relative">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-haspopup="menu"
+        onClick={() => setOpen((value) => !value)}
+        className="inline-flex items-center gap-2 rounded-lg border border-white/40 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+      >
+        <IconDownload />
+        Exportar
+        <svg
+          className={`size-3.5 transition ${open ? 'rotate-180' : ''}`}
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          aria-hidden
+        >
+          <path
+            fillRule="evenodd"
+            d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </button>
+      {open ? (
+        <div
+          role="menu"
+          className="absolute right-0 z-20 mt-2 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
+        >
+          {exportOptions.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                option.run();
+                setOpen(false);
+              }}
+              className="flex w-full flex-col px-4 py-2.5 text-left transition hover:bg-[#F9DDFF]/50"
+            >
+              <span className="text-sm font-semibold text-slate-900">{option.label}</span>
+              <span className="text-xs text-slate-500">{option.hint}</span>
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function IconUser({ className = 'size-4' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+      <path d="M10 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3.465 14.493a1.23 1.23 0 0 0 .41 1.412A9.957 9.957 0 0 0 10 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 0 0-13.074.003Z" />
+    </svg>
+  );
+}
+
+function IconUsers({ className = 'size-4' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+      <path d="M10 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM14 7a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM5 7a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM2.845 12.152A5.002 5.002 0 0 1 7.5 10.5h5a5.002 5.002 0 0 1 4.655 1.652 1.5 1.5 0 0 1-.327 2.146A9.96 9.96 0 0 1 10 17.5a9.96 9.96 0 0 1-6.828-2.702 1.5 1.5 0 0 1-.327-2.146Z" />
+    </svg>
+  );
+}
 
 function DashboardPage() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -180,28 +328,24 @@ function DashboardPage() {
               className="hidden"
               onChange={(e) => handleFileInput(e.target.files)}
             />
+            {mode === 'group' && groupSessions.length > 0 ? (
+              <GroupExportMenu report={groupReport} />
+            ) : null}
             {hasContent ? (
               <button
                 type="button"
                 onClick={() => inputRef.current?.click()}
-                className="rounded-lg border border-white/40 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+                className="inline-flex items-center gap-2 rounded-lg border border-white/40 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
               >
+                <IconSwap />
                 {mode === 'group' ? 'Trocar lote' : 'Trocar arquivo'}
-              </button>
-            ) : null}
-            {mode === 'group' && groupSessions.length > 0 ? (
-              <button
-                type="button"
-                onClick={() => downloadGroupReportJson(groupReport)}
-                className="rounded-lg border border-white/40 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                Exportar JSON consolidado
               </button>
             ) : null}
             <a
               href="#/projeto"
-              className="rounded-lg border border-white/40 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-[#80298F] shadow-sm transition hover:bg-[#F9DDFF]"
             >
+              <IconHome />
               Voltar à home
             </a>
           </div>
@@ -215,30 +359,32 @@ function DashboardPage() {
             <p className="text-xs text-slate-500">
               {mode === 'group'
                 ? '7 visões: estratégia, jornada, pedagogia, produto, recursos, QA e IA'
-                : 'Consolidado, recursos digitais ou técnico & QA'}
+                : 'Consolidado, timeline, recursos digitais ou técnico & QA'}
             </p>
           </div>
           <div className="flex w-fit rounded-lg border border-slate-200 bg-white p-0.5 shadow-sm">
             <button
               type="button"
               onClick={() => switchMode('single')}
-              className={`rounded-md px-4 py-2 text-sm font-semibold transition ${
+              className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition ${
                 mode === 'single'
                   ? 'bg-[#80298F] text-white shadow-sm'
                   : 'text-slate-600 hover:bg-slate-50'
               }`}
             >
+              <IconUser />
               1 sessão
             </button>
             <button
               type="button"
               onClick={() => switchMode('group')}
-              className={`rounded-md px-4 py-2 text-sm font-semibold transition ${
+              className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition ${
                 mode === 'group'
                   ? 'bg-[#80298F] text-white shadow-sm'
                   : 'text-slate-600 hover:bg-slate-50'
               }`}
             >
+              <IconUsers />
               Grupo
             </button>
           </div>

@@ -272,23 +272,33 @@ export default function ProjectHubPage({
             {participantId ? (
               <a
                 href="#/"
-                className="rounded-lg border border-white/35 bg-white px-3 py-2 text-xs font-semibold text-[#80298F] transition hover:bg-[#F9DDFF] md:text-sm"
+                className="inline-flex items-center gap-2 rounded-lg border border-white/35 bg-white px-3 py-2 text-xs font-semibold text-[#80298F] transition hover:bg-[#F9DDFF] md:text-sm"
               >
+                <svg className="size-4 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                  <path d="M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.34-5.89a1.5 1.5 0 0 0 0-2.54L6.3 2.84Z" />
+                </svg>
                 Continuar piloto
               </a>
             ) : (
               <button
                 type="button"
                 onClick={() => scrollTo('piloto')}
-                className="rounded-lg border border-white/35 bg-white px-3 py-2 text-xs font-semibold text-[#80298F] transition hover:bg-[#F9DDFF] md:text-sm"
+                className="inline-flex items-center gap-2 rounded-lg border border-white/35 bg-white px-3 py-2 text-xs font-semibold text-[#80298F] transition hover:bg-[#F9DDFF] md:text-sm"
               >
+                <svg className="size-4 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                  <path d="M10.75 16.82A7.462 7.462 0 0 1 15 15.5c.71 0 1.396.098 2.046.282A.75.75 0 0 0 18 15.06V4.25a.75.75 0 0 0-.5-.707A9.963 9.963 0 0 0 15 3c-1.94 0-3.74.73-5.1 1.93A9.95 9.95 0 0 0 4.9 3 9.96 9.96 0 0 0 2.5 3.543.75.75 0 0 0 2 4.25v10.81a.75.75 0 0 0 .954.722A7.46 7.46 0 0 1 5 15.5c1.79 0 3.44.61 4.75 1.63a.75.75 0 0 0 1 0Z" />
+                </svg>
                 Acesso ao piloto
               </button>
             )}
             <a
               href="#/dashboard"
-              className="rounded-lg border border-white/35 bg-white/10 px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/20 md:text-sm"
+              className="inline-flex items-center gap-2 rounded-lg border border-white/35 bg-white/10 px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/20 md:text-sm"
             >
+              <svg className="size-4 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                <path d="M2.75 3.5A.75.75 0 0 0 2 4.25v11.5c0 .414.336.75.75.75h14.5a.75.75 0 0 0 0-1.5H3.5V4.25a.75.75 0 0 0-.75-.75Z" />
+                <path d="M5.5 13.25a.75.75 0 0 0 1.5 0V9.5a.75.75 0 0 0-1.5 0v3.75ZM9.25 13.25a.75.75 0 0 0 1.5 0V6.75a.75.75 0 0 0-1.5 0v6.5ZM13 13.25a.75.75 0 0 0 1.5 0V8a.75.75 0 0 0-1.5 0v5.25Z" />
+              </svg>
               LD Insights
             </a>
           </div>
@@ -362,7 +372,7 @@ export default function ProjectHubPage({
             <p className="mt-6 max-w-3xl text-sm leading-relaxed text-slate-500 md:text-base">
               O piloto atual testa essa camada no capítulo 07 de História. Os dados coletados
               alimentam o <strong className="text-slate-700">LD Insights</strong>, onde é possível
-              analisar sessões individuais ou consolidar um grupo de teste.
+              analisar sessões individuais ou consolidar várias sessões da mesma turma/piloto.
             </p>
           </section>
 
@@ -585,13 +595,11 @@ export default function ProjectHubPage({
           <section id="relatorios" className="scroll-mt-24 border-t border-slate-200 py-16">
             <SectionTitle>5. Relatórios que podem nascer dessa camada</SectionTitle>
             <p className="mb-8 max-w-3xl text-slate-600">
-              A partir dos eventos coletados, é possível montar diferentes leituras — da sessão
-              individual até uma visão executiva do piloto. O{' '}
-              <strong className="text-slate-800">LD Insights</strong> já oferece relatório individual,
-              consolidado com gráficos, <strong className="text-slate-800">relatório executivo</strong>,{' '}
-              <strong className="text-slate-800">recursos digitais</strong> e{' '}
-              <strong className="text-slate-800">técnico & QA</strong> (abas ao carregar vários
-              JSONs). Os demais representam evoluções naturais da mesma base de dados.
+              A partir dos eventos coletados, o{' '}
+              <strong className="text-slate-800">LD Insights</strong> monta diferentes leituras — da
+              sessão individual até a visão executiva do piloto. As tags abaixo (Estratégia,
+              Pedagogia, Produto…) são as mesmas das abas do dashboard ao carregar um ou vários
+              JSONs.
             </p>
             <div className="grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-3">
               {REPORT_CARDS.map((report) => (
@@ -603,19 +611,16 @@ export default function ProjectHubPage({
                     className={`h-1.5 ${report.status === 'available' ? 'bg-[#80298F]' : 'bg-slate-200'}`}
                   />
                   <div className="flex flex-1 flex-col p-6">
-                    <div className="flex items-start justify-between gap-4">
-                      <h4 className="min-w-0 flex-1 text-base font-bold leading-snug text-slate-900">
+                    <div>
+                      <span className="inline-flex w-fit rounded-full bg-[#F9DDFF]/80 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#80298F]">
+                        {report.tag}
+                      </span>
+                      <h4 className="mt-2.5 text-base font-bold leading-snug text-slate-900">
                         {report.title}
                       </h4>
-                      <span
-                        className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${
-                          report.status === 'available'
-                            ? 'bg-[#80298F] text-white'
-                            : 'bg-slate-100 text-slate-500'
-                        }`}
-                      >
-                        {report.status === 'available' ? 'LD Insights' : 'Em evolução'}
-                      </span>
+                      {report.status === 'roadmap' ? (
+                        <p className="mt-1.5 text-xs font-medium text-slate-500">Em evolução</p>
+                      ) : null}
                     </div>
                     <ul className="mt-5 flex-1 space-y-2.5">
                       {report.items.map((item) => (
@@ -715,7 +720,7 @@ export default function ProjectHubPage({
                   </span>
                   <span className="mt-2 text-xl font-bold text-slate-900">LD Insights</span>
                   <p className="mt-2 text-sm text-slate-600">
-                    Carregue o JSON exportado — sessão individual ou grupo de teste com heatmap e KPIs
+                    Carregue o JSON exportado — sessão individual ou várias sessões com heatmap e KPIs
                     agregados.
                   </p>
                   <span className="mt-4 text-sm font-semibold text-[#80298F]">Abrir dashboard →</span>

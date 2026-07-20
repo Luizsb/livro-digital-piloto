@@ -495,6 +495,7 @@ Classificação no dashboard: Bom ≤2,5 s · Moderado ≤4 s · Lento.
 | Aba | Foco |
 |-----|------|
 | Consolidado | Jornada, métricas de abertura/conclusão, abandono, gap, ritmo, feedback |
+| Timeline | Linha do tempo dos eventos (marcos/demo ou completo; filtro por categoria) |
 | Recursos digitais | ODA, vídeo, professor, inventário editorial |
 | Técnico & QA | Performance, erros, qualidade da coleta |
 
@@ -509,6 +510,8 @@ Classificação no dashboard: Bom ≤2,5 s · Moderado ≤4 s · Lento.
 | Recursos digitais | Funil de adoção e cobertura do manifest |
 | Técnico & QA | Performance agregada e QA por sessão |
 | Resumo com IA | Narrativa executiva (Gemini, sob demanda) |
+
+**Export escola/BI (grupo):** menu **Exportar** no cabeçalho → JSON consolidado, CSV (KPIs + heatmap + participantes) ou PDF resumido.
 
 Ver [DASHBOARD-MVP.md](./DASHBOARD-MVP.md).
 
@@ -613,7 +616,7 @@ Ver [DASHBOARD-MVP.md](./DASHBOARD-MVP.md).
 | Limitação | Impacto | Direção futura |
 |-----------|---------|----------------|
 | Dados só no navegador | Sem painel de turma automático | Backend ou ingestão de JSONs |
-| 1 export por participante | Agregação manual | Pipeline CSV / BI / LMS |
+| 1 export por participante | Agregação manual no LD Insights | CSV/PDF de turma no dashboard; pipeline BI/LMS no futuro |
 | Sessões com coleta falha | Dados enviesados em turma | Filtrar por `data_quality_score` ≥ 85 |
 | Código anônimo (P01) | Não liga à matrícula | Integração escolar opcional |
 | Um capítulo piloto | Generalizar por `CHAPTER_PAGE_REGISTRY` | Portar tracking por livro |

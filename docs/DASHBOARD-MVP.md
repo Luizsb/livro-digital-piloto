@@ -20,13 +20,17 @@ No piloto do livro, use o botão **LD Insights** (canto inferior esquerdo durant
 2. Abra o dashboard (`#/dashboard`).
 3. Mantenha **1 sessão** selecionado e clique em **Carregar relatório JSON**.
 
-### Grupo de teste (multi-sessão)
+Abas: **Consolidado**, **Timeline** (linha do tempo dos eventos — modo marcos ou completo), **Recursos digitais**, **Técnico & QA**.
+
+### Grupo / várias sessões
 
 1. Exporte um JSON por participante (P01, P02, …).
-2. No dashboard, selecione **Grupo de teste**.
-3. Clique em **Carregar JSONs do grupo** e selecione todos os arquivos de uma vez (Ctrl+clique ou Shift+clique).
+2. No dashboard, selecione **Grupo**.
+3. Carregue todos os arquivos de uma vez (Ctrl+clique ou Shift+clique).
 
 O relatório consolidado inclui KPIs médios, heatmap de páginas (visualizada / concluída / vista sem conclusão / abandono), ritmo por página vista, dispositivos, feedback agregado e tabela por sessão. **Por padrão**, Executivo, Consolidado, Retomada, Editorial, Recursos e IA agregam só sessões com `data_quality_score` ≥ 85; na aba **Consolidado**, o toggle **Incluir sessões duvidosas** reincorpora o lote completo. A aba **Técnico & QA** sempre mostra todas as sessões.
+
+**Export para escola/BI:** no cabeçalho do modo grupo, menu **Exportar** → JSON, CSV (KPIs + heatmap + participantes) ou PDF resumido.
 
 ## Fonte de dados
 
@@ -70,9 +74,11 @@ Relatórios antigos ou sem `session_finished` são completados em `parseReport.t
 | **Inventário editorial do capítulo** | Taxas vs manifest (páginas, imagens, recursos, professor, atividades); itens faltantes — aba Recursos |
 | Saúde da coleta | Checklist rápido do ciclo de vida (`session_started` → `events_exported`) |
 | Alertas de interpretação | Sinais de comportamento (saída da aba, varredura rápida, capítulo parcial, comentário aberto) — **não** indicam aprendizagem |
+| **Timeline** (individual) | Linha do tempo dos eventos — modo **Marcos (demo)** ou **Completo**; filtro por categoria (jornada, conteúdo, professor, foco…) |
 | **Grupo — heatmap** | Por página: visualizada, concluída, vista sem conclusão, abandono |
 | **Retomada pedagógica** (grupo) | Aba dedicada: páginas prioritárias, recursos ignorados, participantes com sinais, pontos para aula |
 | **Editorial & produto** (grupo) | Backlog de melhorias: páginas a revisar, imagens com zoom, recursos subutilizados, feedback UX, dispositivos |
+| **Export escola/BI** (grupo) | Menu **Exportar** no cabeçalho: JSON consolidado, CSV (KPIs + heatmap + participantes) e PDF resumido |
 
 > **Interpretação:** alertas descrevem padrões de uso e engajamento. Não inferir compreensão ou desempenho pedagógico — ver [CATÁLOGO-EVENTOS-E-RELATÓRIOS.md § Uso, atenção e aprendizagem](./CATÁLOGO-EVENTOS-E-RELATÓRIOS.md#uso-atenção-e-aprendizagem).
 
@@ -97,21 +103,28 @@ Comentários ficam em `feedback_comments` e só aparecem após clicar em **Ver c
 
 ## Fora de escopo (v0.1)
 
-Backend, login, gráficos avançados exportáveis.
+Backend, login, gráficos avançados interativos exportáveis (além do CSV/PDF de turma).
 
 ## Código
 
 ```text
 src/dashboard/
-  DashboardPage.tsx       ← modos 1 sessão / grupo de teste
-  GroupReportContent.tsx  ← UI do relatório consolidado
-  buildGroupReport.ts     ← agregação multi-sessão
-  parseReport.ts          ← parse único e múltiplo
+  DashboardPage.tsx              ← modos 1 sessão / grupo; menu Exportar
+  SessionReportContent.tsx       ← abas individual (incl. Timeline)
+  SessionTimelineReport.tsx      ← linha do tempo da sessão
+  buildSessionTimeline.ts
+  GroupReportContent.tsx         ← UI do relatório consolidado de grupo
+  buildGroupReport.ts            ← agregação multi-sessão + filtro qualidade
+  exportGroupReport.ts           ← JSON consolidado
+  exportGroupReportSchool.ts     ← CSV e PDF para escola/BI
+  parseReport.ts
   reportExtractors.ts
   reportInsights.ts
-  InfoHint.tsx
   types.ts
+src/app/
+  ProjectHubPage.tsx             ← apresentação do piloto (seção 5 = relatórios)
+  projectHubContent.ts           ← cards de relatórios + tags
 src/ld/
-  collectionQuality.ts    ← validação de integridade (também no export)
-  chapterManifest.ts      ← inventário do capítulo + cobertura
+  collectionQuality.ts           ← validação de integridade (também no export)
+  chapterManifest.ts             ← inventário do capítulo + cobertura
 ```

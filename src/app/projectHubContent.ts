@@ -8,6 +8,8 @@ export interface StakeholderCard {
 
 export interface ReportCard {
   title: string;
+  /** Tag de categoria alinhada às abas do LD Insights (ex.: Pedagogia, QA). */
+  tag: string;
   items: string[];
   usage: string;
   status: 'available' | 'roadmap';
@@ -118,17 +120,30 @@ export const STAKEHOLDER_CARDS: StakeholderCard[] = [
 export const REPORT_CARDS: ReportCard[] = [
   {
     title: 'Relatório individual da sessão',
+    tag: 'Sessão',
     items: [
       'Consolidado: jornada, resumo interpretativo e feedback',
+      'Timeline: linha do tempo dos eventos (marcos ou completo)',
       'Recursos digitais: ODA, vídeo, professor, imagens e cobertura',
       'Técnico & QA: performance, erros e qualidade da coleta',
-      'Mesma estrutura de abas do relatório de grupo',
     ],
-    usage: 'Validar uma sessão no LD Insights — abas Consolidado, Recursos e Técnico.',
+    usage: 'Validar uma sessão no LD Insights — abas Consolidado, Timeline, Recursos e Técnico.',
+    status: 'available',
+  },
+  {
+    title: 'Timeline da sessão',
+    tag: 'Debug',
+    items: [
+      'Sequência cronológica: página → recurso → vídeo → feedback',
+      'Modo marcos (demo) ou completo (debugging)',
+      'Filtro por categoria: jornada, conteúdo, professor, foco, técnico',
+    ],
+    usage: 'Aba Timeline no LD Insights (1 sessão) — útil em demo e QA da coleta.',
     status: 'available',
   },
   {
     title: 'Relatório consolidado de grupo ou turma',
+    tag: 'Jornada',
     items: [
       'Gráficos de status do capítulo, engajamento e jornada por página',
       'Distribuição por dispositivo, SO e navegador',
@@ -136,24 +151,37 @@ export const REPORT_CARDS: ReportCard[] = [
       'Aba Resumo com IA (Gemini) — narrativa executiva sob demanda',
       'Foco e atenção: saídas da aba e tempo inativo',
       'Abas Retomada pedagógica e Editorial & produto',
-      'Exportação do JSON consolidado para arquivo',
+      'Exportação JSON, CSV e PDF para escola/BI',
     ],
     usage: 'Transformar várias sessões em uma leitura visual coletiva no LD Insights.',
     status: 'available',
   },
   {
+    title: 'Export para escola / BI',
+    tag: 'Entrega',
+    items: [
+      'CSV com KPIs, heatmap por página e tabela de participantes',
+      'PDF resumido para enviar sem abrir o dashboard',
+      'Respeita o filtro de qualidade ativo no consolidado',
+    ],
+    usage: 'Menu Exportar no cabeçalho do LD Insights (modo grupo) — JSON, CSV ou PDF.',
+    status: 'available',
+  },
+  {
     title: 'Relatório de retomada pedagógica',
+    tag: 'Pedagogia',
     items: [
       'Páginas que merecem retomada (gap, abandono, baixa conclusão)',
       'Recursos ignorados e vídeos com possível pulo',
       'Participantes com sinais de atenção (abandono, gap, ritmo rápido)',
       'Pontos para discussão em aula',
     ],
-    usage: 'Aba Retomada pedagógica no LD Insights (grupo de teste).',
+    usage: 'Aba Retomada pedagógica no LD Insights ao consolidar várias sessões.',
     status: 'available',
   },
   {
     title: 'Relatório de recursos digitais',
+    tag: 'Recursos',
     items: [
       'Funil de adoção: vídeo, ODA, professor e zoom',
       'Cobertura dos recursos e imagens do manifesto editorial',
@@ -165,6 +193,7 @@ export const REPORT_CARDS: ReportCard[] = [
   },
   {
     title: 'Relatório editorial e de melhoria do produto',
+    tag: 'Produto',
     items: [
       'Backlog sugerido (conteúdo, recurso, UX, técnico)',
       'Páginas para revisão editorial e tempo médio de permanência',
@@ -172,11 +201,12 @@ export const REPORT_CARDS: ReportCard[] = [
       'Feedback de navegação, conforto visual e utilidade dos recursos',
       'Experiência por dispositivo (carga e alertas técnicos)',
     ],
-    usage: 'Aba Editorial & produto no LD Insights (grupo de teste).',
+    usage: 'Aba Editorial & produto no LD Insights ao consolidar várias sessões.',
     status: 'available',
   },
   {
     title: 'Relatório técnico e QA',
+    tag: 'QA',
     items: [
       'Carga, TTFB e peso médio da sessão',
       'Erros de runtime, carregamento e renderização',
@@ -188,6 +218,7 @@ export const REPORT_CARDS: ReportCard[] = [
   },
   {
     title: 'Relatório executivo do piloto',
+    tag: 'Estratégia',
     items: [
       'Coleta ativa: eventos por dimensão (jornada, recursos, professor, feedback, técnico)',
       'KPIs do grupo, aprendizados e valor para empresa, escola e professor',

@@ -95,6 +95,17 @@ Sempre que houver mudança relevante no piloto:
 
 ## Registro cronológico
 
+### 2026-07-20 — Timeline da sessão + export CSV/PDF para escola/BI
+
+**Tipo:** feature + UX + docs  
+**MVP:** dashboard  
+**Resumo:** Nova aba **Timeline** na sessão individual (marcos ou completo, filtro por categoria). No modo grupo, menu **Exportar** (JSON / CSV / PDF) com KPIs, heatmap e participantes — para enviar sem o dashboard. Hub: tags alinhadas às abas do LD Insights; textos sem jargão “grupo de teste”; ícones no header e no seletor 1 sessão/Grupo.  
+**Arquivos:** `SessionTimelineReport.tsx`, `buildSessionTimeline.ts`, `exportGroupReportSchool.ts`, `SessionReportContent.tsx`, `DashboardPage.tsx`, `ProjectHubPage.tsx`, `projectHubContent.ts`  
+**Docs atualizados:** `DASHBOARD-MVP.md`, `CATÁLOGO`, `EVIDENCIAS.md`, `README.md`  
+**Como validar:** 1 sessão → aba Timeline → Marcos/Completo; Grupo → Exportar ▾ → CSV e PDF; hub §5 → cards com tags Pedagogia/Produto/etc.
+
+---
+
 ### 2026-07-20 — Filtro de qualidade no grupo (score ≥ 85)
 
 **Tipo:** feature + UX + docs  

@@ -6,8 +6,9 @@ import { ReportViewTabs, type ReportViewTab } from './reportUi';
 import { SessionConsolidatedReport } from './SessionConsolidatedReport';
 import { SessionResourcesReport } from './SessionResourcesReport';
 import { SessionTechnicalReport } from './SessionTechnicalReport';
+import { SessionTimelineReport } from './SessionTimelineReport';
 
-type SessionReportView = 'consolidated' | 'resources' | 'technical';
+type SessionReportView = 'consolidated' | 'timeline' | 'resources' | 'technical';
 
 const SESSION_TABS: Array<ReportViewTab<SessionReportView>> = [
   {
@@ -15,6 +16,12 @@ const SESSION_TABS: Array<ReportViewTab<SessionReportView>> = [
     label: 'Consolidado',
     tag: 'Jornada',
     hint: 'Progresso, abandono, gap, ritmo e feedback',
+  },
+  {
+    id: 'timeline',
+    label: 'Timeline',
+    tag: 'Debug',
+    hint: 'Linha do tempo dos eventos da sessão',
   },
   {
     id: 'resources',
@@ -57,6 +64,8 @@ export function SessionReportContent({ parsed }: { parsed: ParsedDashboardReport
 
       {view === 'consolidated' ? (
         <SessionConsolidatedReport parsed={parsed} />
+      ) : view === 'timeline' ? (
+        <SessionTimelineReport parsed={parsed} />
       ) : view === 'resources' ? (
         <SessionResourcesReport parsed={parsed} />
       ) : (
